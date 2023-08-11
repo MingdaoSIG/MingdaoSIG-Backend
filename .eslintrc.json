@@ -1,12 +1,15 @@
-module.exports = {
+{
+    "plugins": [
+        "@typescript-eslint"
+    ],
+    "parser": "@typescript-eslint/parser",
+    "extends": [
+        "eslint:recommended",
+        "plugin:@typescript-eslint/recommended"
+    ],
     "env": {
         "browser": true,
         "es2021": true
-    },
-    "overrides": [],
-    "parserOptions": {
-        "ecmaVersion": "latest",
-        "sourceType": "module"
     },
     "rules": {
         "semi": [
@@ -27,6 +30,8 @@ module.exports = {
         "brace-style": [
             "error",
             "stroustrup"
-        ]
+        ],
+        "@typescript-eslint/no-unused-vars": "off",
+        "@typescript-eslint/no-explicit-any": "off"
     }
-};
+}
