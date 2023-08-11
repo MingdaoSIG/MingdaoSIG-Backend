@@ -1,8 +1,9 @@
-import express from "express";
+import express, { Express } from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
 import morgan from "morgan";
 import axios from "axios";
+import dotenv from "dotenv";
 
 import router from "./routers/cloud";
 
@@ -15,9 +16,10 @@ const defaultCors = {
     ]
 };
 
-const cloud = express();
+const cloud: Express = express();
 cloud.use(morgan("combined"));
 (async () => {
+    dotenv.config();
     const config = await getCorsConfig();
     cloud.use(cors(config));
 })();
@@ -25,11 +27,12 @@ cloud.use(bodyParser.urlencoded({ extended: true }));
 cloud.use(bodyParser.json());
 cloud.use("/", router);
 
-const server = express();
+const server: Express = express();
 server.set("trust proxy", 1);
 server.use("/", cloud);
 
 export default server;
+
 
 async function getCorsConfig() {
     const t0 = performance.now();
