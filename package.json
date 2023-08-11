@@ -1,0 +1,18 @@
+{
+    "name": "MingdaoSIG",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "type": "module",
+    "scripts": {
+        "check-and-fix-lint": "(echo '\n---\n\nScanning for lint error...' && eslint .) || (echo '\n\n---\n\nFound lint error, working on it...' && eslint . --fix) || echo \"\n\nWARNING: There are some error that can't be fixed automatically!\"",
+        "lintfix": "npm run --silent check-and-fix-lint"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "eslint": "^8.46.0",
+        "express": "^4.18.2"
+    }
+}
