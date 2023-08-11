@@ -1,3 +1,8 @@
+# Node Modules
 node_modules
 
+# TypeScript Build Output
+dist
+
+# Environment Variable
 .env

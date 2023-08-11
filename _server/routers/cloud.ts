@@ -1,10 +1,10 @@
-import express from "express";
+import express, { Request, Response, Router } from "express";
 import { rateLimit } from "express-rate-limit";
 
 import { status } from "../../_modules/HttpStatusCode";
 
 
-const router = express.Router();
+const router: Router = express.Router();
 
 const limiter_1m_10req = rateLimit({
     windowMs: 1 * 60 * 1000,
@@ -19,11 +19,11 @@ const limiter_1m_20req = rateLimit({
 });
 
 router.use("/users/login", limiter_1m_10req);
-router.get("/users/login", (req, res) => {
+router.get("/users/login", (req: Request, res: Response) => {
     res.status(status.OK).json("Hello World");
 });
 
-router.get("/*", (_, res) => {
+router.get("/*", (_: Request, res: Response) => {
     res.status(status.FORBIDDEN).send("Please insert correct path");
 });
 
