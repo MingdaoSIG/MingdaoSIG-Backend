@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import jwt, { Secret, JwtPayload } from "jsonwebtoken";
 
-import { status } from "../../../_modules/HttpStatusCode";
+import { HTTPstatus } from "@module/HttpStatusCode";
 
 
 export const SECRET_KEY: Secret = String(process.env.JWT_SECRET);
@@ -14,7 +14,7 @@ export default async function JWTverifier(req: Request, res: Response, next: Nex
     try {
         const authHeader = req.header("Authorization");
         if (!authHeader || !authHeader.startsWith("Bearer ")) {
-            return res.sendStatus(status.UNAUTHORIZED);
+            return res.sendStatus(HTTPstatus.UNAUTHORIZED);
         }
 
         const token = authHeader.replace("Bearer ", "");
@@ -27,6 +27,6 @@ export default async function JWTverifier(req: Request, res: Response, next: Nex
     }
     catch (error: any) {
         console.log(error);
-        return res.sendStatus(status.UNAUTHORIZED);
+        return res.sendStatus(HTTPstatus.UNAUTHORIZED);
     }
 }
