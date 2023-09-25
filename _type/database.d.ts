@@ -1,0 +1,1 @@
+export type DatabaseType = "sig" | "user" | "post" | "comment";
