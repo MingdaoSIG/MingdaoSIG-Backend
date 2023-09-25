@@ -5,7 +5,7 @@ import morgan from "morgan";
 import axios from "axios";
 import dotenv from "dotenv";
 
-import router from "./routers/cloud";
+import router from "@router/cloud";
 
 
 const defaultCors = {
@@ -53,7 +53,7 @@ async function getCorsConfig() {
         const t1 = performance.now();
         console.log(`Server : successfully got cors config from remote source (took ${Math.round(t1 - t0) / 1000} seconds)`);
     }
-    catch (err) {
+    catch (error) {
         console.error("Server : cannot get cors config from remote source, using default cors config");
     }
 
