@@ -9,8 +9,7 @@ const host = process.env.HOST || "localhost";
 const port = process.env.PORT || 3001;
 
 try {
-    // const dbName = await connectMongoDB();
-    // console.log(`Server : successfully connected to MongoDB, Database name: "${dbName}"`);
+    connectMongoDB(String(process.env.MONGO_URI));
 
     server.set("host", host);
     server.set("port", port);
@@ -21,8 +20,8 @@ catch (error: any) {
     console.error(error.message);
 }
 
-async function connectMongoDB() {
+async function connectMongoDB(uri: string) {
     mongoose.set("strictQuery", false);
-    const db = await mongoose.connect(String(process.env.MONGO_URI), { keepAlive: true });
-    return db.connections[0].name;
+    const db = await mongoose.connect(uri, { keepAlive: true });
+    console.log(`Server : successfully connected to MongoDB, Database name: "${db.connections[0].name}"`);
 }
