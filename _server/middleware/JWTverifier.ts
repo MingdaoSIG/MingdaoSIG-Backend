@@ -9,7 +9,7 @@ const SECRET_KEY: Secret = String(process.env.JWT_SECRET);
 
 export default async function JWTverifier(req: Request, res: Response, next: NextFunction) {
     try {
-        const authHeader = req.header("Authorization");
+        const authHeader = req.header("authorization");
         if (!authHeader || !authHeader.startsWith("Bearer ")) {
             return res.sendStatus(HttpStatus.UNAUTHORIZED);
         }
