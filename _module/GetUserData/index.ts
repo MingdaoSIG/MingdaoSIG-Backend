@@ -1,17 +1,20 @@
 import axios from "axios";
 
-import MongoDB from "@module/MongoDB";
 import { Identity, UserData } from "@type/user";
+import CustomError from "@type/customError";
+import MongoDB from "@module/MongoDB";
+import { CustomStatus } from "@module/CustomStatusCode";
 
 
 const UserDB = new MongoDB("user");
 
-export async function getUserData(email: string): Promise<UserData> {
+export async function getUserData(email: string, avatar: string): Promise<UserData> {
     const MD_API_URL = "https://mdsrl.mingdao.edu.tw/mdpp/Sig20Login/googleUserCheck";
 
     try {
         // Check user email
         email = email.toLowerCase();
+        if (!email || !email.includes("@")) throw new Error("Invalid email");
         if (email.split("@")[1] != "ms.mingdao.edu.tw") throw new Error("Invalid email");
 
         const response = await axios.postForm(MD_API_URL, {
@@ -25,22 +28,31 @@ export async function getUserData(email: string): Promise<UserData> {
             teach: "teacher",
             stu: "student"
         };
-        const oldData = await UserDB.read(email);
-        const newData: UserData = {
-            email: responseData.mail,
-            name: responseData.user_name,
-            code: responseData.code,
-            class: responseData.class_name,
-            identity: prettierIdentity[responseData.user_identity],
-            displayName: oldData ? oldData.displayName : responseData.user_name,
-        };
 
+        const { mail, user_name, code, class_name, user_identity } = responseData;
+
+        const oldData = await UserDB.read(email).catch(() => null);
+        const displayName = oldData?.displayName || user_name;
+        const description = oldData?.description || "";
+        const permission = oldData?.permission || 1;
+
+        const newData: UserData = {
+            email: mail,
+            name: user_name,
+            code: code,
+            class: class_name,
+            identity: prettierIdentity[user_identity],
+            displayName: displayName,
+            description: description,
+            avatar: avatar,
+            permission: permission
+        };
         const savedData = await UserDB.write(email, newData);
 
         return savedData;
     }
-    catch (error) {
-        throw new Error("Invalid user");
+    catch (error: any) {
+        throw new CustomError(CustomStatus.INVALID_USER, error);
     }
 }
 
