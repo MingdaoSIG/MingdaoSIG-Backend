@@ -1,4 +1,4 @@
-import { UserData } from "@type/user";
+import { Profile } from "@type/profile";
 import { DatabaseType } from "@type/database";
 import user from "@DBfunc/user";
 
@@ -9,7 +9,7 @@ export default class MongoDB {
         this.databaseType = databaseType;
     }
 
-    async read(email: string): Promise<UserData> {
+    async read(email: string): Promise<Profile> {
         switch (this.databaseType) {
             case "user":
                 return await user.read(email);
@@ -19,7 +19,7 @@ export default class MongoDB {
         }
     }
 
-    async write(email: string, dataToWrite: UserData) {
+    async write(email: string, dataToWrite: Profile) {
         switch (this.databaseType) {
             case "user":
                 return await user.write(email, dataToWrite);

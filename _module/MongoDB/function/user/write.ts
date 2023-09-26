@@ -1,22 +1,22 @@
-import { UserData } from "@type/user";
-import { user } from "_module/MongoDB/function/_schema/user";
+import { Profile } from "@type/profile";
+import { profile } from "_module/MongoDB/function/_schema/user";
 
 
-export default async function write(email: string, dataToSave: UserData): Promise<UserData> {
+export default async function write(email: string, dataToSave: Profile): Promise<Profile> {
     try {
-        const data = await user.findOne({ email }).exec();
+        const data = await profile.findOne({ email }).exec();
         const code = data ? 1 : 0;
         if (code) {
-            await user.findOneAndUpdate(
+            await profile.findOneAndUpdate(
                 { email },
                 dataToSave
             );
         }
         else {
-            await new user(dataToSave).save();
+            await new profile(dataToSave).save();
         }
 
-        const newData: UserData = (await user.findOne({ email }))!;
+        const newData: Profile = (await profile.findOne({ email }))!;
         return newData;
     }
     catch (error: any) {
