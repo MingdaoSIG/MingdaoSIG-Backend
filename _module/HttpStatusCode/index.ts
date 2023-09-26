@@ -1,4 +1,4 @@
-export const HTTPcodes = {
+export const HttpCode = {
     100: "Continue",
     101: "Switching Protocols",
     102: "Processing",
@@ -64,7 +64,7 @@ export const HTTPcodes = {
     511: "Network Authentication Required"
 } as const;
 
-export const HTTPstatus = {
+export const HttpStatus = {
     CONTINUE: 100,
     SWITCHING_PROTOCOLS: 101,
     PROCESSING: 102,
