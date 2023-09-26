@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import server from "./_server";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
