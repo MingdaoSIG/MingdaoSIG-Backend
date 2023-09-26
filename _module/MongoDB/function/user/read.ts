@@ -1,7 +1,8 @@
-import { CustomStatus } from "@module/CustomStatusCode";
-import { profile } from "@schema/user";
 import CustomError from "@type/customError";
 import { Profile } from "@type/profile";
+import profile from "@schema/profile";
+
+import { CustomStatus } from "@module/CustomStatusCode";
 
 
 export default async function read(email: string): Promise<Profile> {

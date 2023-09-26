@@ -1,1 +1,1 @@
-export type DatabaseType = "sig" | "user" | "post" | "comment";
+export type DatabaseType = "profile" | "post" | "comment" | "image";

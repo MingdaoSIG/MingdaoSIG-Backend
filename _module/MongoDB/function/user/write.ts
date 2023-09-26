@@ -1,5 +1,5 @@
 import { Profile } from "@type/profile";
-import { profile } from "_module/MongoDB/function/_schema/user";
+import profile from "@schema/profile";
 
 
 export default async function write(email: string, dataToSave: Profile): Promise<Profile> {
