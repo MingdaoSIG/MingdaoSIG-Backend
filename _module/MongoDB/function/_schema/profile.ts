@@ -17,4 +17,4 @@ const profileSchema = new Schema({
     permission: Number
 }, { timestamps: true });
 
-export const profile = mongoose.model("user", profileSchema, "user");
+export default mongoose.model("profile", profileSchema, "profile");
