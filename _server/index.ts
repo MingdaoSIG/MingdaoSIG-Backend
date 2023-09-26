@@ -44,7 +44,7 @@ async function getCorsConfig() {
             "https://raw.githubusercontent.com/MingdaoSIG/Configurations/main/cors.json",
             {
                 headers: {
-                    "Authorization": "Token " + String(process.env.GITHUB_TOKEN_CONFIGURATION)
+                    "Authorization": "Token " + String(process.env.GITHUB_AUTH_TOKEN)
                 }
             }
         );
