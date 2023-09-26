@@ -1,7 +1,10 @@
-import { ExtendedRequest } from "@type/extendRequest";
+import { Request } from "express";
+
+import CustomError from "@type/customError";
+import { CustomStatus } from "@module/CustomStatusCode";
 
 
-export default function checkBody(request: ExtendedRequest, requiredBody: string[]) {
+export default function checkBody(request: Request, requiredBody: string[]) {
     try {
         const body = request.body;
 
@@ -16,7 +19,7 @@ export default function checkBody(request: ExtendedRequest, requiredBody: string
         }
     }
     catch (error) {
-        throw new Error("Invalid body");
+        throw new CustomError(CustomStatus.INVALID_BODY, error);
     }
 }
 
