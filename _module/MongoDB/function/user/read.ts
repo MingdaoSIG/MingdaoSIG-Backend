@@ -1,12 +1,12 @@
 import { CustomStatus } from "@module/CustomStatusCode";
-import { user } from "@schema/user";
+import { profile } from "@schema/user";
 import CustomError from "@type/customError";
-import { UserData } from "@type/user";
+import { Profile } from "@type/profile";
 
 
-export default async function read(email: string): Promise<UserData> {
+export default async function read(email: string): Promise<Profile> {
     try {
-        const data: UserData = (await user.findOne({ email }))!;
+        const data: Profile = (await profile.findOne({ email }))!;
 
         if (!data) {
             throw new Error("User not found");
