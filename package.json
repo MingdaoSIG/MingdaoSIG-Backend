@@ -4,9 +4,11 @@
     "description": "",
     "main": "index.ts",
     "scripts": {
-        "build": "npx tsc",
+        "build": "tsc && tsc-alias",
         "start": "node dist/index.js",
-        "dev": "concurrently \"npx tsc --watch\" \"nodemon -q dist/index.js\"",
+        "dev:build": "tsc --watch",
+        "dev:start": "nodemon --delay 3 --watch dist --exec 'npx tsc-alias && npm start'",
+        "dev": "concurrently \"npm run dev:build\" \"npm run dev:start\"",
         "check-and-fix-lint": "(echo '\n---\n\nScanning for lint error...' && eslint .) || (echo '\n\n---\n\nFound lint error, working on it...' && eslint . --fix) || echo \"\n\nWARNING: There are some error that can't be fixed automatically!\"",
         "lintfix": "npm run --silent check-and-fix-lint"
     },
@@ -14,30 +16,31 @@
     "author": "",
     "license": "ISC",
     "dependencies": {
-        "@types/cors": "^2.8.13",
-        "@types/jsonwebtoken": "^9.0.2",
-        "axios": "^1.4.0",
-        "body-parse": "^0.1.0",
+        "@types/cors": "^2.8.14",
+        "@types/jsonwebtoken": "^9.0.3",
+        "axios": "^1.5.0",
+        "body-parser": "^1.20.2",
         "cors": "^2.8.5",
         "dotenv": "^16.3.1",
         "express": "^4.18.2",
-        "express-rate-limit": "^6.9.0",
-        "jsonwebtoken": "^9.0.1",
-        "mongoose": "^7.4.2",
+        "express-rate-limit": "^6.11.2",
+        "jsonwebtoken": "^9.0.2",
+        "mongoose": "^7.5.3",
         "morgan": "^1.10.0",
-        "ts-node": "^10.9.1"
+        "ts-node": "^10.9.1",
+        "tsc-alias": "^1.8.8"
     },
     "devDependencies": {
-        "@types/body-parser": "^1.19.2",
-        "@types/eslint": "^8.44.2",
-        "@types/express": "^4.17.17",
-        "@types/morgan": "^1.9.4",
-        "@types/node": "^20.4.9",
-        "@typescript-eslint/eslint-plugin": "^6.3.0",
-        "@typescript-eslint/parser": "^6.3.0",
-        "concurrently": "^8.2.0",
-        "eslint": "^8.46.0",
+        "@types/body-parser": "^1.19.3",
+        "@types/eslint": "^8.44.3",
+        "@types/express": "^4.17.18",
+        "@types/morgan": "^1.9.5",
+        "@types/node": "^20.7.0",
+        "@typescript-eslint/eslint-plugin": "^6.7.3",
+        "@typescript-eslint/parser": "^6.7.3",
+        "concurrently": "^8.2.1",
+        "eslint": "^8.50.0",
         "nodemon": "^3.0.1",
-        "typescript": "^5.1.6"
+        "typescript": "^5.2.2"
     }
 }
