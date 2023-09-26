@@ -8,20 +8,21 @@ import rateLimiter from "@middleware/rateLimiter";
 import { login } from "@controller/cloud/users/login";
 
 // Modules
-import { HTTPstatus } from "@module/HttpStatusCode";
+import { HttpStatus } from "@HttpStatusCode";
+import { CustomStatus } from "@module/CustomStatusCode";
 
 const router: Router = express.Router();
 
 router.use("/login", rateLimiter.limiter_1m_10req);
-router.get("/login", login);
+router.post("/login", login);
 
 router.use("/needauth", JWTverifier);
 router.get("/needauth", (req: Request, res: Response) => {
-    res.status(HTTPstatus.OK).send("You got it here!");
+    res.status(HttpStatus.OK).send("You got it here!");
 });
 
 router.get("/*", (_: Request, res: Response) => {
-    res.status(HTTPstatus.FORBIDDEN).send("Please insert correct path");
+    res.status(HttpStatus.NOT_FOUND).json({ statuscode: CustomStatus.NOT_FOUND });
 });
 
 export default router;

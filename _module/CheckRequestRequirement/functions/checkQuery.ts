@@ -1,9 +1,11 @@
-import { ExtendedRequest } from "@type/extendRequest";
+import { Request } from "express";
 
+import CustomError from "@type/customError";
+import { CustomStatus } from "@module/CustomStatusCode";
 
-export default function checkQuery(request: ExtendedRequest, requiredQuery: string[]) {
+export default function checkQuery(request: Request, requiredQuery: string[]) {
     try {
-        const query = request.query;
+        const query = new URL(request.url);
 
         if (!query) throw new Error("Query is empty");
 
@@ -15,8 +17,8 @@ export default function checkQuery(request: ExtendedRequest, requiredQuery: stri
             throw new Error(`Only allowed ${requiredQuery.length} items in the query: [${requiredQuery.join(", ")}]`);
         }
     }
-    catch (error) {
-        throw new Error("Invalid query");
+    catch (error: any) {
+        throw new CustomError(CustomStatus.INVALID_QUERY, error);
     }
 }
 

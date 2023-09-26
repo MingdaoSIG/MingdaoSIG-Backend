@@ -1,12 +1,12 @@
+import { Request } from "express";
+
 import checkQuery from "./functions/checkQuery.js";
 import checkBody from "./functions/checkBody.js";
 
-import { ExtendedRequest } from "@type/extendRequest.js";
-
 
 export default class CheckRequestRequirement {
-    request: ExtendedRequest;
-    constructor(request: ExtendedRequest) {
+    request: Request;
+    constructor(request: Request) {
         this.request = request;
     }
 
