@@ -11,7 +11,7 @@ export default class MongoDB {
 
     async read(email: string): Promise<Profile> {
         switch (this.databaseType) {
-            case "user":
+            case "profile":
                 return await user.read(email);
 
             default:
@@ -21,7 +21,7 @@ export default class MongoDB {
 
     async write(email: string, dataToWrite: Profile) {
         switch (this.databaseType) {
-            case "user":
+            case "profile":
                 return await user.write(email, dataToWrite);
 
             default:

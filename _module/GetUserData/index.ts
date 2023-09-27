@@ -6,7 +6,7 @@ import MongoDB from "@module/MongoDB";
 import { CustomStatus } from "@module/CustomStatusCode";
 
 
-const UserDB = new MongoDB("user");
+const UserDB = new MongoDB("profile");
 
 export async function getUserData(email: string, avatar: string): Promise<Profile> {
     const MD_API_URL = "https://mdsrl.mingdao.edu.tw/mdpp/Sig20Login/googleUserCheck";
@@ -26,8 +26,7 @@ export async function getUserData(email: string, avatar: string): Promise<Profil
 
         const prettierIdentity: { [key: string]: Identity } = {
             teach: "teacher",
-            stu: "student",
-            sig: "sig"
+            stu: "student"
         };
 
         const { mail, user_name, code, class_name, user_identity } = responseData;
