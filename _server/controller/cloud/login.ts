@@ -20,8 +20,12 @@ export const login: RequestHandler = async (req, res) => {
 
         const userData = await getUserData(email, avatar);
 
-        const token = signJWT(userData);
-        return res.status(HttpStatus.OK).header({ "authorization": "Bearer " + token }).json({ status: CustomStatus.OK });
+        const token = signJWT({ _id: userData._id });
+        return res.status(HttpStatus.OK).json({
+            "status": CustomStatus.OK,
+            "authorization": "Bearer " + token,
+            "data": userData
+        });
     }
     catch (error: any) {
         return res.status(HttpStatus.BAD_REQUEST).json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });
