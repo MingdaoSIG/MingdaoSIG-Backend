@@ -31,7 +31,8 @@ export async function getUserData(email: string, avatar: string): Promise<Profil
 
         const { mail, user_name, code, class_name, user_identity } = responseData;
 
-        const oldData = await UserDB.read(email).catch(() => null);
+        const oldData: Profile = (await UserDB.read({ email }).catch(() => null))!;
+        const customId = oldData?.customId || code;
         const sig = user_identity === "sig" ? [] : (oldData?.sig || []);
         const displayName = user_identity === "sig" ? user_name : oldData?.displayName || user_name;
         const description = oldData?.description || "";
@@ -39,6 +40,7 @@ export async function getUserData(email: string, avatar: string): Promise<Profil
         const permission = oldData?.permission || 1;
 
         const newData: Profile = {
+            customId: customId,
             email: mail,
             name: user_name,
             code: code,
@@ -51,7 +53,7 @@ export async function getUserData(email: string, avatar: string): Promise<Profil
             follower: follower,
             permission: permission
         };
-        const savedData = await UserDB.write(email, newData);
+        const savedData: Profile = await UserDB.write(newData, { email });
 
         return savedData;
     }

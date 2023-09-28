@@ -1,21 +1,20 @@
 import CustomError from "@type/customError";
-import { Profile } from "@type/profile";
-
 import { CustomStatus } from "@module/CustomStatusCode";
-import profile from "@schema/profile";
+import image from "@schema/image";
 
 
-export default async function read(id: string): Promise<Profile> {
+export default async function read(id: string) {
     try {
-        const data: Profile = (await profile.findOne({ email: id }))!;
+        const data = (await image.findOne({ _id: id }))!;
 
         if (!data) {
-            throw new Error("User not found");
+            throw new Error("Image not found");
         }
 
-        return data;
+        const imageData: Buffer = data.image!;
+        return imageData;
     }
     catch (error: any) {
-        throw new CustomError(CustomStatus.ERROR_READING_USER_FROM_DB, error);
+        throw new CustomError(CustomStatus.ERROR_READING_IMAGE_FROM_DB, error);
     }
 }

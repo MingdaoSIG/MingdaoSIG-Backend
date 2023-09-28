@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 const Schema = mongoose.Schema;
 
 const profileSchema = new Schema({
+    customId: String,
     email: String,
     name: String,
     code: String,
