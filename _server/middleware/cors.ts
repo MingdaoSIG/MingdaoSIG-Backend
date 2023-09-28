@@ -1,12 +1,39 @@
 import { Request, Response, NextFunction } from "express";
+import axios from "axios";
 
 import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
 
 
-const config = {
+export default async function cors(req: Request, res: Response, next: NextFunction) {
+    try {
+        const { origin } = req.headers;
+        const corsConfig = await getCorsConfig();
+        const allowedOrigin = origin && corsConfig?.origin.includes(origin);
+
+        if (allowedOrigin) {
+            res.header({
+                "Access-Control-Allow-Origin": origin,
+                "Access-Control-Allow-Headers": corsConfig?.headers.join(", ")
+            });
+        }
+
+        next();
+    }
+    catch (error: any) {
+        console.log(error);
+        return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });
+    }
+}
+
+const cachedCors = {
+    config: null,
+    createAt: 0
+};
+const defaultCorsConfig = {
     origin: [
-        "http://localhost:3000"
+        "http://localhost:3000",
+        "http://localhost:3001",
     ],
     headers: [
         "Access-Control-Allow-Headers",
@@ -19,20 +46,43 @@ const config = {
         "Authorization"
     ]
 };
+async function getCorsConfig() {
+    return defaultCorsConfig;
+    const t0 = performance.now();
 
-export default function cors(req: Request, res: Response, next: NextFunction) {
-    try {
-        const { origin } = req.headers;
-        const allowedOrigin = origin && config.origin.includes(origin);
-
-        if (allowedOrigin) {
-            res.header("Access-Control-Allow-Origin", origin);
-            res.header("Access-Control-Allow-Headers", config.headers.join(", "));
-        }
-
-        next();
+    console.log(cachedCors);
+    if (cachedCors && Date.now() - cachedCors.createAt <= 5 * 60 * 1000) {
+        const t1 = performance.now();
+        // eslint-disable-next-line no-console
+        console.log(`Server : successfully got cors config from cache (took ${Math.round(t1 - t0) / 1000} seconds)`);
+        return cachedCors.config;
     }
-    catch (error: any) {
-        return res.sendStatus(HttpStatus.INTERNAL_SERVER_ERROR).json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });
+
+    try {
+        const response = await axios.get(
+            "https://raw.githubusercontent.com/MingdaoSIG/Configurations/main/cors.json",
+            {
+                headers: {
+                    "Authorization": "Token " + String(process.env.GITHUB_AUTH_TOKEN)
+                }
+            }
+        );
+
+        console.log(response.data);
+        const t1 = performance.now();
+        // eslint-disable-next-line no-console
+        console.log(`Server : successfully got cors config from remote source (took ${Math.round(t1 - t0) / 1000} seconds)`);
+
+        cachedCors.config = JSON.parse(response.data);
+        cachedCors.createAt = Date.now();
+
+        // return JSON.parse(response.data);
+    }
+    catch (error) {
+        console.log(error);
+        const t1 = performance.now();
+        // eslint-disable-next-line no-console
+        console.log(`Server : error getting cors config from remote source, use default config instead (took ${Math.round(t1 - t0) / 1000} seconds)`);
+        return defaultCorsConfig;
     }
 }
