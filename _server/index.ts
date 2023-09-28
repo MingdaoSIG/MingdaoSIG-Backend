@@ -11,6 +11,7 @@ const cloud: Express = express();
 cloud.use(morgan("combined"));
 cloud.use(cors);
 cloud.use(bodyParser.urlencoded({ extended: true }));
+cloud.use(bodyParser.raw({ type: "image/webp" }));
 cloud.use(bodyParser.json());
 cloud.use("/", router);
 

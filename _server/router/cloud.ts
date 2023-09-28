@@ -1,4 +1,4 @@
-import { Request, Response, Router, json } from "express";
+import { Request, Response, Router } from "express";
 
 import JWTverifier from "@middleware/JWTverifier";
 import rateLimiter from "@middleware/rateLimiter";
@@ -11,12 +11,11 @@ import { CustomStatus } from "@module/CustomStatusCode";
 
 const router: Router = Router();
 
-router.use("/login", rateLimiter.limiter_1m_10req);
+// router.use("/login", rateLimiter.limiter_1m_10req);
 router.post("/login", login);
 
 router.use("/upload", rateLimiter.limiter_1m_20req);
 router.use("/upload", JWTverifier);
-router.use("/upload", json({ limit: "16mb" }));
 router.use("/upload", upload);
 
 router.use("/needauth", JWTverifier);
