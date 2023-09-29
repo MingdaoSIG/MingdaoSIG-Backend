@@ -5,7 +5,7 @@ import image from "@schema/image";
 
 export default async function read(id: string) {
     try {
-        const data = (await image.findOne({ _id: id }))!;
+        const data = await image.findOne({ _id: id });
 
         if (!data) {
             throw new Error("Image not found");
