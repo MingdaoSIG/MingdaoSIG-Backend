@@ -19,9 +19,7 @@ export default async function JWTverifier(req: Request, res: Response, next: Nex
         const token = authHeader.replace("Bearer ", "");
         const decoded = jwt.verify(token, SECRET_KEY);
 
-        if (typeof (decoded) !== "object") throw new CustomError(CustomStatus.INVALID_JWT, new Error("Invalid JWT"));
-
-        checkData(decoded, ["_id", "email", "name", "code", "class", "identity", "displayName", "createdAt", "updatedAt", "__v", "avatar", "description", "permission", "follower", "sig", "iat"]);
+        checkData(decoded, ["_id", "iat"]);
 
         const customReq = req as unknown as RequestContainJWT;
         customReq.JWT = decoded;
@@ -29,18 +27,23 @@ export default async function JWTverifier(req: Request, res: Response, next: Nex
         next();
     }
     catch (error: any) {
-        return res.sendStatus(HttpStatus.UNAUTHORIZED);
+        return res.status(HttpStatus.UNAUTHORIZED).json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });
     }
 }
 
-function checkData(data: object, keys: string[]) {
-    // Check if input is an object
-    if (typeof data != "object") throw new Error("Not a object");
+function checkData(data: any, keys: string[]) {
+    try {
+        // Check if input is an object
+        if (typeof data != "object") throw new Error("Not a object");
 
-    // Check if object have all required keys
-    if (Object.keys(data).length != keys.length) throw new Error("Invalid data");
-    for (const key of keys) {
-        if (!(key in data)) throw new Error("Invalid data");
+        // Check if object have all required keys
+        if (Object.keys(data).length != keys.length) throw new Error("Invalid data");
+        for (const key of keys) {
+            if (!(key in data)) throw new Error("Invalid data");
+        }
+    }
+    catch (error: any) {
+        throw new CustomError(CustomStatus.INVALID_JWT, error);
     }
 
     return true;
