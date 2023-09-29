@@ -8,7 +8,7 @@ import { ImageData } from "@type/image";
 
 const ImageDB = new MongoDB("image");
 
-export const image: RequestHandler = async (req, res) => {
+export const upload: RequestHandler = async (req, res) => {
     try {
         const image: Buffer = req.body;
 

@@ -3,7 +3,7 @@ import { Request, Response, Router } from "express";
 import JWTverifier from "@middleware/JWTverifier";
 import rateLimiter from "@middleware/rateLimiter";
 import { login } from "@controller/cloud/login";
-import upload from "@controller/cloud/upload";
+import image from "@controller/cloud/image";
 import { HttpStatus } from "@HttpStatusCode";
 import { CustomStatus } from "@module/CustomStatusCode";
 // import bodyParser from "body-parser";
@@ -14,9 +14,9 @@ const router: Router = Router();
 // router.use("/login", rateLimiter.limiter_1m_10req);
 router.post("/login", login);
 
-router.use("/upload", rateLimiter.limiter_1m_20req);
-router.use("/upload", JWTverifier);
-router.use("/upload", upload);
+router.use("/image", rateLimiter.limiter_1m_20req);
+router.use("/image", JWTverifier);
+router.use("/image", image);
 
 router.use("/needauth", JWTverifier);
 router.get("/needauth", (_: Request, res: Response) => {
