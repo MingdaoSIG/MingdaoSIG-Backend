@@ -20,9 +20,9 @@ export default async function JWTverifier(req: Request, res: Response, next: Nex
         const token = authHeader.replace("Bearer ", "");
         const decoded: any = jwt.verify(token, SECRET_KEY);
 
-        checkData(decoded, ["_id", "iat"]);
+        checkData(decoded, ["id", "iat"]);
 
-        if (!isValidObjectId(decoded._id)) throw new CustomError(CustomStatus.INVALID_JWT, new Error("Invalid user id"));
+        if (!isValidObjectId(decoded.id)) throw new CustomError(CustomStatus.INVALID_JWT, new Error("Invalid user id"));
 
         const customReq = req as unknown as RequestContainJWT;
         customReq.JWT = decoded;

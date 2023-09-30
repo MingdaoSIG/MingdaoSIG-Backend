@@ -18,7 +18,7 @@ export const login: RequestHandler = async (req, res) => {
         const googleUserData = await getGoogleUserData(googleToken);
         const userData = await getUserData(googleUserData.email, googleUserData.picture);
 
-        const jwt = signJWT({ _id: userData._id });
+        const jwt = signJWT({ id: userData._id });
         return res.status(HttpStatus.OK).json({
             status: CustomStatus.OK,
             authorization: "Bearer " + jwt,
