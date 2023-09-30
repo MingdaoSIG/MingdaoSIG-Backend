@@ -1,8 +1,10 @@
-import read from "./read";
+import { readByCustomId, readByEmail, readById } from "./read";
 import write from "./write";
 
 
 export default {
-    read,
+    readByEmail,
+    readById,
+    readByCustomId,
     write
 };

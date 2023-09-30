@@ -14,7 +14,18 @@ export default class MongoDB {
     async read(search: Search): Promise<Profile | any> {
         switch (this.databaseType) {
             case "profile":
-                return await user.read(search.email!);
+                if (search.email) {
+                    return await user.readByEmail(search.email!);
+                }
+                else if (search.id) {
+                    return await user.readById(search.id!);
+                }
+                else if (search.customId) {
+                    return await user.readByCustomId(search.customId!);
+                }
+                else {
+                    throw new Error("Search is required");
+                }
 
             case "image":
                 return await image.read(search.id!);
