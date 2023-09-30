@@ -18,7 +18,13 @@ export default async function JWTverifier(req: Request, res: Response, next: Nex
         }
 
         const token = authHeader.replace("Bearer ", "");
-        const decoded: any = jwt.verify(token, SECRET_KEY);
+        let decoded: any;
+        try {
+            decoded = jwt.verify(token, SECRET_KEY);
+        }
+        catch (error) {
+            throw new CustomError(CustomStatus.INVALID_JWT, error);
+        }
 
         checkData(decoded, ["id", "iat"]);
 
