@@ -19,6 +19,6 @@ export const read: RequestHandler = async (req, res) => {
         return res.status(HttpStatus.OK).contentType("image/webp").send(imageData);
     }
     catch (error: any) {
-        return res.status(HttpStatus.BAD_REQUEST).json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });
+        return res.status(HttpStatus.NOT_FOUND).json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });
     }
 };
