@@ -38,8 +38,15 @@ export default class MongoDB {
     async write(dataToWrite: any, search?: Search): Promise<Profile | ImageData | any> {
         switch (this.databaseType) {
             case "profile":
-                if (!search) throw new Error("Search is required");
-                return await user.write(search.email!, dataToWrite);
+                if (search?.email) {
+                    return await user.writeByEmail(search.email, dataToWrite);
+                }
+                else if (search?.id) {
+                    return await user.writeById(search.id, dataToWrite);
+                }
+                else {
+                    throw new Error("Search is required");
+                }
 
             case "image":
                 return await image.write(dataToWrite);

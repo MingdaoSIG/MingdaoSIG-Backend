@@ -4,15 +4,26 @@ import CustomError from "@type/customError";
 import { CustomStatus } from "@module/CustomStatusCode";
 
 
-export default async function write(email: string, dataToSave: Profile) {
+export async function writeById(id: string, dataToSave: Profile) {
+    return await _writeData("_id", id, dataToSave);
+}
+
+export async function writeByEmail(email: string, dataToSave: Profile) {
+    return await _writeData("email", email, dataToSave);
+}
+
+async function _writeData(key: string, value: any, dataToSave: any) {
     try {
-        const data = await profile.findOne({ email }).exec();
+        const data = await profile.findOne({ [key]: value });
         const code = data ? 1 : 0;
 
         if (code) {
             return (await profile.findOneAndUpdate(
-                { email },
-                dataToSave
+                { [key]: value },
+                dataToSave,
+                {
+                    new: true
+                }
             ))!;
         }
         else {

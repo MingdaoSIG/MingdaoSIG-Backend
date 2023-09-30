@@ -1,10 +1,11 @@
 import { readByCustomId, readByEmail, readById } from "./read";
-import write from "./write";
+import { writeByEmail, writeById }from "./write";
 
 
 export default {
     readByEmail,
     readById,
     readByCustomId,
-    write
+    writeById,
+    writeByEmail
 };

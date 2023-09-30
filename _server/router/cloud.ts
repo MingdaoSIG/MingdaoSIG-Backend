@@ -9,6 +9,7 @@ import { read as imageRead } from "@controller/cloud/image/read";
 import { HttpStatus } from "@HttpStatusCode";
 import { CustomStatus } from "@module/CustomStatusCode";
 import { readByCustomId as userReadByCustomId, readById as userReadById } from "@controller/cloud/profile/user/read";
+import { write as userWrite } from "@controller/cloud/profile/user/write";
 
 
 const router: Router = Router();
@@ -22,9 +23,10 @@ router.use("/image", JWTverifier);
 router.use("/image", bodyParser.raw({ limit: "2mb" }));
 router.post("/image", imageUpload);
 
-// router.use("/profile", JWTverifier);
 router.get("/profile/user/@:id", userReadByCustomId);
 router.get("/profile/user/:id", userReadById);
+router.use("/profile", JWTverifier);
+router.post("/profile/user/:id", userWrite);
 
 router.use("/needauth", JWTverifier);
 // router.use("/image", rateLimiter.limiter_1m_20req);
