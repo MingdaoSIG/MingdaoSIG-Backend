@@ -3,6 +3,7 @@ import { ImageData } from "@type/image";
 import { DatabaseType, Search } from "@type/database";
 import user from "@DBfunc/user";
 import image from "@DBfunc/image";
+import post from "@DBfunc/post";
 
 
 export default class MongoDB {
@@ -39,10 +40,10 @@ export default class MongoDB {
         switch (this.databaseType) {
             case "profile":
                 if (search?.email) {
-                    return await user.writeByEmail(search.email, dataToWrite);
+                    return await user.writeByEmail(search.email!, dataToWrite);
                 }
                 else if (search?.id) {
-                    return await user.writeById(search.id, dataToWrite);
+                    return await user.writeById(search.id!, dataToWrite);
                 }
                 else {
                     throw new Error("Search is required");
@@ -50,6 +51,14 @@ export default class MongoDB {
 
             case "image":
                 return await image.write(dataToWrite);
+
+            case "post":
+                if (search?.id) {
+                    return await post.write(search.id!, dataToWrite);
+                }
+                else {
+                    throw new Error("Search is required");
+                }
 
             default:
                 throw new Error("Invalid database type");

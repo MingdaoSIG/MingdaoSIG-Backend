@@ -10,6 +10,7 @@ import { HttpStatus } from "@HttpStatusCode";
 import { CustomStatus } from "@module/CustomStatusCode";
 import { readByCustomId as userReadByCustomId, readById as userReadById } from "@controller/cloud/profile/user/read";
 import { write as userWrite } from "@controller/cloud/profile/user/write";
+import { write } from "@controller/cloud/post/write";
 
 
 const router: Router = Router();
@@ -27,6 +28,9 @@ router.get("/profile/user/@:id", userReadByCustomId);
 router.get("/profile/user/:id", userReadById);
 router.use("/profile", JWTverifier);
 router.post("/profile/user/:id", userWrite);
+
+router.use("/post", JWTverifier);
+router.post("/post", write);
 
 router.use("/needauth", JWTverifier);
 // router.use("/image", rateLimiter.limiter_1m_20req);
