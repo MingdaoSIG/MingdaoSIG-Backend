@@ -1,6 +1,7 @@
 import { RequestHandler } from "express";
 import { isValidObjectId } from "mongoose";
 
+import { Profile } from "@type/profile";
 import CustomError from "@type/customError";
 import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
@@ -15,9 +16,10 @@ export const readById: RequestHandler = async (req, res) => {
 
         if (!id || !isValidObjectId(id)) throw new CustomError(CustomStatus.INVALID_USER_ID, new Error("Invalid user id"));
 
-        const userData = (await ProfileDB.read({ id }))!;
+        const userData: Profile = (await ProfileDB.read({ id }))!;
         return res.status(HttpStatus.OK).json({
             status: CustomStatus.OK,
+            id: userData._id,
             data: userData
         });
     }
@@ -30,9 +32,10 @@ export const readByCustomId: RequestHandler = async (req, res) => {
     try {
         const customId: string = req.params.id!;
 
-        const userData = (await ProfileDB.read({ customId }))!;
+        const userData: Profile = (await ProfileDB.read({ customId }))!;
         return res.status(HttpStatus.OK).json({
             status: CustomStatus.OK,
+            id: userData._id,
             data: userData
         });
     }

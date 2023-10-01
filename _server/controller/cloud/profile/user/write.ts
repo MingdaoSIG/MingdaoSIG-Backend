@@ -31,8 +31,7 @@ export const write: RequestHandler = async (req: Request | RequestContainJWT, re
 
         return res.status(HttpStatus.OK).json({
             status: CustomStatus.OK,
-            id,
-            decodedJwt,
+            id: savedData._id,
             data: savedData
         });
     }
