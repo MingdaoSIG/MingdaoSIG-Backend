@@ -6,7 +6,10 @@ import { RequestContainJWT } from "@type/request";
 import CustomError from "@type/customError";
 import { HttpStatus } from "@module/HttpStatusCode";
 import { CustomStatus } from "@module/CustomStatusCode";
+import MongoDB from "@module/MongoDB";
 
+
+const UserDB = new MongoDB("profile");
 
 export default async function JWTverifier(req: Request, res: Response, next: NextFunction) {
     const SECRET_KEY: Secret = process.env.JWT_SECRET!;
@@ -28,7 +31,13 @@ export default async function JWTverifier(req: Request, res: Response, next: Nex
 
         checkData(decoded, ["id", "iat"]);
 
-        if (!isValidObjectId(decoded.id)) throw new CustomError(CustomStatus.INVALID_JWT, new Error("Invalid user id"));
+        try {
+            if (!isValidObjectId(decoded.id)) throw new Error("Invalid user id");
+            await UserDB.read({ id: decoded.id });
+        }
+        catch (error: any) {
+            throw new CustomError(CustomStatus.INVALID_JWT, error);
+        }
 
         const customReq = req as unknown as RequestContainJWT;
         customReq.JWT = decoded;
