@@ -18,10 +18,10 @@ export const write: RequestHandler = async (req: Request | RequestContainJWT, re
         const decodedJwt: any = (req as RequestContainJWT).JWT;
 
         if (!id || id !== decodedJwt.id || !isValidObjectId(id)) {
-            throw new CustomError(CustomStatus.INVALID_USER_ID, new Error("Invalid user id"));
+            throw new CustomError(CustomStatus.INVALID_USER, new Error("Invalid user"));
         }
 
-        const forbiddenKeys = ["_id", "email", "name", "code", "class", "identity", "avatar", "permission", "createAt", "updateAt", "__v"];
+        const forbiddenKeys = ["_id", "email", "name", "code", "class", "identity", "avatar", "permission", "removed", "createAt", "updateAt", "__v"];
         const invalidKeys = Object.keys(body).filter(key => forbiddenKeys.includes(key));
         if (invalidKeys.length > 0 || Object.keys(body).length === 0) {
             throw new CustomError(CustomStatus.INVALID_BODY, new Error("Invalid body"));
