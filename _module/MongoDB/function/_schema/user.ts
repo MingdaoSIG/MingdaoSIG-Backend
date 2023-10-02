@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 
 const Schema = mongoose.Schema;
 
-const profileSchema = new Schema({
+const userSchema = new Schema({
     customId: String,
     email: String,
     name: String,
@@ -18,4 +18,4 @@ const profileSchema = new Schema({
     permission: Number
 }, { timestamps: true });
 
-export default mongoose.model("profile", profileSchema, "profile");
+export default mongoose.model("profile", userSchema, "profile");

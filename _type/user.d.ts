@@ -22,7 +22,7 @@ export type Identity = "teacher" | "student";
 */
 export type Permission = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 
-export type Profile = {
+export type User = {
     _id?: string, // ID
     customId?: string, // 自定義ID
     email: string, // 帳號

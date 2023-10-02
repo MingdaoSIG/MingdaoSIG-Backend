@@ -1,22 +1,17 @@
 import axios from "axios";
 
-import { Identity, Profile } from "@type/profile";
+import { Identity, User } from "@type/user";
 import CustomError from "@type/customError";
 import MongoDB from "@module/MongoDB";
 import { CustomStatus } from "@module/CustomStatusCode";
 
 
-const UserDB = new MongoDB("profile");
+const UserDB = new MongoDB("user");
 
-export async function getUserData(email: string, avatar: string): Promise<Profile> {
+export async function getUserData(email: string, avatar: string): Promise<User> {
     const MD_API_URL = "https://mdsrl.mingdao.edu.tw/mdpp/Sig20Login/googleUserCheck";
 
     try {
-        // Check user email
-        email = email.toLowerCase();
-        if (!email || !email.includes("@")) throw new Error("Invalid email");
-        if (email.split("@")[1] != "ms.mingdao.edu.tw") throw new Error("Invalid email");
-
         const response = await axios.postForm(MD_API_URL, {
             email
         });
@@ -31,7 +26,7 @@ export async function getUserData(email: string, avatar: string): Promise<Profil
 
         const { mail, user_name, code, class_name, user_identity } = responseData;
 
-        const oldData: Profile = (await UserDB.read({ email }).catch(() => null))!;
+        const oldData: User | null = await UserDB.read({ email }).catch(() => null);
         const customId = oldData?.customId || code;
         const sig = user_identity === "sig" ? [] : (oldData?.sig || []);
         const displayName = user_identity === "sig" ? user_name : oldData?.displayName || user_name;
@@ -39,7 +34,7 @@ export async function getUserData(email: string, avatar: string): Promise<Profil
         const follower = oldData?.follower || [];
         const permission = oldData?.permission || 1;
 
-        const newData: Profile = {
+        const newData: User = {
             customId: customId,
             email: mail,
             name: user_name,
@@ -53,7 +48,7 @@ export async function getUserData(email: string, avatar: string): Promise<Profil
             follower: follower,
             permission: permission
         };
-        const savedData: Profile = await UserDB.write(newData, { email });
+        const savedData: User = await UserDB.write(newData, { email });
 
         return savedData;
     }

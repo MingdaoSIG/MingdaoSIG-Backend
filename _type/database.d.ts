@@ -1,7 +1,7 @@
-export type DatabaseType = "profile" | "post" | "comment" | "image";
+export type DatabaseType = "user" | "post" | "comment" | "image";
 
 export type Search = {
-    email?: string,
-    id?: string,
-    customId?: string,
+    email?: string | null,
+    id?: string | null,
+    customId?: string | null,
 }

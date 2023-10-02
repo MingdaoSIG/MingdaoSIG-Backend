@@ -1,4 +1,4 @@
-import { Profile } from "@type/profile";
+import { User } from "@type/user";
 import { ImageData } from "@type/image";
 import { DatabaseType, Search } from "@type/database";
 import user from "@DBfunc/user";
@@ -12,9 +12,9 @@ export default class MongoDB {
         this.databaseType = databaseType;
     }
 
-    async read(search: Search): Promise<Profile | any> {
+    async read(search: Search): Promise<User | any> {
         switch (this.databaseType) {
-            case "profile":
+            case "user":
                 if (search.email) {
                     return await user.readByEmail(search.email!);
                 }
@@ -31,14 +31,22 @@ export default class MongoDB {
             case "image":
                 return await image.read(search.id!);
 
+            case "post":
+                if (search.id) {
+                    return await post.read(search.id!);
+                }
+                else {
+                    throw new Error("Search is required");
+                }
+
             default:
                 throw new Error("Invalid database type");
         }
     }
 
-    async write(dataToWrite: any, search?: Search): Promise<Profile | ImageData | any> {
+    async write(dataToWrite: any, search?: Search): Promise<User | ImageData | any> {
         switch (this.databaseType) {
-            case "profile":
+            case "user":
                 if (search?.email) {
                     return await user.writeByEmail(search.email!, dataToWrite);
                 }
@@ -55,6 +63,9 @@ export default class MongoDB {
             case "post":
                 if (search?.id) {
                     return await post.write(search.id!, dataToWrite);
+                }
+                else if (!search?.id) {
+                    return await post.write(null, dataToWrite);
                 }
                 else {
                     throw new Error("Search is required");

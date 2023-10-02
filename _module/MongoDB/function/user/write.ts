@@ -1,14 +1,14 @@
-import { Profile } from "@type/profile";
-import profile from "@schema/profile";
+import { User } from "@type/user";
+import profile from "@module/MongoDB/function/_schema/user";
 import CustomError from "@type/customError";
 import { CustomStatus } from "@module/CustomStatusCode";
 
 
-export async function writeById(id: string, dataToSave: Profile) {
+export async function writeById(id: string, dataToSave: User) {
     return await _writeData("_id", id, dataToSave);
 }
 
-export async function writeByEmail(email: string, dataToSave: Profile) {
+export async function writeByEmail(email: string, dataToSave: User) {
     return await _writeData("email", email, dataToSave);
 }
 

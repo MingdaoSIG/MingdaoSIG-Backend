@@ -1,7 +1,7 @@
 import { Request, RequestHandler } from "express";
 import { isValidObjectId } from "mongoose";
 
-import { Profile } from "@type/profile";
+import { User } from "@type/user";
 import { RequestContainJWT } from "@type/request";
 import CustomError from "@type/customError";
 import { CustomStatus } from "@module/CustomStatusCode";
@@ -9,7 +9,7 @@ import { HttpStatus } from "@module/HttpStatusCode";
 import MongoDB from "@module/MongoDB";
 
 
-const UserDB = new MongoDB("profile");
+const UserDB = new MongoDB("user");
 
 export const write: RequestHandler = async (req: Request | RequestContainJWT, res) => {
     try {
@@ -27,7 +27,7 @@ export const write: RequestHandler = async (req: Request | RequestContainJWT, re
             throw new CustomError(CustomStatus.INVALID_BODY, new Error("Invalid body"));
         }
 
-        const savedData: Profile = await UserDB.write(body, { id });
+        const savedData: User = await UserDB.write(body, { id });
 
         return res.status(HttpStatus.OK).json({
             status: CustomStatus.OK,

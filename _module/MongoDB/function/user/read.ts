@@ -1,5 +1,5 @@
 import CustomError from "@type/customError";
-import profile from "@schema/profile";
+import profile from "@module/MongoDB/function/_schema/user";
 
 import { CustomStatus } from "@module/CustomStatusCode";
 
