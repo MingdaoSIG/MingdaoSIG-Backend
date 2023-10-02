@@ -1,31 +1,59 @@
-import { RequestHandler } from "express";
-import { isValidObjectId } from "mongoose";
+import { RequestHandler, Response } from "express";
 
-import CustomError from "@type/customError";
 import { Post } from "@type/post";
 import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
 import MongoDB from "@module/MongoDB";
+import { isValidObjectId } from "mongoose";
+import CustomError from "@type/customError";
 
 
 const PostDB = new MongoDB("post");
+const UserDB = new MongoDB("user");
 
-export const read: RequestHandler = async (req, res) => {
+export const listAll: RequestHandler = async (_, res) => {
     try {
-        const id: string = req.params.id!;
-
-        if (!isValidObjectId(id)) throw new CustomError(CustomStatus.INVALID_POST_ID, new Error("Invalid post id"));
-
-        const postData: Post | null = await PostDB.read({ id }).catch(() => null);
-        if (!postData) throw new CustomError(CustomStatus.NOT_FOUND, new Error("Post not found"));
-
-        return res.status(HttpStatus.OK).json({
-            status: CustomStatus.OK,
-            id: postData._id,
-            postData
-        });
+        return await _list(res, {});
     }
     catch (error: any) {
         return res.status(HttpStatus.NOT_FOUND).json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });
     }
 };
+
+// Not finished, wait for sig api
+// export const listAllBySig: RequestHandler = async (req, res) => {
+//     try {
+//         return await _list(res, {});
+//     }
+//     catch (error: any) {
+//         return res.status(HttpStatus.NOT_FOUND).json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });
+//     }
+// };
+
+export const listAllByUser: RequestHandler = async (req, res) => {
+    try {
+        const id: string = req.params.id!;
+
+        if (!isValidObjectId(id)) throw new CustomError(CustomStatus.INVALID_USER_ID, new Error("Invalid user id"));
+
+        const haveUser = await UserDB.read({ id }).catch(() => null);
+        if (!haveUser) throw new CustomError(CustomStatus.INVALID_USER_ID, new Error("Invalid user id"));
+
+        return await _list(res, { user: id });
+    }
+    catch (error: any) {
+        return res.status(HttpStatus.NOT_FOUND).json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });
+    }
+};
+
+async function _list(res: Response, search: object) {
+    const postData: Post[] | null = await PostDB.list({
+        ...search,
+        removed: false
+    });
+
+    return res.status(HttpStatus.OK).json({
+        status: CustomStatus.OK,
+        postData
+    });
+}

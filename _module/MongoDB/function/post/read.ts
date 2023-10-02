@@ -5,7 +5,7 @@ import post from "@schema/post";
 
 export default async function read(id: string) {
     try {
-        const data = await post.findOne({ _id: id });
+        const data = await post.findOne({ _id: id, removed: false });
 
         if (!data) {
             throw new Error("Post not found");
