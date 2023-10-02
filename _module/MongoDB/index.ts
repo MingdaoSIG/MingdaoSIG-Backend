@@ -1,5 +1,6 @@
 import { User } from "@type/user";
 import { ImageData } from "@type/image";
+import { Post } from "@type/post";
 import { DatabaseType, Search } from "@type/database";
 import user from "@DBfunc/user";
 import image from "@DBfunc/image";
@@ -12,7 +13,7 @@ export default class MongoDB {
         this.databaseType = databaseType;
     }
 
-    async read(search: Search): Promise<User | any> {
+    async read(search: Search) {
         switch (this.databaseType) {
             case "user":
                 if (search.email) {
@@ -44,7 +45,7 @@ export default class MongoDB {
         }
     }
 
-    async write(dataToWrite: any, search?: Search): Promise<User | ImageData | any> {
+    async write(dataToWrite: any, search?: Search) {
         switch (this.databaseType) {
             case "user":
                 if (search?.email) {
@@ -76,5 +77,11 @@ export default class MongoDB {
         }
     }
 
-    async delete() { }
+    async list(search: any) {
+        if (!search) throw new Error("Search is required");
+        switch (this.databaseType) {
+            case "post":
+                return await post.list(search);
+        }
+    }
 }
