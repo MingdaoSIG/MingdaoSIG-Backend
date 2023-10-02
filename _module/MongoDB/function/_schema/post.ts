@@ -10,6 +10,7 @@ const postSchema = new Schema({
     user: String,
     hashtag: [String],
     like: [String],
+    removed: { type: Boolean, default: false }
 });
 
 export default mongoose.model("post", postSchema, "post");
