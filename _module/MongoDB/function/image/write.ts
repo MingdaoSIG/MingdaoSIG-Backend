@@ -6,7 +6,7 @@ import image from "@schema/image";
 
 export default async function write(dataToSave: ImageData) {
     try {
-        const data = await image.findOne({ image: dataToSave.image }).exec();
+        const data = await image.findOne({ image: dataToSave.image });
         const code = data ? 1 : 0;
 
         if (code) {
