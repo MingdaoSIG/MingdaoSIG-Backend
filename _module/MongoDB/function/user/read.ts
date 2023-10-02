@@ -1,12 +1,24 @@
-import { CustomStatus } from "@module/CustomStatusCode";
-import { profile } from "@schema/user";
 import CustomError from "@type/customError";
-import { Profile } from "@type/profile";
+import profile from "@module/MongoDB/function/_schema/user";
+
+import { CustomStatus } from "@module/CustomStatusCode";
 
 
-export default async function read(email: string): Promise<Profile> {
+export async function readByEmail(email: string) {
+    return await _readData("email", email);
+}
+
+export async function readById(id: string) {
+    return await _readData("_id", id);
+}
+
+export async function readByCustomId(id: string) {
+    return await _readData("customId", id);
+}
+
+async function _readData(key: string, value: any) {
     try {
-        const data: Profile = (await profile.findOne({ email }))!;
+        const data = await profile.findOne({ [key]: value });
 
         if (!data) {
             throw new Error("User not found");

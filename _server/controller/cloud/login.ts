@@ -1,32 +1,31 @@
 import { RequestHandler } from "express";
 
-import CustomError from "@type/customError";
 import CheckRequestRequirement from "@module/CheckRequestRequirement";
 import { HttpStatus } from "@module/HttpStatusCode";
 import { getUserData } from "@module/GetUserData";
 import { CustomStatus } from "@module/CustomStatusCode";
 import signJWT from "@module/SignJWT";
+import { getGoogleUserData } from "@module/GetGoogleUserData";
 
 
 export const login: RequestHandler = async (req, res) => {
     try {
-        console.log(req?.body);
-
         const checker = new CheckRequestRequirement(req);
-        checker.hasBody(["email", "avatar"]);
+        checker.hasBody(["googleToken"]);
 
-        const email = req.body.email;
-        const avatar = req.body.avatar;
+        const googleToken: string = req.body.googleToken;
 
-        if (!avatar || !avatar.includes("https://")) throw new CustomError(CustomStatus.INVALID_BODY, new Error("Invalid avatar"));
+        const googleUserData = await getGoogleUserData(googleToken);
+        const userData = await getUserData(googleUserData.email, googleUserData.picture);
 
-        const userData = await getUserData(email, avatar);
-
-        const token = signJWT(userData);
-        return res.status(HttpStatus.OK).header({ "authorization": "Bearer " + token }).json({ status: CustomStatus.OK });
+        const jwt = signJWT({ id: userData._id });
+        return res.status(HttpStatus.OK).json({
+            status: CustomStatus.OK,
+            authorization: "Bearer " + jwt,
+            data: userData
+        });
     }
     catch (error: any) {
-        console.error(error);
         return res.status(HttpStatus.BAD_REQUEST).json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });
     }
 };

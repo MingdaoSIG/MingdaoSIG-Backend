@@ -1,6 +1,7 @@
-import { Profile } from "@type/profile";
-import { DatabaseType } from "@type/database";
+import { DatabaseType, Search } from "@type/database";
 import user from "@DBfunc/user";
+import image from "@DBfunc/image";
+import post from "@DBfunc/post";
 
 
 export default class MongoDB {
@@ -9,25 +10,75 @@ export default class MongoDB {
         this.databaseType = databaseType;
     }
 
-    async read(email: string): Promise<Profile> {
+    async read(search: Search): Promise<any> {
         switch (this.databaseType) {
             case "user":
-                return await user.read(email);
+                if (search.email) {
+                    return await user.readByEmail(search.email!);
+                }
+                else if (search.id) {
+                    return await user.readById(search.id!);
+                }
+                else if (search.customId) {
+                    return await user.readByCustomId(search.customId!);
+                }
+                else {
+                    throw new Error("Search is required");
+                }
+
+            case "image":
+                return await image.read(search.id!);
+
+            case "post":
+                if (search.id) {
+                    return await post.read(search.id!);
+                }
+                else {
+                    throw new Error("Search is required");
+                }
 
             default:
-                throw new Error("Invalid databaseType");
+                throw new Error("Invalid database type");
         }
     }
 
-    async write(email: string, dataToWrite: Profile) {
+    async write(dataToWrite: any, search?: Search): Promise<any> {
         switch (this.databaseType) {
             case "user":
-                return await user.write(email, dataToWrite);
+                if (search?.email) {
+                    return await user.writeByEmail(search.email!, dataToWrite);
+                }
+                else if (search?.id) {
+                    return await user.writeById(search.id!, dataToWrite);
+                }
+                else {
+                    throw new Error("Search is required");
+                }
+
+            case "image":
+                return await image.write(dataToWrite);
+
+            case "post":
+                if (search?.id) {
+                    return await post.write(search.id!, dataToWrite);
+                }
+                else if (!search?.id) {
+                    return await post.write(null, dataToWrite);
+                }
+                else {
+                    throw new Error("Search is required");
+                }
 
             default:
-                throw new Error("Invalid databaseType");
+                throw new Error("Invalid database type");
         }
     }
 
-    async delete() { }
+    async list(search: object): Promise<any> {
+        if (!search) throw new Error("Search is required");
+        switch (this.databaseType) {
+            case "post":
+                return await post.list(search);
+        }
+    }
 }
