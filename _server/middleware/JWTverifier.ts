@@ -9,7 +9,7 @@ import { CustomStatus } from "@module/CustomStatusCode";
 import MongoDB from "@module/MongoDB";
 
 
-const UserDB = new MongoDB("profile");
+const UserDB = new MongoDB("user");
 
 export default async function JWTverifier(req: Request, res: Response, next: NextFunction) {
     const SECRET_KEY: Secret = process.env.JWT_SECRET!;
@@ -17,7 +17,7 @@ export default async function JWTverifier(req: Request, res: Response, next: Nex
     try {
         const authHeader = req.header("authorization");
         if (!authHeader || !authHeader.startsWith("Bearer ")) {
-            return res.sendStatus(HttpStatus.UNAUTHORIZED);
+            throw new CustomError(CustomStatus.INVALID_JWT, new Error("Invalid JWT"));
         }
 
         const token = authHeader.replace("Bearer ", "");
