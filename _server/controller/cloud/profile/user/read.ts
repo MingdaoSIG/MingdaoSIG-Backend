@@ -16,7 +16,9 @@ export const readById: RequestHandler = async (req, res) => {
 
         if (!id || !isValidObjectId(id)) throw new CustomError(CustomStatus.INVALID_USER_ID, new Error("Invalid user id"));
 
-        const userData: User = (await ProfileDB.read({ id }))!;
+        const userData: User | null = await ProfileDB.read({ id }).catch(() => null);
+        if (!userData) throw new CustomError(CustomStatus.NOT_FOUND, new Error("User not found"));
+
         return res.status(HttpStatus.OK).json({
             status: CustomStatus.OK,
             id: userData._id,
@@ -32,7 +34,9 @@ export const readByCustomId: RequestHandler = async (req, res) => {
     try {
         const customId: string = req.params.id!;
 
-        const userData: User = (await ProfileDB.read({ customId }))!;
+        const userData: User = await ProfileDB.read({ customId }).catch(() => null);
+        if (!userData) throw new CustomError(CustomStatus.NOT_FOUND, new Error("User not found"));
+
         return res.status(HttpStatus.OK).json({
             status: CustomStatus.OK,
             id: userData._id,

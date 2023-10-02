@@ -15,7 +15,9 @@ export const read: RequestHandler = async (req, res) => {
 
         if (!id || !isValidObjectId(id)) throw new CustomError(CustomStatus.INVALID_IMAGE_ID, new Error("Invalid image id"));
 
-        const imageData = (await ImageDB.read({ id }))!;
+        const imageData: Buffer | null = await ImageDB.read({ id }).catch(() => null);
+        if (!imageData) throw new CustomError(CustomStatus.NOT_FOUND, new Error("Image not found"));
+
         return res.status(HttpStatus.OK).contentType("image/webp").send(imageData);
     }
     catch (error: any) {
