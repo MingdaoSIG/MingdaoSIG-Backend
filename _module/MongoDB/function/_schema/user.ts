@@ -18,4 +18,4 @@ const userSchema = new Schema({
     permission: Number
 }, { timestamps: true });
 
-export default mongoose.model("profile", userSchema, "profile");
+export default mongoose.model("user", userSchema, "user");
