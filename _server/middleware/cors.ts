@@ -33,6 +33,9 @@ const defaultCorsConfig = {
     origin: [
         "http://localhost:3000",
         "http://localhost:3001",
+        "https://mdsig20-dev.lazco.dev",
+        "https://sig.zeabur.app",
+        "https://sig.mingdao.edu.tw"
     ],
     headers: [
         "Access-Control-Allow-Headers",
