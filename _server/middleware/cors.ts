@@ -9,7 +9,8 @@ export default async function cors(req: Request, res: Response, next: NextFuncti
     try {
         const { origin } = req.headers;
         const corsConfig = await getCorsConfig();
-        const allowedOrigin = origin && corsConfig?.origin.includes(origin);
+        // const allowedOrigin = origin && corsConfig?.origin.includes(origin);
+        const allowedOrigin = true;
 
         if (allowedOrigin) {
             res.header({
