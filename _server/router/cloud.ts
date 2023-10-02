@@ -14,6 +14,7 @@ import { write as postWrite } from "@controller/cloud/post/write";
 import { read as postRead } from "@controller/cloud/post/read";
 import { remove as postRemove } from "@controller/cloud/post/remove";
 import { listAllByUser as postListAllByUser, listAll as postListAll } from "@controller/cloud/post/list";
+import { disLike as postDisLike, like as postLike } from "@controller/cloud/post/like";
 
 
 const router: Router = Router();
@@ -40,6 +41,8 @@ router.use("/post", JWTverifier);
 router.post("/post", postWrite);
 router.post("/post/:id", postWrite);
 router.delete("/post/:id", postRemove);
+router.post("/post/:id/like", postLike);
+router.delete("/post/:id/like", postDisLike);
 
 router.use("/needauth", JWTverifier);
 // router.use("/image", rateLimiter.limiter_1m_20req);
