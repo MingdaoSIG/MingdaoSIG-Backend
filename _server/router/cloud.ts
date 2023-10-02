@@ -31,6 +31,7 @@ router.post("/profile/user/:id", userWrite);
 
 router.use("/post", JWTverifier);
 router.post("/post", write);
+router.post("/post/:id", write);
 
 router.use("/needauth", JWTverifier);
 // router.use("/image", rateLimiter.limiter_1m_20req);
@@ -39,7 +40,7 @@ router.get("/needauth", (_: Request, res: Response) => {
 });
 
 router.use("/*", (_: Request, res: Response) => {
-    res.status(HttpStatus.NOT_FOUND).json({ statuscode: CustomStatus.NOT_FOUND });
+    res.status(HttpStatus.NOT_FOUND).json({ status: CustomStatus.NOT_FOUND });
 });
 
 export default router;

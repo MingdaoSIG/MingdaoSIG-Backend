@@ -4,7 +4,7 @@ import CustomError from "@type/customError";
 import { CustomStatus } from "@module/CustomStatusCode";
 
 
-export default async function write(id: string, dataToSave: Post) {
+export default async function write(id: string | null, dataToSave: Post) {
     try {
         const data = await post.findOne({ _id: id });
         const code = data ? 1 : 0;

@@ -17,10 +17,6 @@ export const write: RequestHandler = async (req: Request | RequestContainJWT, re
         const id = (req as Request).params.id;
         const decodedJwt: any = (req as RequestContainJWT).JWT;
 
-        if (!isValidObjectId(id)) {
-            throw new CustomError(CustomStatus.INVALID_POST_ID, new Error("Invalid user id"));
-        }
-
         const forbiddenKeys = ["_id", "user", "like", "createAt", "updateAt", "__v"];
         const invalidKeys = Object.keys(body).filter(key => forbiddenKeys.includes(key));
         if (invalidKeys.length > 0 || Object.keys(body).length === 0) {
@@ -29,15 +25,42 @@ export const write: RequestHandler = async (req: Request | RequestContainJWT, re
 
         const { sig, title, content, hashtag } = body;
 
-        if (!sig || !title || !content) {
+        // Need to check if sig is valid
+        if (!sig || !title || !content || title === "" || content === "") {
             throw new CustomError(CustomStatus.INVALID_BODY, new Error("Invalid body"));
         }
 
-        const savedData: Post = await PostDB.write(body, { id });
+        const dataToSave = {
+            sig,
+            title,
+            content,
+            user: decodedJwt.id,
+            hashtag
+        };
+
+        const oldData: Post | null = await PostDB.read({ id }).catch(() => null);
+        if (!id) {
+            if (!oldData) {
+                const savedData: Post = await PostDB.write(dataToSave);
+                return res.status(HttpStatus.OK).json({
+                    status: CustomStatus.OK,
+                    id: savedData._id,
+                    data: savedData
+                });
+            }
+        }
+        else if (!isValidObjectId(id)) {
+            throw new CustomError(CustomStatus.INVALID_POST_ID, new Error("Invalid post id"));
+        }
+        else if (!oldData) {
+            throw new CustomError(CustomStatus.INVALID_POST_ID, new Error("Invalid post id"));
+        }
+
+        const savedData: Post = await PostDB.write(dataToSave, { id });
 
         return res.status(HttpStatus.OK).json({
             status: CustomStatus.OK,
-            id,
+            id: savedData._id,
             data: savedData
         });
     }
