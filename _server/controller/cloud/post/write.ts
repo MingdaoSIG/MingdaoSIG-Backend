@@ -27,14 +27,14 @@ export const write: RequestHandler = async (req: Request | RequestContainJWT, re
         const { sig, title, cover, content, hashtag } = body;
 
         // Need to check if sig is valid
-        if (!sig || !title || !content || title === "" || content === "") {
+        if (!sig || !title || !content || title === "" || content === "" || (cover && !await isValidCover(cover))) {
             throw new CustomError(CustomStatus.INVALID_BODY, new Error("Invalid body"));
         }
 
         const dataToSave = {
             sig,
             title,
-            cover: await isValidCover(cover) ? cover : "https://lazco.dev/sig-photo-coming-soon-picture",
+            cover: cover || "https://lazco.dev/sig-photo-coming-soon-picture",
             content,
             user: decodedJwt.id,
             hashtag
