@@ -27,7 +27,7 @@ export async function getUserData(email: string, avatar: string): Promise<User> 
         const { mail, user_name, code, class_name, user_identity } = responseData;
 
         const oldData: User | null = await UserDB.read({ email }).catch(() => null);
-        const customId = oldData?.customId || code;
+        const customId = oldData?.customId?.toLowerCase() || code.toLowerCase();
         const sig = user_identity === "sig" ? [] : (oldData?.sig || []);
         const displayName = user_identity === "sig" ? user_name : oldData?.displayName || user_name;
         const description = oldData?.description || "";
