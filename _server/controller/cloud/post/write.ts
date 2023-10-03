@@ -7,6 +7,7 @@ import CustomError from "@type/customError";
 import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
 import MongoDB from "@module/MongoDB";
+import axios from "axios";
 
 
 const PostDB = new MongoDB("post");
@@ -23,7 +24,7 @@ export const write: RequestHandler = async (req: Request | RequestContainJWT, re
             throw new CustomError(CustomStatus.INVALID_BODY, new Error("Invalid body"));
         }
 
-        const { sig, title, content, hashtag } = body;
+        const { sig, title, cover, content, hashtag } = body;
 
         // Need to check if sig is valid
         if (!sig || !title || !content || title === "" || content === "") {
@@ -33,6 +34,7 @@ export const write: RequestHandler = async (req: Request | RequestContainJWT, re
         const dataToSave = {
             sig,
             title,
+            cover: await isValidCover(cover) ? cover : "https://lazco.dev/sig-photo-coming-soon-picture",
             content,
             user: decodedJwt.id,
             hashtag
@@ -45,6 +47,7 @@ export const write: RequestHandler = async (req: Request | RequestContainJWT, re
                 return res.status(HttpStatus.OK).json({
                     status: CustomStatus.OK,
                     id: savedData._id,
+                    cover: savedData.cover,
                     data: savedData
                 });
             }
@@ -68,3 +71,14 @@ export const write: RequestHandler = async (req: Request | RequestContainJWT, re
         return res.status(HttpStatus.BAD_REQUEST).json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });
     }
 };
+
+async function isValidCover(url: string) {
+    if (!url) return false;
+    try {
+        await axios.get(url);
+        return true;
+    }
+    catch (error) {
+        return false;
+    }
+}

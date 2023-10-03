@@ -2,6 +2,7 @@ export type Post = {
     _id?: string, // ID
     sig: string, // SIG
     title: string, // 標題
+    cover: string, // 封面圖
     content: string, // 內容
     user: string, // 發布者
     hashtag: string[], // 標籤

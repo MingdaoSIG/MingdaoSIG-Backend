@@ -7,7 +7,7 @@ import { login } from "@controller/cloud/login";
 import { upload as imageUpload } from "@controller/cloud/image/upload";
 import { read as imageRead } from "@controller/cloud/image/read";
 import { HttpStatus } from "@HttpStatusCode";
-import { CustomStatus as 自定義狀態 } from "@module/CustomStatusCode";
+import { CustomStatus } from "@module/CustomStatusCode";
 import { readByCustomId as userReadByCustomId, readById as userReadById } from "@controller/cloud/profile/user/read";
 import { write as userWrite } from "@controller/cloud/profile/user/write";
 import { write as postWrite } from "@controller/cloud/post/write";
@@ -51,7 +51,7 @@ router.get("/needauth", (_: Request, res: Response) => {
 });
 
 router.use("/*", (_: Request, res: Response) => {
-    res.status(HttpStatus.NOT_FOUND).json({ status: 自定義狀態.NOT_FOUND });
+    res.status(HttpStatus.NOT_FOUND).json({ status: CustomStatus.NOT_FOUND });
 });
 
 export default router;
