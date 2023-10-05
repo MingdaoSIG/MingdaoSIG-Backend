@@ -15,6 +15,7 @@ import { read as postRead } from "@controller/cloud/post/read";
 import { remove as postRemove } from "@controller/cloud/post/remove";
 import { listAllByUser as postListAllByUser, listAll as postListAll } from "@controller/cloud/post/list";
 import { disLike as postDisLike, like as postLike } from "@controller/cloud/post/like";
+import { readById as sigReadById, readByCustomId as sigReadByCustomId } from "@controller/cloud/profile/sig/read";
 
 
 const router: Router = Router();
@@ -30,12 +31,16 @@ router.post("/image", imageUpload);
 
 router.get("/profile/user/@:id", userReadByCustomId);
 router.get("/profile/user/:id", userReadById);
+router.get("/profile/sig/@:id", sigReadByCustomId);
+router.get("/profile/sig/:id", sigReadById);
 router.use("/profile", JWTverifier);
 router.post("/profile/user/:id", userWrite);
+router.post("/profile/sig/:id", userWrite); // TODO
 
 router.get("/post/list", postListAll);
-// router.get("/post/list/sig/:id", postListAll);
+router.get("/sig/list", postListAll); // TODO
 router.get("/post/list/user/:id", postListAllByUser);
+// router.get("/post/list/sig/:id", postListAll);
 router.get("/post/:id", postRead);
 router.use("/post", JWTverifier);
 router.post("/post", postWrite);
