@@ -1,4 +1,4 @@
-export type DatabaseType = "user" | "post" | "comment" | "image";
+export type DatabaseType = "user" | "post" | "comment" | "image" | "sig";
 
 export type Search = {
     email?: string | null,

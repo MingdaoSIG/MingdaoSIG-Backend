@@ -2,6 +2,7 @@ import { DatabaseType, Search } from "@type/database";
 import user from "@DBfunc/user";
 import image from "@DBfunc/image";
 import post from "@DBfunc/post";
+import sig from "@DBfunc/sig";
 
 
 export default class MongoDB {
@@ -32,6 +33,17 @@ export default class MongoDB {
             case "post":
                 if (search.id) {
                     return await post.read(search.id!);
+                }
+                else {
+                    throw new Error("Search is required");
+                }
+
+            case "sig":
+                if (search.id) {
+                    return await sig.readById(search.id!);
+                }
+                else if (search.customId) {
+                    return await sig.readByCustomId(search.customId!);
                 }
                 else {
                     throw new Error("Search is required");
@@ -69,6 +81,14 @@ export default class MongoDB {
                     throw new Error("Search is required");
                 }
 
+            case "sig":
+                if (search?.id) {
+                    return await sig.write(search.id!, dataToWrite);
+                }
+                else {
+                    throw new Error("Search is required");
+                }
+
             default:
                 throw new Error("Invalid database type");
         }
@@ -79,6 +99,12 @@ export default class MongoDB {
         switch (this.databaseType) {
             case "post":
                 return await post.list(search);
+
+            case "sig":
+                return await sig.list(search);
+
+            default:
+                throw new Error("Invalid database type");
         }
     }
 }
