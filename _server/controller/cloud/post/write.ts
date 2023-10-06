@@ -1,16 +1,18 @@
 import { Request, RequestHandler } from "express";
 import { isValidObjectId } from "mongoose";
+import axios from "axios";
 
 import { Post } from "@type/post";
+import { Sig } from "@type/sig";
 import { RequestContainJWT } from "@type/request";
 import CustomError from "@type/customError";
 import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
 import MongoDB from "@module/MongoDB";
-import axios from "axios";
 
 
 const PostDB = new MongoDB("post");
+const SigDB = new MongoDB("sig");
 
 export const write: RequestHandler = async (req: Request | RequestContainJWT, res) => {
     try {
@@ -26,10 +28,12 @@ export const write: RequestHandler = async (req: Request | RequestContainJWT, re
 
         const { sig, title, cover, content, hashtag } = body;
 
-        // Need to check if sig is valid
         if (!sig || !title || !content || title === "" || content === "" || (cover && !await isValidCover(cover))) {
             throw new CustomError(CustomStatus.INVALID_BODY, new Error("Invalid body"));
         }
+
+        const sigData: Sig | null = await SigDB.read({ id: sig }).catch(() => null);
+        if (!sigData) throw new CustomError(CustomStatus.INVALID_SIG_ID, new Error("Sig not found"));
 
         const dataToSave = {
             sig,

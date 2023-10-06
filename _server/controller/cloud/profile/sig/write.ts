@@ -32,7 +32,6 @@ export const write: RequestHandler = async (req: Request | RequestContainJWT, re
 
         if (body.description && body.description?.length > 250) throw new CustomError(CustomStatus.INVALID_BODY, new Error("Invalid description"));
 
-        // TODO: check if sig exist
         const savedData: Sig = await SigDB.write(body, { id });
 
         return res.status(HttpStatus.OK).json({

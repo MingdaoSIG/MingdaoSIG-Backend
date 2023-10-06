@@ -36,7 +36,6 @@ export const write: RequestHandler = async (req: Request | RequestContainJWT, re
         });
     }
     catch (error: any) {
-        console.log(error);
         return res.status(HttpStatus.BAD_REQUEST).json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });
     }
 };
