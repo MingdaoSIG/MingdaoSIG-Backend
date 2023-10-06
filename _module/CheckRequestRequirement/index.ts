@@ -1,7 +1,8 @@
 import { Request } from "express";
 
-import checkQuery from "./functions/checkQuery.js";
-import checkBody from "./functions/checkBody.js";
+import matchQuery from "./functions/matchQuery.js";
+import matchBody from "./functions/matchBody.js";
+import forbiddenBody from "./functions/forbiddenBody.js";
 
 
 export default class CheckRequestRequirement {
@@ -10,11 +11,15 @@ export default class CheckRequestRequirement {
         this.request = request;
     }
 
-    hasQuery(requiredQuery: string[]) {
-        return checkQuery(this.request, requiredQuery);
+    matchQuery(requiredQuery: string[]) {
+        return matchQuery(this.request, requiredQuery);
     }
 
-    hasBody(requiredBody: string[]) {
-        return checkBody(this.request, requiredBody);
+    matchBody(requiredBody: string[]) {
+        return matchBody(this.request, requiredBody);
+    }
+
+    forbiddenBody(forbiddenKeys: string[]) {
+        return forbiddenBody(this.request, forbiddenKeys);
     }
 }

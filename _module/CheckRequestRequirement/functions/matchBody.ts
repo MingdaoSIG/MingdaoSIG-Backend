@@ -4,7 +4,7 @@ import CustomError from "@type/customError";
 import { CustomStatus } from "@module/CustomStatusCode";
 
 
-export default function checkBody(request: Request, requiredBody: string[]) {
+export default function matchBody(request: Request, requiredBody: string[]) {
     try {
         const body = request.body;
 

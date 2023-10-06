@@ -3,7 +3,8 @@ import { Request } from "express";
 import CustomError from "@type/customError";
 import { CustomStatus } from "@module/CustomStatusCode";
 
-export default function checkQuery(request: Request, requiredQuery: string[]) {
+
+export default function matchQuery(request: Request, requiredQuery: string[]) {
     try {
         const query = new URL(request.url);
 
