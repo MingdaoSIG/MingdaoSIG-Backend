@@ -16,6 +16,7 @@ import { remove as postRemove } from "@controller/cloud/post/remove";
 import { listAllByUser as postListAllByUser, listAll as postListAll } from "@controller/cloud/post/list";
 import { disLike as postDisLike, like as postLike } from "@controller/cloud/post/like";
 import { readById as sigReadById, readByCustomId as sigReadByCustomId } from "@controller/cloud/profile/sig/read";
+import { write as sigWrite } from "@controller/cloud/profile/sig/write";
 
 
 const router: Router = Router();
@@ -35,7 +36,7 @@ router.get("/profile/sig/@:id", sigReadByCustomId);
 router.get("/profile/sig/:id", sigReadById);
 router.use("/profile", JWTverifier);
 router.post("/profile/user/:id", userWrite);
-router.post("/profile/sig/:id", userWrite); // TODO
+router.post("/profile/sig/:id", sigWrite);
 
 router.get("/post/list", postListAll);
 router.get("/sig/list", postListAll); // TODO

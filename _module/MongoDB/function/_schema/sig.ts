@@ -8,6 +8,7 @@ const sigSchema = new Schema({
     description: String,
     avatar: String,
     follower: [String],
+    customId: String,
     moderator: [String],
     leader: [String],
 });
