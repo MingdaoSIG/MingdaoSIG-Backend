@@ -1,4 +1,4 @@
-import { RequestHandler, Response } from "express";
+import { RequestHandler } from "express";
 
 import { Sig } from "@type/sig";
 import { CustomStatus } from "@module/CustomStatusCode";
