@@ -28,7 +28,7 @@ export const listAllBySig: RequestHandler = async (req, res) => {
         if (!isValidObjectId(id)) throw new CustomError(CustomStatus.INVALID_SIG_ID, new Error("Invalid sig id"));
 
         const sigData = await SigDB.read({ id }).catch(() => null);
-        if (!sigData) throw new CustomError(CustomStatus.INVALID_SIG_ID, new Error("Invalid user id"));
+        if (!sigData) throw new CustomError(CustomStatus.INVALID_SIG_ID, new Error("Invalid sig id"));
 
         return await _list(res, { sig: id });
     }

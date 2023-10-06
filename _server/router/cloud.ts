@@ -13,10 +13,11 @@ import { write as userWrite } from "@controller/cloud/profile/user/write";
 import { write as postWrite } from "@controller/cloud/post/write";
 import { read as postRead } from "@controller/cloud/post/read";
 import { remove as postRemove } from "@controller/cloud/post/remove";
-import { listAllByUser as postListAllByUser, listAll as postListAll, listAllBySig } from "@controller/cloud/post/list";
+import { listAllByUser as postListAllByUser, listAll as postListAll, listAllBySig as postListAllBySig } from "@controller/cloud/post/list";
 import { disLike as postDisLike, like as postLike } from "@controller/cloud/post/like";
 import { readById as sigReadById, readByCustomId as sigReadByCustomId } from "@controller/cloud/profile/sig/read";
 import { write as sigWrite } from "@controller/cloud/profile/sig/write";
+import { listAll as sigListAll } from "@controller/cloud/profile/sig/list";
 
 
 const router: Router = Router();
@@ -39,9 +40,9 @@ router.post("/profile/user/:id", userWrite);
 router.post("/profile/sig/:id", sigWrite);
 
 router.get("/post/list", postListAll);
-router.get("/sig/list", postListAll); // TODO
+router.get("/sig/list", sigListAll);
 router.get("/post/list/user/:id", postListAllByUser);
-router.get("/post/list/sig/:id", listAllBySig);
+router.get("/post/list/sig/:id", postListAllBySig);
 router.get("/post/:id", postRead);
 router.use("/post", JWTverifier);
 router.post("/post", postWrite);
