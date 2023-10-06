@@ -11,7 +11,7 @@ import { getGoogleUserData } from "@module/GetGoogleUserData";
 export const login: RequestHandler = async (req, res) => {
     try {
         const checker = new CheckRequestRequirement(req);
-        checker.hasBody(["googleToken"]);
+        checker.matchBody(["googleToken"]);
 
         const googleToken: string = req.body.googleToken;
 
