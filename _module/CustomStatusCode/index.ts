@@ -1,4 +1,26 @@
 export const CustomCode = {
+    2000: "OK",
+    4000: "Not found",
+    4001: "Forbidden",
+
+    4010: "Invalid user",
+    4011: "Invalid body",
+    4012: "Invalid query",
+    4013: "Invalid jwt",
+    4015: "Invalid google access token",
+    4016: "Invalid image id",
+    4017: "Invalid user id",
+    4018: "Invalid post id",
+    4019: "Invalid sig id",
+
+    4100: "Error reading user from db",
+    4101: "Error writing user to db",
+    4102: "Error reading image from db",
+    4103: "Error writing image to db",
+    4104: "Error reading post from db",
+    4105: "Error writing post to db",
+    4106: "Error reading sig from db",
+    4107: "Error writing sig to db",
 } as const;
 
 export const CustomStatus = {
