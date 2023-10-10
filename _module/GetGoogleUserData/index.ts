@@ -5,7 +5,7 @@ import { GoogleUserData } from "@type/googleUserData";
 import { CustomStatus } from "@module/CustomStatusCode";
 
 
-export async function getGoogleUserData(googleToken: string): Promise<GoogleUserData> {
+export default async function getGoogleUserData(googleToken: string): Promise<GoogleUserData> {
     const GOOGLE_API_URL = "https://www.googleapis.com/oauth2/v3/userinfo";
 
     try {

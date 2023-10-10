@@ -2,10 +2,10 @@ import { RequestHandler } from "express";
 
 import CheckRequestRequirement from "@module/CheckRequestRequirement";
 import { HttpStatus } from "@module/HttpStatusCode";
-import { getUserData } from "@module/GetUserData";
 import { CustomStatus } from "@module/CustomStatusCode";
 import signJWT from "@module/SignJWT";
-import { getGoogleUserData } from "@module/GetGoogleUserData";
+import getUserData from "@module/GetUserData";
+import getGoogleUserData from "@module/GetGoogleUserData";
 
 
 export const login: RequestHandler = async (req, res) => {
