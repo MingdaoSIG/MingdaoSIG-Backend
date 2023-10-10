@@ -32,7 +32,7 @@ export default async function getUserData(email: string, avatar: string): Promis
         let haveId: User | null = null;
         do {
             if (customId) break;
-            customId = code.toLowerCase() + UniqueId(5);
+            customId = `${code.toLowerCase()}_${UniqueId(5)}`;
             haveId = await UserDB.read({ customId }).catch(() => null);
         } while (haveId);
 
