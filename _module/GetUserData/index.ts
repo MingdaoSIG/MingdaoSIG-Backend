@@ -4,11 +4,12 @@ import { Identity, User } from "@type/user";
 import CustomError from "@type/customError";
 import MongoDB from "@module/MongoDB";
 import { CustomStatus } from "@module/CustomStatusCode";
+import UniqueId from "@module/UniqueId";
 
 
 const UserDB = new MongoDB("user");
 
-export async function getUserData(email: string, avatar: string): Promise<User> {
+export default async function getUserData(email: string, avatar: string): Promise<User> {
     const MD_API_URL = "https://mdsrl.mingdao.edu.tw/mdpp/Sig20Login/googleUserCheck";
 
     try {
@@ -17,17 +18,24 @@ export async function getUserData(email: string, avatar: string): Promise<User> 
         });
 
         const responseData = response.data;
-        checkData(responseData, ["code", "mail", "class_name", "user_name", "user_identity"]);
 
+        checkData(responseData, ["code", "mail", "class_name", "user_name", "user_identity"]);
         const prettierIdentity: { [key: string]: Identity } = {
             teach: "teacher",
             stu: "student"
         };
-
         const { mail, user_name, code, class_name, user_identity } = responseData;
 
         const oldData: User | null = await UserDB.read({ email }).catch(() => null);
-        const customId = oldData?.customId?.toLowerCase() || code.toLowerCase();
+
+        let customId = oldData?.customId?.toLowerCase();
+        let haveId: User | null = null;
+        do {
+            if (customId) break;
+            customId = code.toLowerCase() + UniqueId(5);
+            haveId = await UserDB.read({ customId }).catch(() => null);
+        } while (haveId);
+
         const sig = user_identity === "sig" ? [] : (oldData?.sig || []);
         const displayName = user_identity === "sig" ? user_name : oldData?.displayName || user_name;
         const description = oldData?.description || "";
