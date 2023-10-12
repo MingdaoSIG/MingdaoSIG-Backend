@@ -12,6 +12,9 @@ export const CustomCode = {
     4017: "Invalid user id",
     4018: "Invalid post id",
     4019: "Invalid sig id",
+    4020: "Invalid custom id",
+    4021: "Custom id already exists",
+    4022: "Invalid description length",
 
     4100: "Error reading user from db",
     4101: "Error writing user to db",
