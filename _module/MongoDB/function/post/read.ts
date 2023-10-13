@@ -1,6 +1,6 @@
 import CustomError from "@type/customError";
-import { CustomStatus } from "@module/CustomStatusCode";
 import post from "@schema/post";
+import { CustomStatus } from "@module/CustomStatusCode";
 
 
 export default async function read(id: string) {

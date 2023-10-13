@@ -1,5 +1,6 @@
 export const CustomCode = {
     2000: "OK",
+
     4000: "Not found",
     4001: "Forbidden",
 
@@ -53,6 +54,8 @@ export const CustomStatus = {
     ERROR_WRITING_POST_TO_DB: 4105,
     ERROR_READING_SIG_FROM_DB: 4106,
     ERROR_WRITING_SIG_TO_DB: 4107,
+    ERROR_READING_COMMENT_TO_DB: 4108,
+    ERROR_WRITING_COMMENT_TO_DB: 4109,
 
     UNKNOWN_ERROR: 5000
 } as const;

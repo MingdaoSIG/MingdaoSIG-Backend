@@ -1,11 +1,8 @@
-export type Post = {
+export type Comment = {
     _id?: string, // ID
-    sig: string, // SIG
-    title: string, // 標題
-    cover: string, // 封面圖
+    post: string, // 文章ID
     content: string, // 內容
     user: string, // 發布者
-    hashtag: string[], // 標籤
     like?: string[], // 按讚者
     removed?: boolean, // 刪除
     createAt?: string, // 建立時間
