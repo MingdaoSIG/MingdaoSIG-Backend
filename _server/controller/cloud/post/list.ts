@@ -10,6 +10,7 @@ import CustomError from "@type/customError";
 
 const PostDB = new MongoDB("post");
 const UserDB = new MongoDB("user");
+const SigDB = new MongoDB("sig");
 
 export const listAll: RequestHandler = async (_, res) => {
     try {
@@ -20,15 +21,21 @@ export const listAll: RequestHandler = async (_, res) => {
     }
 };
 
-// Not finished, wait for sig api
-// export const listAllBySig: RequestHandler = async (req, res) => {
-//     try {
-//         return await _list(res, {});
-//     }
-//     catch (error: any) {
-//         return res.status(HttpStatus.NOT_FOUND).json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });
-//     }
-// };
+export const listAllBySig: RequestHandler = async (req, res) => {
+    try {
+        const id: string = req.params.id!;
+
+        if (!isValidObjectId(id)) throw new CustomError(CustomStatus.INVALID_SIG_ID, new Error("Invalid sig id"));
+
+        const sigData = await SigDB.read({ id }).catch(() => null);
+        if (!sigData) throw new CustomError(CustomStatus.INVALID_SIG_ID, new Error("Invalid sig id"));
+
+        return await _list(res, { sig: id });
+    }
+    catch (error: any) {
+        return res.status(HttpStatus.NOT_FOUND).json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });
+    }
+};
 
 export const listAllByUser: RequestHandler = async (req, res) => {
     try {

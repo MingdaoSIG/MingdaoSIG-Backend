@@ -1,6 +1,6 @@
 import CustomError from "@type/customError";
-import { CustomStatus } from "@module/CustomStatusCode";
 import image from "@schema/image";
+import { CustomStatus } from "@module/CustomStatusCode";
 
 
 export default async function read(id: string) {

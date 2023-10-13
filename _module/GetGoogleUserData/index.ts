@@ -5,7 +5,7 @@ import { GoogleUserData } from "@type/googleUserData";
 import { CustomStatus } from "@module/CustomStatusCode";
 
 
-export async function getGoogleUserData(googleToken: string): Promise<GoogleUserData> {
+export default async function getGoogleUserData(googleToken: string): Promise<GoogleUserData> {
     const GOOGLE_API_URL = "https://www.googleapis.com/oauth2/v3/userinfo";
 
     try {
@@ -18,7 +18,7 @@ export async function getGoogleUserData(googleToken: string): Promise<GoogleUser
         const userDataKeys = Object.keys(response.data) as (keyof GoogleUserData)[];
         checkData(response.data, userDataKeys);
 
-        return response.data as GoogleUserData;
+        return { ...response.data, picture: response.data.picture.split("=")[0] } as GoogleUserData;
     }
     catch (error: any) {
         throw new CustomError(CustomStatus.INVALID_GOOGLE_ACCESS_TOKEN, error);

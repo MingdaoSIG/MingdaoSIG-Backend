@@ -1,6 +1,6 @@
 import { Post } from "@type/post";
-import post from "@schema/post";
 import CustomError from "@type/customError";
+import post from "@schema/post";
 import { CustomStatus } from "@module/CustomStatusCode";
 
 

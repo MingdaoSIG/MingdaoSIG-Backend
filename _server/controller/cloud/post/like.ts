@@ -38,7 +38,7 @@ export const like: RequestHandler = async (req: Request | RequestContainJWT, res
     }
 };
 
-export const disLike: RequestHandler = async (req: Request | RequestContainJWT, res) => {
+export const dislike: RequestHandler = async (req: Request | RequestContainJWT, res) => {
     try {
         const id = (req as Request).params.id;
         const decodedJwt: any = (req as RequestContainJWT).JWT;
