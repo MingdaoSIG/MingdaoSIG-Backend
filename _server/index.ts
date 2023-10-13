@@ -10,6 +10,7 @@ import cors from "@middleware/cors";
 const cloud: Express = express();
 cloud.use(morgan("combined"));
 cloud.use(cors);
+cloud.options("*", cors);
 cloud.use(bodyParser.urlencoded({ extended: true }));
 cloud.use(bodyParser.json());
 cloud.use("/", router);
