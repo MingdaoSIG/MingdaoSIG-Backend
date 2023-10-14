@@ -1,15 +1,14 @@
-/* eslint-disable no-console */
 import express, { Express } from "express";
 import bodyParser from "body-parser";
 import morgan from "morgan";
 
 import router from "@router/_main";
-import cors from "@middleware/cors";
+import configuredCors from "@middleware/cors";
 
 
 const cloud: Express = express();
 cloud.use(morgan("combined"));
-cloud.use(cors);
+cloud.use(configuredCors);
 cloud.use(bodyParser.urlencoded({ extended: true }));
 cloud.use(bodyParser.json());
 cloud.use("/", router);
