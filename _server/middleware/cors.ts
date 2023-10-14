@@ -10,9 +10,7 @@ const config = {
         "https://sig-dev.zeabur.app",
         "https://sig.mingdao.edu.tw"
     ],
-    headers: [
-        "Authorization"
-    ]
+    headers: ["*"]
 };
 
 export default function configuredCors(req: Request, res: Response, next: NextFunction) {
