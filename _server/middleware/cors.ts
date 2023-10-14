@@ -15,7 +15,7 @@ const config = {
 
 export default function configuredCors(req: Request, res: Response, next: NextFunction) {
     cors({
-        origin: config.origin,
+        origin: "*",
         allowedHeaders: config.headers
     })(req, res, next);
 }
