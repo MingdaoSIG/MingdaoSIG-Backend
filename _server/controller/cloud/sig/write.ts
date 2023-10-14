@@ -8,7 +8,7 @@ import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
 import MongoDB from "@module/MongoDB";
 import CheckRequestRequirement from "@module/CheckRequestRequirement";
-import CheckExistsCustomId from "@module/CheckExistsCustomId";
+import CheckValidCustomId from "@module/CheckValidCustomId";
 
 
 const SigDB = new MongoDB("sig");
@@ -28,12 +28,7 @@ export const write: RequestHandler = async (req: Request | RequestContainJWT, re
 
         new CheckRequestRequirement(req as Request).forbiddenBody(["_id", "name", "moderator", "leader"]);
 
-        const regex = /^(?=.{1,25}$)[a-z0-9_]+(\.[a-z0-9_]+)*$/gm;
-        if (body.customId && !regex.test(body.customId)) throw new CustomError(CustomStatus.INVALID_CUSTOM_ID, new Error("Invalid custom id"));
-
-        if (sigData.customId !== body.customId) {
-            if (await CheckExistsCustomId(body.customId)) throw new CustomError(CustomStatus.CUSTOM_ID_ALREADY_EXISTS, new Error("Custom id already exists"));
-        }
+        await CheckValidCustomId(body.customId);
 
         if (body.description && body.description?.length > 250) throw new CustomError(CustomStatus.INVALID_DESCRIPTION_LENGTH, new Error("Invalid description"));
 
