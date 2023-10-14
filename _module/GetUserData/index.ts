@@ -19,7 +19,12 @@ export default async function getUserData(email: string, avatar: string): Promis
 
         const responseData = response.data;
 
-        checkData(responseData, ["code", "mail", "class_name", "user_name", "user_identity"]);
+        try {
+            checkData(responseData, ["code", "mail", "class_name", "user_name", "user_identity"]);
+        }
+        catch (error) {
+            checkData(responseData, ["code", "mail", "user_name", "user_identity"]);
+        }
         const prettierIdentity: { [key: string]: Identity } = {
             teach: "teacher",
             stu: "student"
@@ -47,7 +52,7 @@ export default async function getUserData(email: string, avatar: string): Promis
             email: mail,
             name: user_name,
             code: code,
-            class: class_name,
+            class: class_name || "",
             identity: prettierIdentity[user_identity],
             sig: sig,
             displayName: displayName,
