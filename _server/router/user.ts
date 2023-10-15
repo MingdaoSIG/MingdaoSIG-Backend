@@ -12,6 +12,6 @@ user.get("/@:id", readByCustomId);
 user.get("/:id", readById);
 
 user.use(JWTverifier);
-user.post("/:id", write);
+user.post("/", write);
 
 export default user;
