@@ -35,6 +35,8 @@ export const write: RequestHandler = async (req: Request | ExtendedRequest, res)
         const sigData: Sig | null = await SigDB.read({ id: sig }).catch(() => null);
         if (!sigData) throw new CustomError(CustomStatus.INVALID_SIG_ID, new Error("Sig not found"));
 
+        if (!sigData.leader?.includes(decodedJwt.id) || !sigData.moderator?.includes(decodedJwt.id)) throw new CustomError(CustomStatus.FORBIDDEN, new Error("Not leader or moderator"));
+
         const dataToSave = {
             sig,
             title,
@@ -62,9 +64,6 @@ export const write: RequestHandler = async (req: Request | ExtendedRequest, res)
         }
         else if (oldData?.user !== decodedJwt.id) {
             throw new CustomError(CustomStatus.INVALID_USER, new Error("Not author"));
-        }
-        else if (!sigData.leader?.includes(decodedJwt.id) || !sigData.moderator?.includes(decodedJwt.id)) {
-            throw new CustomError(CustomStatus.FORBIDDEN, new Error("Not leader or moderator"));
         }
 
         const savedData: Post = await PostDB.write(dataToSave, { id });
