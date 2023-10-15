@@ -2,11 +2,12 @@ import { Request, Response, NextFunction } from "express";
 import jwt, { Secret } from "jsonwebtoken";
 import { isValidObjectId } from "mongoose";
 
-import { RequestContainJWT } from "@type/request";
+import { ExtendedRequest } from "@type/request";
 import CustomError from "@type/customError";
 import { HttpStatus } from "@module/HttpStatusCode";
 import { CustomStatus } from "@module/CustomStatusCode";
 import MongoDB from "@module/MongoDB";
+import { User } from "@type/user";
 
 
 const UserDB = new MongoDB("user");
@@ -31,16 +32,18 @@ export default async function JWTverifier(req: Request, res: Response, next: Nex
 
         checkData(decoded, ["id", "iat"]);
 
+        let userData: User;
         try {
             if (!isValidObjectId(decoded.id)) throw new Error("Invalid user id");
-            await UserDB.read({ id: decoded.id });
+            userData = await UserDB.read({ id: decoded.id });
         }
         catch (error: any) {
             throw new CustomError(CustomStatus.INVALID_JWT, error);
         }
 
-        const customReq = req as unknown as RequestContainJWT;
+        const customReq = req as unknown as ExtendedRequest;
         customReq.JWT = decoded;
+        customReq.userData = userData;
 
         next();
     }

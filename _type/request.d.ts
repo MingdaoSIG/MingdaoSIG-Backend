@@ -1,5 +1,9 @@
 import { JwtPayload } from "jsonwebtoken";
 
-export interface RequestContainJWT extends Request {
+import { User } from "./user";
+
+
+export interface ExtendedRequest extends Request {
     JWT: string | JwtPayload;
+    userData: User;
 }
