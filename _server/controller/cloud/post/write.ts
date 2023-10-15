@@ -35,7 +35,10 @@ export const write: RequestHandler = async (req: Request | ExtendedRequest, res)
         const sigData: Sig | null = await SigDB.read({ id: sig }).catch(() => null);
         if (!sigData) throw new CustomError(CustomStatus.INVALID_SIG_ID, new Error("Sig not found"));
 
-        if (!sigData.leader?.includes(decodedJwt.id) || !sigData.moderator?.includes(decodedJwt.id)) throw new CustomError(CustomStatus.FORBIDDEN, new Error("Not leader or moderator"));
+        const sigList: [Sig] = await SigDB.list({});
+        const leaders = sigList.flatMap(sig => sig.leader);
+        const moderators = sigList.flatMap(sig => sig.moderator);
+        if (!leaders?.includes(decodedJwt.id) || !moderators?.includes(decodedJwt.id)) throw new CustomError(CustomStatus.FORBIDDEN, new Error("Not leader or moderator"));
 
         const dataToSave = {
             sig,
