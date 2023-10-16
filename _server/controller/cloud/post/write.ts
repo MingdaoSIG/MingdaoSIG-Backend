@@ -26,9 +26,9 @@ export const write: RequestHandler = async (req: Request | ExtendedRequest, res)
             throw new CustomError(CustomStatus.INVALID_BODY, new Error("Body contains invalid keys"));
         }
 
-        const { sig, title, cover, content, hashtag } = body;
+        const { sig, title, cover, content, hashtag }: Post = body;
 
-        if (!sig || !title || !content || title === "" || content === "" || (cover && !await isValidCover(cover))) {
+        if (!sig || !title || !content || title.trim() === "" || content.trim() === "" || (cover && !await isValidCover(cover))) {
             throw new CustomError(CustomStatus.INVALID_BODY, new Error("Invalid body"));
         }
 
