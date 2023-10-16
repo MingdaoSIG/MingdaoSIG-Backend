@@ -16,23 +16,28 @@ const SigDB = new MongoDB("sig");
 export const write: RequestHandler = async (req: Request | ExtendedRequest, res) => {
     try {
         const { body } = req;
-        const id = (req as Request).params.id;
+        const sigId = (req as Request).params.id;
         const decodedJwt: any = (req as ExtendedRequest).JWT;
 
-        if (!id || !isValidObjectId(id)) throw new CustomError(CustomStatus.INVALID_SIG_ID, new Error("Invalid sig id"));
-
-        const sigData: Sig | null = await SigDB.read({ id }).catch(() => null);
-        if (!sigData) throw new CustomError(CustomStatus.NOT_FOUND, new Error("Sig not found"));
-
-        if (!sigData.leader?.includes(decodedJwt.id) || !sigData.moderator?.includes(decodedJwt.id)) throw new CustomError(CustomStatus.FORBIDDEN, new Error("Forbidden"));
+        if (!sigId || !isValidObjectId(sigId)) throw new CustomError(CustomStatus.INVALID_SIG_ID, new Error("Invalid sig id"));
 
         new CheckRequestRequirement(req as Request).forbiddenBody(["_id", "name", "moderator", "leader", "removed"]);
+
+        const sigList: [Sig] = await SigDB.list({});
+        const sigData = sigList.find(sig => sig?._id?.toString() === sigId)!;
+        if (!sigData) throw new CustomError(CustomStatus.INVALID_SIG_ID, new Error("Sig not found"));
+
+        const isOneOfModerators = sigList.flatMap(sig => sig.moderator).includes(decodedJwt.id);
+        const isOneOfLeaders = sigList.flatMap(sig => sig.leader).includes(decodedJwt.id);
+        if (!isOneOfModerators && !isOneOfLeaders) throw new CustomError(CustomStatus.FORBIDDEN, new Error("Not leader or moderator"));
+
+        if (sigData.removed && !sigData.moderator?.includes(decodedJwt.id)) throw new CustomError(CustomStatus.FORBIDDEN, new Error("Sig removed"));
 
         if (sigData.customId !== body.customId) await CheckValidCustomId(body.customId);
 
         if (body.description && body.description?.length > 250) throw new CustomError(CustomStatus.INVALID_DESCRIPTION_LENGTH, new Error("Invalid description"));
 
-        const savedData: Sig = await SigDB.write(body, { id });
+        const savedData: Sig = await SigDB.write(body, { id: sigId });
 
         return res.status(HttpStatus.OK).json({
             status: CustomStatus.OK,
