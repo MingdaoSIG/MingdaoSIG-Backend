@@ -26,7 +26,7 @@ export const write: RequestHandler = async (req: Request | ExtendedRequest, res)
 
         if (!sigData.leader?.includes(decodedJwt.id) || !sigData.moderator?.includes(decodedJwt.id)) throw new CustomError(CustomStatus.FORBIDDEN, new Error("Forbidden"));
 
-        new CheckRequestRequirement(req as Request).forbiddenBody(["_id", "name", "moderator", "leader"]);
+        new CheckRequestRequirement(req as Request).forbiddenBody(["_id", "name", "moderator", "leader", "removed"]);
 
         if (sigData.customId !== body.customId) await CheckValidCustomId(body.customId);
 

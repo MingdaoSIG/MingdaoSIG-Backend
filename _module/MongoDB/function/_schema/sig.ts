@@ -11,6 +11,7 @@ const sigSchema = new Schema({
     customId: String,
     moderator: [String],
     leader: [String],
+    removed: { type: Boolean, default: false }
 });
 
 export default mongoose.model("sig", sigSchema, "sig");
