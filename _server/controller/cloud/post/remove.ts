@@ -23,14 +23,16 @@ export const remove: RequestHandler = async (req: Request | ExtendedRequest, res
         const oldData: Post | null = await PostDB.read({ id: postId }).catch(() => null);
         if (!oldData) throw new CustomError(CustomStatus.INVALID_POST_ID, new Error("Invalid post id"));
 
-        if (oldData.user !== decodedJwt.id) throw new CustomError(CustomStatus.INVALID_USER, new Error("Not author"));
-
         const sigList: [Sig] = await SigDB.list({});
-        const moderators = sigList.flatMap(sig => sig.moderator);
-        const sigData = sigList.find(sig => sig._id === postId);
-        const leader = sigData?.leader;
-
-        if (!leader?.includes(decodedJwt.id) || !moderators.includes(decodedJwt.id)) throw new CustomError(CustomStatus.FORBIDDEN, new Error("Not leader or moderator"));
+        const isModerator = sigList.flatMap(sig => sig.moderator).includes(decodedJwt.id);
+        const sigData = sigList.find(sig => sig._id?.toString() === oldData.sig);
+        const isLeader = sigData?.leader?.includes(decodedJwt.id);
+        try {
+            if (oldData.user !== decodedJwt.id) throw new CustomError(CustomStatus.INVALID_USER, new Error("Not author"));
+        }
+        catch (error) {
+            if (!isModerator && !isLeader) throw new CustomError(CustomStatus.FORBIDDEN, new Error("Not leader or moderator"));
+        }
 
         await PostDB.write({
             removed: true
