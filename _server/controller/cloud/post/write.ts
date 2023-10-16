@@ -17,7 +17,7 @@ const SigDB = new MongoDB("sig");
 export const write: RequestHandler = async (req: Request | ExtendedRequest, res) => {
     try {
         const { body } = req;
-        const id = (req as Request).params.id;
+        const postId = (req as Request).params.id;
         const decodedJwt: any = (req as ExtendedRequest).JWT;
 
         const forbiddenKeys = ["_id", "user", "like", "createAt", "updateAt", "__v"];
@@ -26,22 +26,24 @@ export const write: RequestHandler = async (req: Request | ExtendedRequest, res)
             throw new CustomError(CustomStatus.INVALID_BODY, new Error("Body contains invalid keys"));
         }
 
-        const { sig, title, cover, content, hashtag }: Post = body;
+        const { sig: sigId, title, cover, content, hashtag }: Post = body;
 
-        if (!sig || !title || !content || title.trim() === "" || content.trim() === "" || (cover && !await isValidCover(cover))) {
+        if (!sigId || !title || !content || title.trim() === "" || content.trim() === "" || (cover && !await isValidCover(cover))) {
             throw new CustomError(CustomStatus.INVALID_BODY, new Error("Invalid body"));
         }
 
-        const sigData: Sig | null = await SigDB.read({ id: sig }).catch(() => null);
+        const sigList: [Sig] = await SigDB.list({});
+        const sigData = sigList.find(sig => sig?._id?.toString() === sigId)!;
         if (!sigData) throw new CustomError(CustomStatus.INVALID_SIG_ID, new Error("Sig not found"));
 
-        const sigList: [Sig] = await SigDB.list({});
-        const isModerator = sigList.flatMap(sig => sig.moderator).includes(decodedJwt.id);
-        const isLeader = sigList.flatMap(sig => sig.leader).includes(decodedJwt.id);
-        if (!isModerator && !isLeader) throw new CustomError(CustomStatus.FORBIDDEN, new Error("Not leader or moderator"));
+        const isOneOfModerators = sigList.flatMap(sig => sig.moderator).includes(decodedJwt.id);
+        const isOneOfLeaders = sigList.flatMap(sig => sig.leader).includes(decodedJwt.id);
+        if (!isOneOfModerators && !isOneOfLeaders) throw new CustomError(CustomStatus.FORBIDDEN, new Error("Not leader or moderator"));
+
+        if (sigData.removed && !sigData.moderator?.includes(decodedJwt.id)) throw new CustomError(CustomStatus.FORBIDDEN, new Error("Sig removed"));
 
         const dataToSave = {
-            sig,
+            sig: sigId,
             title,
             cover: cover || "https://lazco.dev/sig-photo-coming-soon-picture",
             content,
@@ -49,8 +51,8 @@ export const write: RequestHandler = async (req: Request | ExtendedRequest, res)
             hashtag
         };
 
-        const oldData: Post | null = await PostDB.read({ id }).catch(() => null);
-        if (!id && !oldData) {
+        const oldData: Post | null = await PostDB.read({ id: postId }).catch(() => null);
+        if (!postId && !oldData) {
             const savedData: Post = await PostDB.write(dataToSave);
             return res.status(HttpStatus.OK).json({
                 status: CustomStatus.OK,
@@ -59,7 +61,7 @@ export const write: RequestHandler = async (req: Request | ExtendedRequest, res)
                 data: savedData
             });
         }
-        else if (!isValidObjectId(id)) {
+        else if (!isValidObjectId(postId)) {
             throw new CustomError(CustomStatus.INVALID_POST_ID, new Error("Invalid post id"));
         }
         else if (!oldData) {
@@ -69,7 +71,7 @@ export const write: RequestHandler = async (req: Request | ExtendedRequest, res)
             throw new CustomError(CustomStatus.INVALID_USER, new Error("Not author"));
         }
 
-        const savedData: Post = await PostDB.write(dataToSave, { id });
+        const savedData: Post = await PostDB.write(dataToSave, { id: postId });
         return res.status(HttpStatus.OK).json({
             status: CustomStatus.OK,
             id: savedData._id,
