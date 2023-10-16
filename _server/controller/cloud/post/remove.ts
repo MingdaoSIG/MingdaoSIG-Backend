@@ -15,22 +15,28 @@ const SigDB = new MongoDB("sig");
 
 export const remove: RequestHandler = async (req: Request | ExtendedRequest, res) => {
     try {
-        const id = (req as Request).params.id;
+        const postId = (req as Request).params.id;
         const decodedJwt: any = (req as ExtendedRequest).JWT;
 
-        if (!isValidObjectId(id)) throw new CustomError(CustomStatus.INVALID_POST_ID, new Error("Invalid post id"));
+        if (!isValidObjectId(postId)) throw new CustomError(CustomStatus.INVALID_POST_ID, new Error("Invalid post id"));
 
-        const oldData: Post | null = await PostDB.read({ id }).catch(() => null);
+        const oldData: Post | null = await PostDB.read({ id: postId }).catch(() => null);
         if (!oldData) throw new CustomError(CustomStatus.INVALID_POST_ID, new Error("Invalid post id"));
 
-        if (oldData.user !== decodedJwt.id) throw new CustomError(CustomStatus.INVALID_USER, new Error("Not author"));
-
-        const sigData: Sig | null = await SigDB.read({ id: oldData.sig }).catch(() => null);
-        if (!sigData?.leader?.includes(decodedJwt.id) || !sigData?.moderator?.includes(decodedJwt.id)) throw new CustomError(CustomStatus.FORBIDDEN, new Error("Not leader or moderator"));
+        const sigList: [Sig] = await SigDB.list({});
+        const isModerator = sigList.flatMap(sig => sig.moderator).includes(decodedJwt.id);
+        const sigData = sigList.find(sig => sig._id?.toString() === oldData.sig);
+        const isLeader = sigData?.leader?.includes(decodedJwt.id);
+        try {
+            if (oldData.user !== decodedJwt.id) throw new CustomError(CustomStatus.INVALID_USER, new Error("Not author"));
+        }
+        catch (error) {
+            if (!isModerator && !isLeader) throw new CustomError(CustomStatus.FORBIDDEN, new Error("Not leader or moderator"));
+        }
 
         await PostDB.write({
             removed: true
-        }, { id });
+        }, { id: postId });
 
         return res.status(HttpStatus.OK).json({
             status: CustomStatus.OK,

@@ -26,9 +26,9 @@ export const write: RequestHandler = async (req: Request | ExtendedRequest, res)
             throw new CustomError(CustomStatus.INVALID_BODY, new Error("Body contains invalid keys"));
         }
 
-        const { sig, title, cover, content, hashtag } = body;
+        const { sig, title, cover, content, hashtag }: Post = body;
 
-        if (!sig || !title || !content || title === "" || content === "" || (cover && !await isValidCover(cover))) {
+        if (!sig || !title || !content || title.trim() === "" || content.trim() === "" || (cover && !await isValidCover(cover))) {
             throw new CustomError(CustomStatus.INVALID_BODY, new Error("Invalid body"));
         }
 
@@ -36,9 +36,9 @@ export const write: RequestHandler = async (req: Request | ExtendedRequest, res)
         if (!sigData) throw new CustomError(CustomStatus.INVALID_SIG_ID, new Error("Sig not found"));
 
         const sigList: [Sig] = await SigDB.list({});
-        const leaders = sigList.flatMap(sig => sig.leader);
-        const moderators = sigList.flatMap(sig => sig.moderator);
-        if (!leaders?.includes(decodedJwt.id) || !moderators?.includes(decodedJwt.id)) throw new CustomError(CustomStatus.FORBIDDEN, new Error("Not leader or moderator"));
+        const isModerator = sigList.flatMap(sig => sig.moderator).includes(decodedJwt.id);
+        const isLeader = sigList.flatMap(sig => sig.leader).includes(decodedJwt.id);
+        if (!isModerator && !isLeader) throw new CustomError(CustomStatus.FORBIDDEN, new Error("Not leader or moderator"));
 
         const dataToSave = {
             sig,
