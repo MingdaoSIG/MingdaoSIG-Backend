@@ -29,19 +29,19 @@ export const write: RequestHandler = async (req: Request | ExtendedRequest, res)
         const { sig: sigId, title, cover, content, hashtag }: Post = body;
 
         if (!sigId || !title || !content || title.trim() === "" || content.trim() === "" || (cover && !await isValidCover(cover))) {
-            throw new CustomError(CustomStatus.INVALID_BODY, new Error("Invalid body"));
+            throw new CustomError(CustomStatus.INVALID_BODY, new Error("No title, content or sig id"));
         }
 
         const sigList: [Sig] = await SigDB.list({});
         const sigData = sigList.find(sig => sig?._id?.toString() === sigId)!;
         if (!sigData) throw new CustomError(CustomStatus.INVALID_SIG_ID, new Error("Sig not found"));
-
-        // const isOneOfModerators = sigList.flatMap(sig => sig.moderator).includes(decodedJwt.id);
-        // const isOneOfLeaders = sigList.flatMap(sig => sig.leader).includes(decodedJwt.id);
-        // if (!isOneOfModerators && !isOneOfLeaders) throw new CustomError(CustomStatus.FORBIDDEN, new Error("Not leader or moderator"));
-
         if (sigData.removed && !sigData.moderator?.includes(decodedJwt.id)) throw new CustomError(CustomStatus.FORBIDDEN, new Error("Sig removed"));
 
+        if (!isValidObjectId(postId) && typeof (postId) !== "undefined") throw new CustomError(CustomStatus.INVALID_POST_ID, new Error("Invalid post id"));
+
+        const oldData: Post = await PostDB.read({ id: postId }).catch(() => null);
+        const isOneOfModerators = sigList.flatMap(sig => sig.moderator).includes(decodedJwt.id);
+        const isOneOfLeaders = sigList.flatMap(sig => sig.leader).includes(decodedJwt.id);
         const dataToSave = {
             sig: sigId,
             title,
@@ -50,28 +50,19 @@ export const write: RequestHandler = async (req: Request | ExtendedRequest, res)
             user: decodedJwt.id,
             hashtag
         };
-
-        const oldData: Post | null = await PostDB.read({ id: postId }).catch(() => null);
-        if (!postId && !oldData) {
-            const savedData: Post = await PostDB.write(dataToSave);
-            return res.status(HttpStatus.OK).json({
-                status: CustomStatus.OK,
-                id: savedData._id,
-                cover: savedData.cover,
-                data: savedData
-            });
-        }
-        else if (!isValidObjectId(postId)) {
+        if (typeof (postId) !== "undefined" && !oldData) {
             throw new CustomError(CustomStatus.INVALID_POST_ID, new Error("Invalid post id"));
         }
-        else if (!oldData) {
-            throw new CustomError(CustomStatus.INVALID_POST_ID, new Error("Invalid post id"));
+        else if (!isOneOfModerators && !isOneOfLeaders && oldData?.user !== decodedJwt.id) {
+            throw new CustomError(CustomStatus.FORBIDDEN, new Error("Not leader, moderator or author"));
         }
-        else if (oldData?.user !== decodedJwt.id) {
-            throw new CustomError(CustomStatus.INVALID_USER, new Error("Not author"));
+        else if (typeof (postId) !== "undefined" && oldData?.user !== decodedJwt.id) {
+            throw new CustomError(CustomStatus.FORBIDDEN, new Error("Not author"));
         }
 
-        const savedData: Post = await PostDB.write(dataToSave, { id: postId });
+        const writeOptions = postId ? { id: postId } : undefined;
+        const writePromise = PostDB.write(dataToSave, writeOptions);
+        const savedData = await writePromise;
         return res.status(HttpStatus.OK).json({
             status: CustomStatus.OK,
             id: savedData._id,
