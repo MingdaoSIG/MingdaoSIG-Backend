@@ -36,9 +36,9 @@ export const write: RequestHandler = async (req: Request | ExtendedRequest, res)
         const sigData = sigList.find(sig => sig?._id?.toString() === sigId)!;
         if (!sigData) throw new CustomError(CustomStatus.INVALID_SIG_ID, new Error("Sig not found"));
 
-        const isOneOfModerators = sigList.flatMap(sig => sig.moderator).includes(decodedJwt.id);
-        const isOneOfLeaders = sigList.flatMap(sig => sig.leader).includes(decodedJwt.id);
-        if (!isOneOfModerators && !isOneOfLeaders) throw new CustomError(CustomStatus.FORBIDDEN, new Error("Not leader or moderator"));
+        // const isOneOfModerators = sigList.flatMap(sig => sig.moderator).includes(decodedJwt.id);
+        // const isOneOfLeaders = sigList.flatMap(sig => sig.leader).includes(decodedJwt.id);
+        // if (!isOneOfModerators && !isOneOfLeaders) throw new CustomError(CustomStatus.FORBIDDEN, new Error("Not leader or moderator"));
 
         if (sigData.removed && !sigData.moderator?.includes(decodedJwt.id)) throw new CustomError(CustomStatus.FORBIDDEN, new Error("Sig removed"));
 
