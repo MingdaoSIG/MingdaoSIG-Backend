@@ -5,6 +5,7 @@ import CustomError from "@type/customError";
 import MongoDB from "@module/MongoDB";
 import { CustomStatus } from "@module/CustomStatusCode";
 import UniqueId from "@module/UniqueId";
+import CheckValidCustomId from "@module/CheckValidCustomId";
 
 
 const UserDB = new MongoDB("user");
@@ -16,39 +17,47 @@ export default async function getUserData(email: string, avatar: string): Promis
         const response = await axios.postForm(MD_API_URL, {
             email
         });
-
         const responseData = response.data;
-
         try {
             checkData(responseData, ["code", "mail", "class_name", "user_name", "user_identity"]);
         }
         catch (error) {
             checkData(responseData, ["code", "mail", "user_name", "user_identity"]);
         }
+
         const prettierIdentity: { [key: string]: Identity } = {
             teach: "teacher",
             stu: "student"
         };
-        const { mail, user_name, code, class_name, user_identity } = responseData;
+        const {
+            mail, user_name, code, class_name, user_identity
+        }: {
+            mail: string,
+            user_name: string,
+            code: string,
+            class_name: string,
+            user_identity: "teach" | "stu"
+        } = responseData;
 
-        const oldData: User | null = await UserDB.read({ email }).catch(() => null);
+        const oldData: User | null = await UserDB.read({ email: mail }).catch(() => null);
 
-        let customId = oldData?.customId?.toLowerCase();
-        let haveId: User | null = null;
+        const customId = oldData?.customId || mail.split("@")[0].toLowerCase();
+        let targetCustomId = customId;
+        let validId = oldData?.customId ? true : await _CheckValidCustomId(targetCustomId);
         do {
-            if (customId) break;
-            customId = `${code.toLowerCase()}_${UniqueId(5)}`;
-            haveId = await UserDB.read({ customId }).catch(() => null);
-        } while (haveId);
+            if (validId) break;
+            targetCustomId = `${customId}_${UniqueId(5)}`;
+            validId = await _CheckValidCustomId(targetCustomId);
+        } while (!validId);
 
-        const sig = user_identity === "sig" ? [] : (oldData?.sig || []);
-        const displayName = user_identity === "sig" ? user_name : oldData?.displayName || user_name;
+        const sig = oldData?.sig || [];
+        const displayName = oldData?.displayName || user_name;
         const description = oldData?.description || "";
         const follower = oldData?.follower || [];
         const permission = oldData?.permission || 1;
 
         const newData: User = {
-            customId: customId,
+            customId: targetCustomId,
             email: mail,
             name: user_name,
             code: code,
@@ -81,4 +90,14 @@ function checkData(data: object, keys: string[]) {
     }
 
     return true;
+}
+
+async function _CheckValidCustomId(customId: string) {
+    try {
+        await CheckValidCustomId(customId);
+        return true;
+    }
+    catch (error) {
+        return false;
+    }
 }

@@ -7,4 +7,5 @@ export type Sig = {
     customId?: string, // 自定義ID
     moderator?: string[], // 管理者
     leader?: string[], // 領導者
+    removed?: boolean, // 刪除
 }
