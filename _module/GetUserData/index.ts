@@ -39,11 +39,11 @@ export default async function getUserData(email: string, avatar: string): Promis
             user_identity: "teach" | "stu"
         } = responseData;
 
-        const oldData: User = await UserDB.read({ email: mail });
+        const oldData: User | null = await UserDB.read({ email: mail }).catch(() => null);
 
         const customId = oldData?.customId || mail.split("@")[0].toLowerCase();
         let targetCustomId = customId;
-        let validId = oldData.customId ? true : await _CheckValidCustomId(targetCustomId);
+        let validId = oldData?.customId ? true : await _CheckValidCustomId(targetCustomId);
         do {
             if (validId) break;
             targetCustomId = `${customId}_${UniqueId(5)}`;
