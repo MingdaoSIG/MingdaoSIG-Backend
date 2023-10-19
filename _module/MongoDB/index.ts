@@ -3,6 +3,7 @@ import user from "@DBfunc/user";
 import image from "@DBfunc/image";
 import post from "@DBfunc/post";
 import sig from "@DBfunc/sig";
+import comment from "@DBfunc/comment";
 
 
 export default class MongoDB {
@@ -84,6 +85,17 @@ export default class MongoDB {
             case "sig":
                 if (search?.id) {
                     return await sig.write(search.id!, dataToWrite);
+                }
+                else {
+                    throw new Error("Search is required");
+                }
+
+            case "comment":
+                if (search?.id) {
+                    return await comment.write(search.id!, dataToWrite);
+                }
+                else if (!search?.id) {
+                    return await comment.write(null, dataToWrite);
                 }
                 else {
                     throw new Error("Search is required");

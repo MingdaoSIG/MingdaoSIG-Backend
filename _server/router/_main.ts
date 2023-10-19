@@ -8,6 +8,7 @@ import login from "./login";
 import post from "./post";
 import sig from "./sig";
 import user from "./user";
+import comment from "./comment";
 
 
 const router: Router = Router();
@@ -16,6 +17,7 @@ router.use("/login", login);
 router.use("/sig", sig);
 router.use("/user", user);
 router.use("/post", post);
+router.use("/comment", comment);
 router.use("/image", image);
 
 router.use("/needauth", JWTverifier);
