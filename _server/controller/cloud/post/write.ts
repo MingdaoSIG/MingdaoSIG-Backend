@@ -83,8 +83,7 @@ export const write: RequestHandler = async (req: Request | ExtendedRequest, res)
         }
 
         const writeOptions = postId ? { id: postId } : undefined;
-        const writePromise = PostDB.write(dataToSave, writeOptions);
-        const savedData = await writePromise;
+        const savedData = await PostDB.write(dataToSave, writeOptions);
         return res.status(HttpStatus.OK).json({
             status: CustomStatus.OK,
             id: savedData._id,
