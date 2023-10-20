@@ -1,7 +1,6 @@
 import { Request, RequestHandler } from "express";
 import { isValidObjectId } from "mongoose";
 
-import { Post } from "@type/post";
 import { Comment } from "@type/comment";
 import { ExtendedRequest } from "@type/request";
 import CustomError from "@type/customError";
@@ -23,13 +22,20 @@ export const write: RequestHandler = async (req: Request | ExtendedRequest, res)
 
         new CheckRequestRequirement(req as Request).matchBody(["post", "reply", "content"]);
 
-        const { post: postId, reply: replyId, content }: { post: string, reply: string | "", content: string } = body;
+        const {
+            post: postId,
+            reply: replyId,
+            content
+        }: {
+            post: string,
+            reply: string | "",
+            content: string
+        } = body;
 
         if (content.length > 250) throw new CustomError(CustomStatus.INVALID_CONTENT_LENGTH, new Error("Invalid content length"));
         if (content.trim() === "") throw new CustomError(CustomStatus.EMPTY_CONTENT, new Error("Content is empty"));
 
-        const postData: Post | null = await PostDB.read({ id: postId }).catch(() => null);
-        if ((postId && isValidObjectId(postId)) || !postData) throw new CustomError(CustomStatus.INVALID_POST_ID, new Error("Post not found"));
+        if (!isValidObjectId(postId) || !(await PostDB.read({ id: postId }).catch(() => null))) throw new CustomError(CustomStatus.INVALID_POST_ID, new Error("Post not found"));
 
         const validReplyTarget = replyId === "" ? true : await CommentDB.read({ id: replyId }).catch(() => null);
         if (!validReplyTarget) throw new CustomError(CustomStatus.INVALID_REPLY_ID, new Error("Reply not found"));
