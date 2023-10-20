@@ -50,6 +50,14 @@ export default class MongoDB {
                     throw new Error("Search is required");
                 }
 
+            case "comment":
+                if (search.id) {
+                    return await comment.read(search.id!);
+                }
+                else {
+                    throw new Error("Search is required");
+                }
+
             default:
                 throw new Error("Invalid database type");
         }
@@ -114,6 +122,9 @@ export default class MongoDB {
 
             case "sig":
                 return await sig.list(search);
+
+            case "comment":
+                return await comment.list(search);
 
             default:
                 throw new Error("Invalid database type");
