@@ -17,6 +17,7 @@ export const remove: RequestHandler = async (req: Request | ExtendedRequest, res
     try {
         const postId = (req as Request).params.id;
         const decodedJwt: any = (req as ExtendedRequest).JWT;
+        const userId = decodedJwt.id;
 
         if (!isValidObjectId(postId)) throw new CustomError(CustomStatus.INVALID_POST_ID, new Error("Invalid post id"));
 
@@ -24,11 +25,11 @@ export const remove: RequestHandler = async (req: Request | ExtendedRequest, res
         if (!oldData) throw new CustomError(CustomStatus.INVALID_POST_ID, new Error("Invalid post id"));
 
         const sigList: [Sig] = await SigDB.list({});
-        const isModerator = sigList.flatMap(sig => sig.moderator).includes(decodedJwt.id);
+        const isModerator = sigList.flatMap(sig => sig.moderator).includes(userId);
         const sigData = sigList.find(sig => sig._id?.toString() === oldData.sig);
-        const isLeader = sigData?.leader?.includes(decodedJwt.id);
+        const isLeader = sigData?.leader?.includes(userId);
         try {
-            if (oldData.user !== decodedJwt.id) throw new CustomError(CustomStatus.INVALID_USER, new Error("Not author"));
+            if (oldData.user !== userId) throw new CustomError(CustomStatus.INVALID_USER, new Error("Not author"));
         }
         catch (error) {
             if (!isModerator && !isLeader) throw new CustomError(CustomStatus.FORBIDDEN, new Error("Not leader or moderator"));

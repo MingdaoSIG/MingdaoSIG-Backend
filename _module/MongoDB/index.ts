@@ -3,6 +3,7 @@ import user from "@DBfunc/user";
 import image from "@DBfunc/image";
 import post from "@DBfunc/post";
 import sig from "@DBfunc/sig";
+import comment from "@DBfunc/comment";
 
 
 export default class MongoDB {
@@ -49,6 +50,14 @@ export default class MongoDB {
                     throw new Error("Search is required");
                 }
 
+            case "comment":
+                if (search.id) {
+                    return await comment.read(search.id!);
+                }
+                else {
+                    throw new Error("Search is required");
+                }
+
             default:
                 throw new Error("Invalid database type");
         }
@@ -89,6 +98,17 @@ export default class MongoDB {
                     throw new Error("Search is required");
                 }
 
+            case "comment":
+                if (search?.id) {
+                    return await comment.write(search.id!, dataToWrite);
+                }
+                else if (!search?.id) {
+                    return await comment.write(null, dataToWrite);
+                }
+                else {
+                    throw new Error("Search is required");
+                }
+
             default:
                 throw new Error("Invalid database type");
         }
@@ -97,11 +117,17 @@ export default class MongoDB {
     async list(search: object): Promise<any> {
         if (!search) throw new Error("Search is required");
         switch (this.databaseType) {
+            case "user":
+                return await user.list(search);
+
             case "post":
                 return await post.list(search);
 
             case "sig":
                 return await sig.list(search);
+
+            case "comment":
+                return await comment.list(search);
 
             default:
                 throw new Error("Invalid database type");
