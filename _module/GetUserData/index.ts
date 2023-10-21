@@ -18,25 +18,27 @@ export default async function getUserData(email: string, avatar: string): Promis
             email
         });
         const responseData = response.data;
-        try {
-            checkData(responseData, ["code", "mail", "class_name", "user_name", "user_identity"]);
-        }
-        catch (error) {
-            checkData(responseData, ["code", "mail", "user_name", "user_identity"]);
-        }
+
+        const validData =
+            checkData(responseData, ["code", "mail", "class_name", "user_name", "user_identity"]) ||
+            checkData(responseData, ["code", "mail", "user_name", "user_identity"]) ||
+            checkData(responseData, ["mail", "user_name", "user_job", "user_identity"]);
+        if (!validData) throw new Error("Invalid data");
 
         const prettierIdentity: { [key: string]: Identity } = {
             teach: "teacher",
-            stu: "student"
+            stu: "student",
+            alu: "alumni"
         };
         const {
-            mail, user_name, code, class_name, user_identity
+            mail, user_name, code, class_name, user_job, user_identity
         }: {
             mail: string,
             user_name: string,
             code: string,
             class_name: string,
-            user_identity: "teach" | "stu"
+            user_job: string,
+            user_identity: "teach" | "stu" | "alu"
         } = responseData;
 
         const oldData: User | null = await UserDB.read({ email: mail }).catch(() => null);
@@ -60,8 +62,8 @@ export default async function getUserData(email: string, avatar: string): Promis
             customId: targetCustomId,
             email: mail,
             name: user_name,
-            code: code,
-            class: class_name || "",
+            code: code || "",
+            class: class_name || user_job || "",
             identity: prettierIdentity[user_identity],
             sig: sig,
             displayName: displayName,
@@ -84,9 +86,9 @@ function checkData(data: object, keys: string[]) {
     if (typeof data != "object") throw new Error("Not a object");
 
     // Check if object have all required keys
-    if (Object.keys(data).length != keys.length) throw new Error("Invalid data");
+    if (Object.keys(data).length != keys.length) return false;
     for (const key of keys) {
-        if (!(key in data)) throw new Error("Invalid data");
+        if (!(key in data)) return false;
     }
 
     return true;
