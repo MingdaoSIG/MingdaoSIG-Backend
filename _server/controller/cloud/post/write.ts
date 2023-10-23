@@ -9,6 +9,7 @@ import CustomError from "@type/customError";
 import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
 import MongoDB from "@module/MongoDB";
+import CheckRequestRequirement from "@module/CheckRequestRequirement";
 
 
 const PostDB = new MongoDB("post");
@@ -44,11 +45,9 @@ export const write: RequestHandler = async (req: Request | ExtendedRequest, res)
         const postId = (req as Request).params.id;
         const decodedJwt: any = (req as ExtendedRequest).JWT;
 
-        const forbiddenKeys = ["_id", "user", "like", "createAt", "updateAt", "__v"];
-        const invalidKeys = Object.keys(body).filter(key => forbiddenKeys.includes(key));
-        if (invalidKeys.length > 0 || Object.keys(body).length === 0) {
-            throw new CustomError(CustomStatus.INVALID_BODY, new Error("Body contains invalid keys"));
-        }
+        new CheckRequestRequirement(req as Request).forbiddenBody(
+            ["_id", "user", "like", "priority", "pinned", "removed", "createAt", "updateAt", "__v"]
+        );
 
         const { sig: sigId, title, cover, content, hashtag }: Post = body;
 
@@ -74,7 +73,7 @@ export const write: RequestHandler = async (req: Request | ExtendedRequest, res)
             cover: cover || sigDefaultCover[sigId] || "https://lazco.dev/sig-photo-coming-soon-picture",
             content,
             user: decodedJwt.id,
-            hashtag
+            hashtag: hashtag || [],
         };
         if (typeof (postId) !== "undefined" && !oldData) {
             throw new CustomError(CustomStatus.INVALID_POST_ID, new Error("Invalid post id"));
