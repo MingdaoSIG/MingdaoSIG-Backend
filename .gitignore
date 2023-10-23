@@ -6,3 +6,5 @@ dist
 
 # Environment Variable
 .env
+
+updateDatabase
