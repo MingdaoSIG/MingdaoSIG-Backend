@@ -14,7 +14,7 @@ const SigDB = new MongoDB("sig");
 
 export const listAll: RequestHandler = async (_, res) => {
     try {
-        return await listPostBy(res, {});
+        return await listPostBy(res, { pinned: false });
     }
     catch (error: any) {
         return res.status(HttpStatus.NOT_FOUND).json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });
@@ -86,6 +86,6 @@ async function listPostBy(res: Response, search: FilterQuery<Post>) {
 
     return res.status(HttpStatus.OK).json({
         status: CustomStatus.OK,
-        postData
+        data: postData
     });
 }

@@ -58,6 +58,6 @@ async function listByPost(res: Response, search: FilterQuery<Comment>) {
 
     return res.status(HttpStatus.OK).json({
         status: CustomStatus.OK,
-        postData: commentDataWithUser
+        data: commentDataWithUser
     });
 }
