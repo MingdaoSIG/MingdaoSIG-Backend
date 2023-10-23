@@ -52,6 +52,8 @@ export const write: RequestHandler = async (req: Request | ExtendedRequest, res)
 
         const { sig: sigId, title, cover, content, hashtag }: Post = body;
 
+        checkHashtag(hashtag);
+
         if (!sigId || !title || !content || title.trim() === "" || content.trim() === "" || (cover && !await isValidCover(cover))) {
             throw new CustomError(CustomStatus.INVALID_BODY, new Error("No title, content or sig id"));
         }
@@ -96,6 +98,16 @@ export const write: RequestHandler = async (req: Request | ExtendedRequest, res)
         return res.status(HttpStatus.BAD_REQUEST).json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });
     }
 };
+
+function checkHashtag(hashtags: string[]) {
+    if (!hashtags || hashtags.length === 0) return true;
+
+    if (typeof hashtags !== "object") throw new CustomError(CustomStatus.INVALID_HASHTAG, new Error("Invalid hashtag"));
+
+    hashtags.forEach((hashtag: string) => {
+        if (hashtag.trim() === "") throw new CustomError(CustomStatus.INVALID_HASHTAG, new Error("Invalid hashtag"));
+    });
+}
 
 async function isValidCover(url: string) {
     if (!url) return false;

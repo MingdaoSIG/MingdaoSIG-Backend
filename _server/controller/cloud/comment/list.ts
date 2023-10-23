@@ -19,14 +19,14 @@ export const listAllByPost: RequestHandler = async (req, res) => {
 
         if (!isValidObjectId(postId) || !(await PostDB.read({ id: postId }).catch(() => null))) throw new CustomError(CustomStatus.INVALID_POST_ID, new Error("Invalid post id"));
 
-        return await listCommentBy(res, { post: postId, reply: "" });
+        return await listByPost(res, { post: postId, reply: "" });
     }
     catch (error: any) {
         return res.status(error.statusCode ? HttpStatus.NOT_FOUND : HttpStatus.INTERNAL_SERVER_ERROR).json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });
     }
 };
 
-async function listCommentBy(res: Response, search: FilterQuery<Comment>) {
+async function listByPost(res: Response, search: FilterQuery<Comment>) {
     const commentData: Comment[] | null = await CommentDB.list({
         ...search,
         removed: false
