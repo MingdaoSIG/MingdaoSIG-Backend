@@ -7,6 +7,7 @@ export type Post = {
     user: string, // 發布者
     hashtag: string[], // 標籤
     like?: string[], // 按讚者
+    likes?: number, // 按讚數
     priority?: number, // 重要性
     pinned?: boolean, // 推薦
     removed?: boolean, // 刪除

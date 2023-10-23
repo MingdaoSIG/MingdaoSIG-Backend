@@ -11,6 +11,7 @@ const postSchema = new Schema({
     user: String,
     hashtag: [String],
     like: [String],
+    likes: { type: Number, default: 0 },
     priority: { type: Number, default: 0 },
     pinned: { type: Boolean, default: false },
     removed: { type: Boolean, default: false }
