@@ -5,7 +5,7 @@ import JWTverifier from "@middleware/JWTverifier";
 import { write } from "@controller/cloud/post/write";
 import { read } from "@controller/cloud/post/read";
 import { remove } from "@controller/cloud/post/remove";
-import { listAllByUser, listAll, listAllBySig, listAllByUserLike } from "@controller/cloud/post/list";
+import { listAllByUser, listAll, listAllBySig, listAllByUserLike, listAllByPinned } from "@controller/cloud/post/list";
 import { dislike, like } from "@controller/cloud/post/like";
 
 
@@ -16,6 +16,7 @@ post.get("/list", listAll);
 post.get("/list/user/:id", listAllByUser);
 post.get("/list/user/:id/like", listAllByUserLike);
 post.get("/list/sig/:id", listAllBySig);
+post.get("/list/pinned", listAllByPinned);
 post.get("/:id", read);
 
 post.use("/", JWTverifier);

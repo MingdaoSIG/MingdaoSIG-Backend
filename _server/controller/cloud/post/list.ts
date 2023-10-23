@@ -69,6 +69,15 @@ export const listAllByUserLike: RequestHandler = async (req, res) => {
     }
 };
 
+export const listAllByPinned: RequestHandler = async (_, res) => {
+    try {
+        return await listPostBy(res, { pinned: true });
+    }
+    catch (error: any) {
+        return res.status(HttpStatus.NOT_FOUND).json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });
+    }
+};
+
 async function listPostBy(res: Response, search: FilterQuery<Post>) {
     const postData: Post[] | null = await PostDB.list({
         ...search,
