@@ -1,4 +1,4 @@
-export type Identity = "teacher" | "student";
+export type Identity = "teacher" | "student" | "alumni";
 
 /*
 0:view

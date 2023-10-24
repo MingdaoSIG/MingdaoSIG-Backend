@@ -21,11 +21,14 @@ export const like: RequestHandler = async (req: Request | ExtendedRequest, res) 
         const oldData: Post | null = await PostDB.read({ id }).catch(() => null);
         if (!oldData) throw new CustomError(CustomStatus.INVALID_POST_ID, new Error("Invalid post id"));
 
-        await PostDB.write({
-            $addToSet: {
-                like: decodedJwt.id
-            }
-        }, { id });
+        if (!oldData.like?.includes(decodedJwt.id)) {
+            await PostDB.write({
+                $addToSet: {
+                    like: decodedJwt.id
+                },
+                likes: (oldData.like?.length || 0) + 1
+            }, { id });
+        }
 
         return res.status(HttpStatus.OK).json({
             status: CustomStatus.OK,
@@ -46,11 +49,14 @@ export const dislike: RequestHandler = async (req: Request | ExtendedRequest, re
         const oldData: Post | null = await PostDB.read({ id }).catch(() => null);
         if (!oldData) throw new CustomError(CustomStatus.INVALID_POST_ID, new Error("Invalid post id"));
 
-        await PostDB.write({
-            $pull: {
-                like: decodedJwt.id
-            }
-        }, { id });
+        if (oldData.like?.includes(decodedJwt.id)) {
+            await PostDB.write({
+                $pull: {
+                    like: decodedJwt.id
+                },
+                likes: (oldData.like.length || 0) - 1
+            }, { id });
+        }
 
         return res.status(HttpStatus.OK).json({
             status: CustomStatus.OK,

@@ -1,4 +1,4 @@
-import { DatabaseType, Search } from "@type/database";
+import { DatabaseType, Option, Search } from "@type/database";
 import user from "@DBfunc/user";
 import image from "@DBfunc/image";
 import post from "@DBfunc/post";
@@ -114,14 +114,14 @@ export default class MongoDB {
         }
     }
 
-    async list(search: object): Promise<any> {
+    async list(search: object, option?: Option): Promise<any> {
         if (!search) throw new Error("Search is required");
         switch (this.databaseType) {
             case "user":
                 return await user.list(search);
 
             case "post":
-                return await post.list(search);
+                return await post.list(search, option);
 
             case "sig":
                 return await sig.list(search);

@@ -22,7 +22,7 @@ export const read: RequestHandler = async (req, res) => {
         return res.status(HttpStatus.OK).json({
             status: CustomStatus.OK,
             id: postData._id,
-            postData
+            data: postData
         });
     }
     catch (error: any) {

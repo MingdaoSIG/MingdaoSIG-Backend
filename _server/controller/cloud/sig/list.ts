@@ -10,11 +10,11 @@ const SigDB = new MongoDB("sig");
 
 export const listAll: RequestHandler = async (_, res) => {
     try {
-        const postData: Sig[] | null = await SigDB.list({});
+        const sigData: Sig[] | null = await SigDB.list({});
 
         return res.status(HttpStatus.OK).json({
             status: CustomStatus.OK,
-            postData
+            data: sigData
         });
     }
     catch (error: any) {
