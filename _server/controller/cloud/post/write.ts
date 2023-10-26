@@ -65,8 +65,8 @@ export const write: RequestHandler = async (req: Request | ExtendedRequest, res)
         if (!isValidObjectId(postId) && typeof (postId) !== "undefined") throw new CustomError(CustomStatus.INVALID_POST_ID, new Error("Invalid post id"));
 
         const oldData: Post = await PostDB.read({ id: postId }).catch(() => null);
-        // const isOneOfModerators = sigList.flatMap(sig => sig.moderator).includes(decodedJwt.id);
-        // const isOneOfLeaders = sigList.flatMap(sig => sig.leader).includes(decodedJwt.id);
+        const isOneOfModerators = sigList.flatMap(sig => sig.moderator).includes(decodedJwt.id);
+        const isOneOfLeaders = sigList.flatMap(sig => sig.leader).includes(decodedJwt.id);
         const dataToSave = {
             sig: sigId,
             title,
@@ -78,9 +78,9 @@ export const write: RequestHandler = async (req: Request | ExtendedRequest, res)
         if (typeof (postId) !== "undefined" && !oldData) {
             throw new CustomError(CustomStatus.INVALID_POST_ID, new Error("Invalid post id"));
         }
-        // else if (!isOneOfModerators && !isOneOfLeaders && oldData?.user !== decodedJwt.id) {
-        //     throw new CustomError(CustomStatus.FORBIDDEN, new Error("Not leader, moderator or author"));
-        // }
+        else if (!isOneOfModerators && !isOneOfLeaders && oldData?.user !== decodedJwt.id) {
+            throw new CustomError(CustomStatus.FORBIDDEN, new Error("Not leader, moderator or author"));
+        }
         else if (typeof (postId) !== "undefined" && oldData?.user !== decodedJwt.id) {
             throw new CustomError(CustomStatus.FORBIDDEN, new Error("Not author"));
         }
