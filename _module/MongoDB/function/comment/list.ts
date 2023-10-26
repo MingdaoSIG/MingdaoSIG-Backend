@@ -1,11 +1,17 @@
 import CustomError from "@type/customError";
+import { Option } from "@type/database";
 import comment from "@schema/comment";
 import { CustomStatus } from "@module/CustomStatusCode";
 
 
-export default async function list(search: object) {
+export default async function list(search: object, option?: Option) {
     try {
-        const data = await comment.find(search);
+        const { skip, limit, sort } = option || {};
+
+        const data = await comment.find(search)
+            .sort(sort || { createdAt: -1 })
+            .skip(skip || 0)
+            .limit(limit || 0);
 
         if (!data) {
             throw new Error("Comment not found");
