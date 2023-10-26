@@ -7,6 +7,7 @@ import { Sort } from "@type/database";
 import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
 import MongoDB from "@module/MongoDB";
+import CheckValidPaginationOption from "@module/CheckValidPaginationOption";
 
 
 const PostDB = new MongoDB("post");
@@ -18,19 +19,9 @@ export const listAll: RequestHandler = async (req, res) => {
         const skip = req.query?.skip;
         const limit = req.query?.limit;
 
-        // ! This should be removed once Frontend finish
-        if (!skip || !limit) {
-            return await listPostBy(res, { pinned: false }, 0, 0, { likes: -1 });
-        }
+        CheckValidPaginationOption(req);
 
-        if (typeof skip !== "string" || typeof limit !== "string") throw new CustomError(CustomStatus.INVALID_QUERY, new Error("Skip or limit is not a string"));
-
-        if (isNaN(Number(skip)) || isNaN(Number(limit))) throw new CustomError(CustomStatus.INVALID_QUERY, new Error("Skip or limit is not a number"));
-
-        if (Number(skip) < 0) throw new CustomError(CustomStatus.INVALID_QUERY, new Error("Skip should be above or equal to 0"));
-        if (Number(limit) <= 0 || Number(limit) > 50) throw new CustomError(CustomStatus.INVALID_QUERY, new Error("Limit should be above 0 and less than 50"));
-
-        return await listPostBy(res, { pinned: false }, Number(skip), Number(limit), { likes: -1 });
+        return await listPostBy(res, { pinned: false }, (skip ? Number(skip) : 0), (limit ? Number(limit) : 0), { likes: -1 });
     }
     catch (error: any) {
         return res.status(HttpStatus.NOT_FOUND).json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });
