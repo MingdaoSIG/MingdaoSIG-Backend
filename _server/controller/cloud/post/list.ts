@@ -31,13 +31,17 @@ export const listAll: RequestHandler = async (req, res) => {
 export const listAllBySig: RequestHandler = async (req, res) => {
     try {
         const sigId: string = req.params.id!;
+        const skip = req.query?.skip;
+        const limit = req.query?.limit;
+
+        CheckValidPaginationOption(req);
 
         if (!isValidObjectId(sigId)) throw new CustomError(CustomStatus.INVALID_SIG_ID, new Error("Invalid sig id"));
 
         const sigData = await SigDB.read({ id: sigId }).catch(() => null);
         if (!sigData) throw new CustomError(CustomStatus.INVALID_SIG_ID, new Error("Invalid sig id"));
 
-        return await listPostBy(res, { sig: sigId });
+        return await listPostBy(res, { sig: sigId }, (skip ? Number(skip) : 0), (limit ? Number(limit) : 0));
     }
     catch (error: any) {
         return res.status(HttpStatus.NOT_FOUND).json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });
@@ -47,13 +51,17 @@ export const listAllBySig: RequestHandler = async (req, res) => {
 export const listAllByUser: RequestHandler = async (req, res) => {
     try {
         const userId: string = req.params.id!;
+        const skip = req.query?.skip;
+        const limit = req.query?.limit;
+
+        CheckValidPaginationOption(req);
 
         if (!isValidObjectId(userId)) throw new CustomError(CustomStatus.INVALID_USER_ID, new Error("Invalid user id"));
 
         const haveUser = await UserDB.read({ id: userId }).catch(() => null);
         if (!haveUser) throw new CustomError(CustomStatus.INVALID_USER_ID, new Error("Invalid user id"));
 
-        return await listPostBy(res, { user: userId });
+        return await listPostBy(res, { user: userId }, (skip ? Number(skip) : 0), (limit ? Number(limit) : 0));
     }
     catch (error: any) {
         return res.status(HttpStatus.NOT_FOUND).json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });
@@ -63,13 +71,17 @@ export const listAllByUser: RequestHandler = async (req, res) => {
 export const listAllByUserLike: RequestHandler = async (req, res) => {
     try {
         const userId: string = req.params.id!;
+        const skip = req.query?.skip;
+        const limit = req.query?.limit;
+
+        CheckValidPaginationOption(req);
 
         if (!isValidObjectId(userId)) throw new CustomError(CustomStatus.INVALID_USER_ID, new Error("Invalid user id"));
 
         const haveUser = await UserDB.read({ id: userId }).catch(() => null);
         if (!haveUser) throw new CustomError(CustomStatus.INVALID_USER_ID, new Error("Invalid user id"));
 
-        return await listPostBy(res, { like: userId });
+        return await listPostBy(res, { like: userId }, (skip ? Number(skip) : 0), (limit ? Number(limit) : 0));
     }
     catch (error: any) {
         return res.status(HttpStatus.NOT_FOUND).json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });
