@@ -34,6 +34,7 @@ export type User = {
     displayName?: string, // 顯示名稱
     description?: string, // 描述
     avatar?: string, // 大頭貼
+    badge?: ("developer" | "10/21_user")[], // 徽章
     follower?: string[], // 追隨者
     permission?: Permission, // 權限
     createAt?: string, // 建立時間

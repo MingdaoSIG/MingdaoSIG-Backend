@@ -14,6 +14,15 @@ const userSchema = new Schema({
     displayName: String,
     description: String,
     avatar: String,
+    badge: {
+        type: [
+            {
+                type: String,
+                enum: ["developer", "10/21_user"]
+            }
+        ],
+        default: []
+    },
     follower: [String],
     permission: Number
 }, { timestamps: true });
