@@ -37,7 +37,11 @@ export const write: RequestHandler = async (req: Request | ExtendedRequest, res)
 
         if (body.description && body.description?.length > 250) throw new CustomError(CustomStatus.INVALID_CONTENT_LENGTH, new Error("Invalid description"));
 
-        const savedData: Sig = await SigDB.write(body, { id: sigId });
+        const dataToSave = {
+            customId: String(body.customId),
+            description: String(body.description),
+        };
+        const savedData: Sig = await SigDB.write(dataToSave, { id: sigId });
 
         return res.status(HttpStatus.OK).json({
             status: CustomStatus.OK,
