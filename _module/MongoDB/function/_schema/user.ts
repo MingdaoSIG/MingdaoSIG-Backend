@@ -18,7 +18,7 @@ const userSchema = new Schema({
         type: [
             {
                 type: String,
-                enum: ["developer", "10/21_user"]
+                enum: ["developer", "10.21_user"]
             }
         ],
         default: []
