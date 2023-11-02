@@ -16,6 +16,7 @@ export const upload: RequestHandler = async (req, res) => {
 
         const byteLimit = 5 * 1000 * 1000; // 5 MB
         if (rawImage.byteLength > byteLimit) throw new CustomError(CustomStatus.CONTENT_SIZE_EXCEEDED, new Error("Content size exceeded"));
+        if (!rawImage) throw new CustomError(CustomStatus.EMPTY_CONTENT, new Error("Content is empty"));
 
         const webpImage =
             await sharp(rawImage)
