@@ -2,6 +2,8 @@ import { RequestHandler, Response } from "express";
 import { FilterQuery, isValidObjectId } from "mongoose";
 
 import { Post } from "@type/post";
+import { User } from "@type/user";
+import { Sig } from "@type/sig";
 import CustomError from "@type/customError";
 import { Sort } from "@type/database";
 import { CustomStatus } from "@module/CustomStatusCode";
@@ -107,8 +109,47 @@ async function listPostBy(res: Response, search: FilterQuery<Post>, skip?: numbe
         sort: sort || { createdAt: -1 }
     });
 
+    const userIds = new Set<string>();
+    postData?.forEach((comment) => {
+        userIds.add(comment.user);
+    });
+    const usersDataMap: Record<string, User> = {};
+    const usersData: User[] = await UserDB.list({ _id: { $in: Array.from(userIds) } });
+    usersData.forEach((user) => {
+        if (user._id) {
+            usersDataMap[user._id] = user;
+        }
+    });
+
+    const sigIds = new Set<string>();
+    postData?.forEach((comment) => {
+        sigIds.add(comment.sig);
+    });
+    const sigsDataMap: Record<string, Sig> = {};
+    const sigsData: Sig[] = await SigDB.list({ _id: { $in: Array.from(sigIds) } });
+    sigsData.forEach((sig) => {
+        if (sig._id) {
+            sigsDataMap[sig._id] = sig;
+        }
+    });
+
+    const fullPostData = postData?.map((comment) => {
+        comment = JSON.parse(JSON.stringify(comment));
+        return {
+            ...comment,
+            user: {
+                _id: usersDataMap[comment.user]?._id,
+                name: usersDataMap[comment.user]?.name
+            },
+            sig: {
+                _id: sigsDataMap[comment.sig]?._id,
+                name: sigsDataMap[comment.sig]?.name
+            }
+        };
+    });
+
     return res.status(HttpStatus.OK).json({
         status: CustomStatus.OK,
-        data: postData
+        data: fullPostData
     });
 }
