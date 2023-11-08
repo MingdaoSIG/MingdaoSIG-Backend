@@ -1,4 +1,5 @@
 import { JwtPayload } from "jsonwebtoken";
+import { Request } from "express";
 
 import { User } from "./user";
 

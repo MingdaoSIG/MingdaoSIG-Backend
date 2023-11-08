@@ -2,11 +2,14 @@ import { RequestHandler, Response } from "express";
 import { FilterQuery, isValidObjectId } from "mongoose";
 
 import { Post } from "@type/post";
+import { User } from "@type/user";
+import { Sig } from "@type/sig";
 import CustomError from "@type/customError";
 import { Sort } from "@type/database";
 import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
 import MongoDB from "@module/MongoDB";
+import CheckValidPaginationOption from "@module/CheckValidPaginationOption";
 
 
 const PostDB = new MongoDB("post");
@@ -18,19 +21,9 @@ export const listAll: RequestHandler = async (req, res) => {
         const skip = req.query?.skip;
         const limit = req.query?.limit;
 
-        // ! This should be removed once Frontend finish
-        if (!skip || !limit) {
-            return await listPostBy(res, { pinned: false }, 0, 0, { likes: -1 });
-        }
+        CheckValidPaginationOption(req);
 
-        if (typeof skip !== "string" || typeof limit !== "string") throw new CustomError(CustomStatus.INVALID_QUERY, new Error("Skip or limit is not a string"));
-
-        if (isNaN(Number(skip)) || isNaN(Number(limit))) throw new CustomError(CustomStatus.INVALID_QUERY, new Error("Skip or limit is not a number"));
-
-        if (Number(skip) < 0) throw new CustomError(CustomStatus.INVALID_QUERY, new Error("Skip should be above or equal to 0"));
-        if (Number(limit) <= 0 || Number(limit) > 50) throw new CustomError(CustomStatus.INVALID_QUERY, new Error("Limit should be above 0 and less than 50"));
-
-        return await listPostBy(res, { pinned: false }, Number(skip), Number(limit), { likes: -1 });
+        return await listPostBy(res, { pinned: false }, (skip ? Number(skip) : 0), (limit ? Number(limit) : 0), { likes: -1 });
     }
     catch (error: any) {
         return res.status(HttpStatus.NOT_FOUND).json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });
@@ -40,13 +33,17 @@ export const listAll: RequestHandler = async (req, res) => {
 export const listAllBySig: RequestHandler = async (req, res) => {
     try {
         const sigId: string = req.params.id!;
+        const skip = req.query?.skip;
+        const limit = req.query?.limit;
+
+        CheckValidPaginationOption(req);
 
         if (!isValidObjectId(sigId)) throw new CustomError(CustomStatus.INVALID_SIG_ID, new Error("Invalid sig id"));
 
         const sigData = await SigDB.read({ id: sigId }).catch(() => null);
         if (!sigData) throw new CustomError(CustomStatus.INVALID_SIG_ID, new Error("Invalid sig id"));
 
-        return await listPostBy(res, { sig: sigId });
+        return await listPostBy(res, { sig: sigId }, (skip ? Number(skip) : 0), (limit ? Number(limit) : 0));
     }
     catch (error: any) {
         return res.status(HttpStatus.NOT_FOUND).json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });
@@ -56,13 +53,17 @@ export const listAllBySig: RequestHandler = async (req, res) => {
 export const listAllByUser: RequestHandler = async (req, res) => {
     try {
         const userId: string = req.params.id!;
+        const skip = req.query?.skip;
+        const limit = req.query?.limit;
+
+        CheckValidPaginationOption(req);
 
         if (!isValidObjectId(userId)) throw new CustomError(CustomStatus.INVALID_USER_ID, new Error("Invalid user id"));
 
         const haveUser = await UserDB.read({ id: userId }).catch(() => null);
         if (!haveUser) throw new CustomError(CustomStatus.INVALID_USER_ID, new Error("Invalid user id"));
 
-        return await listPostBy(res, { user: userId });
+        return await listPostBy(res, { user: userId }, (skip ? Number(skip) : 0), (limit ? Number(limit) : 0));
     }
     catch (error: any) {
         return res.status(HttpStatus.NOT_FOUND).json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });
@@ -72,13 +73,17 @@ export const listAllByUser: RequestHandler = async (req, res) => {
 export const listAllByUserLike: RequestHandler = async (req, res) => {
     try {
         const userId: string = req.params.id!;
+        const skip = req.query?.skip;
+        const limit = req.query?.limit;
+
+        CheckValidPaginationOption(req);
 
         if (!isValidObjectId(userId)) throw new CustomError(CustomStatus.INVALID_USER_ID, new Error("Invalid user id"));
 
         const haveUser = await UserDB.read({ id: userId }).catch(() => null);
         if (!haveUser) throw new CustomError(CustomStatus.INVALID_USER_ID, new Error("Invalid user id"));
 
-        return await listPostBy(res, { like: userId });
+        return await listPostBy(res, { like: userId }, (skip ? Number(skip) : 0), (limit ? Number(limit) : 0));
     }
     catch (error: any) {
         return res.status(HttpStatus.NOT_FOUND).json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });
@@ -104,8 +109,47 @@ async function listPostBy(res: Response, search: FilterQuery<Post>, skip?: numbe
         sort: sort || { createdAt: -1 }
     });
 
+    const userIds = new Set<string>();
+    postData?.forEach((comment) => {
+        userIds.add(comment.user);
+    });
+    const usersDataMap: Record<string, User> = {};
+    const usersData: User[] = await UserDB.list({ _id: { $in: Array.from(userIds) } });
+    usersData.forEach((user) => {
+        if (user._id) {
+            usersDataMap[user._id] = user;
+        }
+    });
+
+    const sigIds = new Set<string>();
+    postData?.forEach((comment) => {
+        sigIds.add(comment.sig);
+    });
+    const sigsDataMap: Record<string, Sig> = {};
+    const sigsData: Sig[] = await SigDB.list({ _id: { $in: Array.from(sigIds) } });
+    sigsData.forEach((sig) => {
+        if (sig._id) {
+            sigsDataMap[sig._id] = sig;
+        }
+    });
+
+    const fullPostData = postData?.map((comment) => {
+        comment = JSON.parse(JSON.stringify(comment));
+        return {
+            ...comment,
+            user: {
+                _id: usersDataMap[comment.user]?._id,
+                name: usersDataMap[comment.user]?.name
+            },
+            sig: {
+                _id: sigsDataMap[comment.sig]?._id,
+                name: sigsDataMap[comment.sig]?.name
+            }
+        };
+    });
+
     return res.status(HttpStatus.OK).json({
         status: CustomStatus.OK,
-        data: postData
+        data: fullPostData
     });
 }

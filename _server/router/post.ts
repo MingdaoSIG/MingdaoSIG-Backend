@@ -9,7 +9,6 @@ import { listAllByUser, listAll, listAllBySig, listAllByUserLike, listAllByPinne
 import { dislike, like } from "@controller/cloud/post/like";
 
 
-
 const post: Router = Router();
 
 post.get("/list", listAll);

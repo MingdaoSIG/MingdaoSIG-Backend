@@ -10,12 +10,13 @@ import { read } from "@controller/cloud/image/read";
 const image: Router = Router();
 
 // router.use(rateLimiter.limiter_1m_20req);
-image.use(bodyParser.raw({ type: "image/webp" }));
-
 image.get("/:id", read);
 
 image.use("/", JWTverifier);
-image.use("/", bodyParser.raw({ limit: "2mb" }));
+image.use("/", bodyParser.raw({
+    type: "*/*",
+    limit: "1gb"
+}));
 image.post("/", upload);
 
 export default image;

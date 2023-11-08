@@ -127,7 +127,7 @@ export default class MongoDB {
                 return await sig.list(search);
 
             case "comment":
-                return await comment.list(search);
+                return await comment.list(search, option);
 
             default:
                 throw new Error("Invalid database type");
