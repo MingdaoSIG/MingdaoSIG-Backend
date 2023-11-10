@@ -7,15 +7,19 @@ export const CustomCode = {
     4010: "Invalid user",
     4011: "Invalid body",
     4012: "Invalid query",
-    4013: "Invalid jwt",
+    4013: "Invalid JWT",
     4015: "Invalid google access token",
     4016: "Invalid image id",
     4017: "Invalid user id",
     4018: "Invalid post id",
     4019: "Invalid sig id",
-    4020: "Invalid custom id",
-    4021: "Custom id already exists",
-    4022: "Invalid description length",
+    4020: "Invalid reply id",
+    4021: "Invalid custom id",
+    4022: "Custom id already exists",
+    4023: "Invalid content length",
+    4024: "Empty content",
+    4025: "Invalid hashtag",
+    4026: "Content size exceeded",
 
     4100: "Error reading user from db",
     4101: "Error writing user to db",
@@ -25,6 +29,10 @@ export const CustomCode = {
     4105: "Error writing post to db",
     4106: "Error reading sig from db",
     4107: "Error writing sig to db",
+    4108: "Error reading comment from db",
+    4109: "Error writing comment to db",
+
+    5000: "Unknown error"
 } as const;
 
 export const CustomStatus = {
