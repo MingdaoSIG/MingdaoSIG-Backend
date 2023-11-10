@@ -1,6 +1,6 @@
 import { User } from "@type/user";
-import CustomError from "@type/customError";
 import sig from "@schema/sig";
+import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 
 

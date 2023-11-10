@@ -1,7 +1,7 @@
 import axios from "axios";
 
-import CustomError from "@type/customError";
 import { GoogleUserData } from "@type/googleUserData";
+import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 
 

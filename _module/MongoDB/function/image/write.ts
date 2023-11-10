@@ -1,6 +1,6 @@
-import CustomError from "@type/customError";
 import { ImageData } from "@type/image";
 import image from "@schema/image";
+import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 
 

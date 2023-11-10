@@ -1,5 +1,5 @@
-import CustomError from "@type/customError";
 import post from "@schema/post";
+import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 
 

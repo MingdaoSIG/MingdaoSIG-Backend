@@ -3,11 +3,11 @@ import jwt, { Secret } from "jsonwebtoken";
 import { isValidObjectId } from "mongoose";
 
 import { ExtendedRequest } from "@type/request";
-import CustomError from "@type/customError";
+import { User } from "@type/user";
+import CustomError from "@module/CustomError";
 import { HttpStatus } from "@module/HttpStatusCode";
 import { CustomStatus } from "@module/CustomStatusCode";
 import MongoDB from "@module/MongoDB";
-import { User } from "@type/user";
 
 
 const UserDB = new MongoDB("user");

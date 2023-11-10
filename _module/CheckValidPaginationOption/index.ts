@@ -1,7 +1,7 @@
 import { Request } from "express";
 
-import CustomError from "@type/customError";
 import { ExtendedRequest } from "@type/request";
+import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 
 
