@@ -3,7 +3,7 @@ import { isValidObjectId } from "mongoose";
 
 import { Comment } from "@type/comment";
 import { ExtendedRequest } from "@type/request";
-import CustomError from "@type/customError";
+import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
 import MongoDB from "@module/MongoDB";

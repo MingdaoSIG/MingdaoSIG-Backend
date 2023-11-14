@@ -1,4 +1,4 @@
-import CustomError from "@type/customError";
+import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 import MongoDB from "@module/MongoDB";
 

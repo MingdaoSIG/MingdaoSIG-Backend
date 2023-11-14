@@ -5,7 +5,7 @@ import axios from "axios";
 import { Post } from "@type/post";
 import { Sig } from "@type/sig";
 import { ExtendedRequest } from "@type/request";
-import CustomError from "@type/customError";
+import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
 import MongoDB from "@module/MongoDB";

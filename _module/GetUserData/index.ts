@@ -1,7 +1,7 @@
 import axios from "axios";
 
 import { Identity, User } from "@type/user";
-import CustomError from "@type/customError";
+import CustomError from "@module/CustomError";
 import MongoDB from "@module/MongoDB";
 import { CustomStatus } from "@module/CustomStatusCode";
 import UniqueId from "@module/UniqueId";

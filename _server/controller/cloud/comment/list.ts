@@ -1,10 +1,10 @@
 import { RequestHandler, Response } from "express";
 import { FilterQuery, isValidObjectId } from "mongoose";
 
-import CustomError from "@type/customError";
 import { Comment } from "@type/comment";
 import { User } from "@type/user";
 import { Sort } from "@type/database";
+import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
 import MongoDB from "@module/MongoDB";

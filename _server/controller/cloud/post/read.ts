@@ -1,8 +1,8 @@
 import { RequestHandler } from "express";
 import { isValidObjectId } from "mongoose";
 
-import CustomError from "@type/customError";
 import { Post } from "@type/post";
+import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
 import MongoDB from "@module/MongoDB";

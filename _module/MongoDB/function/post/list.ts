@@ -1,6 +1,6 @@
-import CustomError from "@type/customError";
 import { Option } from "@type/database";
 import post from "@schema/post";
+import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 
 
