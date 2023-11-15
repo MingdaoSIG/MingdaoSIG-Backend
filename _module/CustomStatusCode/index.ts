@@ -31,6 +31,7 @@ export const CustomCode = {
     4107: "Error writing sig to db",
     4108: "Error reading comment from db",
     4109: "Error writing comment to db",
+    4110: "Error sending email",
 
     5000: "Unknown error"
 } as const;
@@ -68,6 +69,7 @@ export const CustomStatus = {
     ERROR_WRITING_SIG_TO_DB: 4107,
     ERROR_READING_COMMENT_FROM_DB: 4108,
     ERROR_WRITING_COMMENT_TO_DB: 4109,
+    ERROR_SENDING_EMAIL: 4110,
 
     UNKNOWN_ERROR: 5000
 } as const;
