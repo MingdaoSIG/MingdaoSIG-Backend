@@ -6,7 +6,7 @@ import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
 import CheckRequestRequirement from "@module/CheckRequestRequirement";
-import JoinSigRequest from "@module/sendEmail";
+import JoinSigRequest from "@module/JoinSigRequest";
 
 
 export const join: RequestHandler = async (req: Request | ExtendedRequest, res) => {
