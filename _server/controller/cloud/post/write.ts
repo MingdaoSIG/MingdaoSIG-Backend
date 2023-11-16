@@ -68,12 +68,12 @@ export const write: RequestHandler = async (req: Request | ExtendedRequest, res)
         const isOneOfModerators = sigList.flatMap(sig => sig.moderator).includes(decodedJwt.id);
         const isOneOfLeaders = sigList.flatMap(sig => sig.leader).includes(decodedJwt.id);
         const dataToSave = {
-            sig: sigId,
-            title,
-            cover: cover || sigDefaultCover[sigId] || "https://lazco.dev/sig-photo-coming-soon-picture",
-            content,
+            sig: sigId || oldData?.sig,
+            title: title || oldData?.title,
+            cover: cover || oldData?.cover || sigDefaultCover[sigId] || "https://lazco.dev/sig-photo-coming-soon-picture",
+            content: content || oldData?.content,
             user: decodedJwt.id,
-            hashtag: hashtag || [],
+            hashtag: hashtag || oldData?.hashtag || [],
         };
         if (typeof (postId) !== "undefined" && !oldData) {
             throw new CustomError(CustomStatus.INVALID_POST_ID, new Error("Invalid post id"));
