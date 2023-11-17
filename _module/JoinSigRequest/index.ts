@@ -1,19 +1,16 @@
-import axios from "axios";
-
-import { JoinSigRequestMessage } from "@type/joinSigRequest";
+import { JoinSigRequest } from "@type/joinSigRequest";
 import { Sig } from "@type/sig";
 import MongoDB from "@module/MongoDB";
 import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 import { Identity, User } from "@type/user";
+import SendMail from "@module/SendMail";
 
 
 const SigDB = new MongoDB("sig");
 const UserDB = new MongoDB("user");
 
-export default async function JoinSigRequest(sigId: string, userId: string, requestMessage: JoinSigRequestMessage) {
-    const MD_API_URL = "https://mdsrl.mingdao.edu.tw/mdpp/Sig20Login/sendMail";
-
+export default async function JoinSigRequest(sigId: string, userId: string, requestMessage: JoinSigRequest) {
     try {
         const sigData: Sig | null = await SigDB.read({ id: sigId }).catch(() => null);
         if (!sigData || sigData.removed) throw new CustomError(CustomStatus.INVALID_SIG_ID, new Error("Invalid sig id"));
@@ -30,16 +27,11 @@ export default async function JoinSigRequest(sigId: string, userId: string, requ
             }) ?? [])
         ));
 
-        const requestBody = {
-            "from": "SIG 平台開發團隊",
-            "title": `${sigName} SIG 加入申請`,
-            "msg": prettyRequestMessage,
-            "to": targetEmails.join(",")
-        };
-        const response = await axios.postForm(MD_API_URL, requestBody);
-        if (targetEmails.join("") !== response.data || response.status !== 200) {
-            throw new CustomError(CustomStatus.ERROR_SENDING_EMAIL, new Error("Error sending email"));
-        }
+        await SendMail(
+            `${sigName} SIG 加入申請`,
+            prettyRequestMessage,
+            targetEmails
+        );
 
         return true; // TODO: requestId: string
     }
@@ -48,7 +40,7 @@ export default async function JoinSigRequest(sigId: string, userId: string, requ
     }
 }
 
-function parseRequestMessage(sigName: string, userData: User, requestMessage: JoinSigRequestMessage) {
+function parseRequestMessage(sigName: string, userData: User, requestMessage: JoinSigRequest) {
     const prettierIdentity: {
         [key in Identity]: string
     } = {
