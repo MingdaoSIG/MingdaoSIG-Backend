@@ -21,6 +21,6 @@ export default async function SendMail(title: string, msg: string, target: strin
         return true;
     }
     catch (error) {
-        throw new CustomError(CustomStatus.ERROR_SENDING_EMAIL, error);
+        throw new CustomError(CustomStatus.FAILED_TO_SEND_EMAIL, error);
     }
 }
