@@ -1,10 +1,11 @@
 import { Option } from "@type/database";
+import { CommentFilter } from "@type/comment";
 import comment from "@schema/comment";
 import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 
 
-export default async function list(search: object, option?: Option) {
+export default async function list(search: CommentFilter, option?: Option) {
     try {
         const { skip, limit, sort } = option || {};
 

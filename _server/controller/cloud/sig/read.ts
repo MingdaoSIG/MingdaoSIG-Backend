@@ -5,10 +5,10 @@ import { Sig } from "@type/sig";
 import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
-import MongoDB from "@module/MongoDB";
+import _MongoDB from "@module/MongoDB";
 
 
-const SigDB = new MongoDB("sig");
+const SigDB = new _MongoDB("sig");
 
 export const readById: RequestHandler = async (req, res) => {
     try {

@@ -2,13 +2,13 @@ import axios from "axios";
 
 import { Identity, User } from "@type/user";
 import CustomError from "@module/CustomError";
-import MongoDB from "@module/MongoDB";
+import _MongoDB from "@module/MongoDB";
 import { CustomStatus } from "@module/CustomStatusCode";
 import UniqueId from "@module/UniqueId";
 import CheckValidCustomId from "@module/CheckValidCustomId";
 
 
-const UserDB = new MongoDB("user");
+const UserDB = new _MongoDB("user");
 
 export default async function getUserData(email: string, avatar: string): Promise<User> {
     const MD_API_URL = "https://mdsrl.mingdao.edu.tw/mdpp/Sig20Login/googleUserCheck";

@@ -4,10 +4,10 @@ import { isValidObjectId } from "mongoose";
 import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
-import MongoDB from "@module/MongoDB";
+import _MongoDB from "@module/MongoDB";
 
 
-const ImageDB = new MongoDB("image");
+const ImageDB = new _MongoDB("image");
 
 export const read: RequestHandler = async (req, res) => {
     try {

@@ -1,14 +1,14 @@
 import { JoinRequest } from "@type/joinRequest";
 import { Sig } from "@type/sig";
-import MongoDB from "@module/MongoDB";
+import _MongoDB from "@module/MongoDB";
 import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 import { Identity, User } from "@type/user";
 import SendMail from "@module/SendMail";
 
 
-const SigDB = new MongoDB("sig");
-const UserDB = new MongoDB("user");
+const SigDB = new _MongoDB("sig");
+const UserDB = new _MongoDB("user");
 
 export default async function JoinRequest(sigId: string, userId: string, requestMessage: JoinRequest) {
     try {

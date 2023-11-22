@@ -1,9 +1,10 @@
+import { SigFilter } from "@type/sig";
 import sig from "@schema/sig";
 import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 
 
-export default async function list(search: object) {
+export default async function list(search: SigFilter) {
     try {
         const data = await sig.find(search);
 

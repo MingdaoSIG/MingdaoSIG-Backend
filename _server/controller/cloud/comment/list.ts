@@ -7,13 +7,13 @@ import { Sort } from "@type/database";
 import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
-import MongoDB from "@module/MongoDB";
+import MongoDB, { UserDB as _UserDB } from "@module/MongoDB";
 import CheckValidPaginationOption from "@module/CheckValidPaginationOption";
 
 
-const CommentDB = new MongoDB("comment");
-const PostDB = new MongoDB("post");
-const UserDB = new MongoDB("user");
+const CommentDB = new MongoDB.Comment();
+const PostDB = new MongoDB.Post();
+const UserDB = new MongoDB.User();
 
 export const listAllByPost: RequestHandler = async (req, res) => {
     try {
@@ -33,7 +33,7 @@ export const listAllByPost: RequestHandler = async (req, res) => {
 };
 
 async function listByPost(res: Response, search: FilterQuery<Comment>, skip?: number, limit?: number, sort?: Sort) {
-    const commentData: Comment[] | null = await CommentDB.list({
+    const commentData = await CommentDB.list({
         ...search,
         removed: false
     }, {

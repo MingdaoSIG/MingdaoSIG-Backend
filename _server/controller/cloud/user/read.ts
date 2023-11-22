@@ -5,10 +5,10 @@ import { User } from "@type/user";
 import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
-import MongoDB from "@module/MongoDB";
+import _MongoDB from "@module/MongoDB";
 
 
-const ProfileDB = new MongoDB("user");
+const ProfileDB = new _MongoDB("user");
 
 export const readById: RequestHandler = async (req, res) => {
     try {

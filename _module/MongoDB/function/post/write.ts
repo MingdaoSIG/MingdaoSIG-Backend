@@ -1,10 +1,10 @@
-import { Post } from "@type/post";
+import { PostWrite } from "@type/post";
 import post from "@schema/post";
 import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 
 
-export default async function write(id: string | null, dataToSave: Post) {
+export default async function write(id: string | null, dataToSave: PostWrite) {
     try {
         const data = await post.findOne({ _id: id });
         const code = data ? 1 : 0;

@@ -8,13 +8,13 @@ import { Sort } from "@type/database";
 import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
-import MongoDB from "@module/MongoDB";
+import _MongoDB from "@module/MongoDB";
 import CheckValidPaginationOption from "@module/CheckValidPaginationOption";
 
 
-const PostDB = new MongoDB("post");
-const UserDB = new MongoDB("user");
-const SigDB = new MongoDB("sig");
+const PostDB = new _MongoDB("post");
+const UserDB = new _MongoDB("user");
+const SigDB = new _MongoDB("sig");
 
 const sortMethods = {
     mostLikes: { likes: -1 },

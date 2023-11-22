@@ -1,10 +1,11 @@
 import { Option } from "@type/database";
+import { PostFilter } from "@type/post";
 import post from "@schema/post";
 import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 
 
-export default async function list(search: object, option?: Option) {
+export default async function list(search: PostFilter, option?: Option) {
     try {
         const { skip, limit, sort } = option || {};
 

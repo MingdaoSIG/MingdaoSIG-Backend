@@ -8,12 +8,12 @@ import { ExtendedRequest } from "@type/request";
 import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
-import MongoDB from "@module/MongoDB";
+import _MongoDB from "@module/MongoDB";
 import CheckRequestRequirement from "@module/CheckRequestRequirement";
 
 
-const PostDB = new MongoDB("post");
-const SigDB = new MongoDB("sig");
+const PostDB = new _MongoDB("post");
+const SigDB = new _MongoDB("sig");
 
 const sigDefaultCover: { [key: string]: string } = {
     "651799ebfa1d45d97b139864": "https://sig-api.lazco.dev/image/653296b40b891d1f6b5b4412", // 資安

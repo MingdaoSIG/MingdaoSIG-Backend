@@ -1,10 +1,10 @@
-import { Comment } from "@type/comment";
+import { CommentWrite } from "@type/comment";
 import comment from "@schema/comment";
 import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 
 
-export default async function write(id: string | null, dataToSave: Comment) {
+export default async function write(id: string | null, dataToSave: CommentWrite) {
     try {
         const data = await comment.findOne({ _id: id });
         const code = data ? 1 : 0;

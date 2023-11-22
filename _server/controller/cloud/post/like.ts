@@ -6,10 +6,10 @@ import { ExtendedRequest } from "@type/request";
 import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
-import MongoDB from "@module/MongoDB";
+import _MongoDB from "@module/MongoDB";
 
 
-const PostDB = new MongoDB("post");
+const PostDB = new _MongoDB("post");
 
 export const like: RequestHandler = async (req: Request | ExtendedRequest, res) => {
     try {

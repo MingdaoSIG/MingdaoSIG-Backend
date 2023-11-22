@@ -7,10 +7,10 @@ import { User } from "@type/user";
 import CustomError from "@module/CustomError";
 import { HttpStatus } from "@module/HttpStatusCode";
 import { CustomStatus } from "@module/CustomStatusCode";
-import MongoDB from "@module/MongoDB";
+import _MongoDB from "@module/MongoDB";
 
 
-const UserDB = new MongoDB("user");
+const UserDB = new _MongoDB("user");
 
 export default async function JWTverifier(req: Request, res: Response, next: NextFunction) {
     const SECRET_KEY: Secret = process.env.JWT_SECRET!;

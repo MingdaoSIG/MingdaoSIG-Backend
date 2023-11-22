@@ -1,9 +1,12 @@
+import { ObjectId } from "mongoose";
+
+
 export type Identity = "teacher" | "student" | "alumni";
 
 export type Permission = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 
 export type User = {
-    _id?: string; // ID
+    _id?: string | ObjectId; // ID
     customId?: string; // 自定義ID
     email: string; // 帳號
     name: string; // 姓名
@@ -20,4 +23,23 @@ export type User = {
     createAt?: string; // 建立時間
     updateAt?: string; // 更新時間
     __v?: number; // 版本
+}
+
+export type UserWrite = {
+    [K in keyof Omit<User,
+        | "_id"
+        | "createAt"
+        | "updateAt"
+        | "__v"
+    >]?: User[K];
+}
+
+export type UserSearch = {
+    id?: string | ObjectId | null;
+    customId?: string | null;
+    email?: string | null;
+}
+
+export type UserFilter = {
+    [key in keyof User]?: any;
 }

@@ -3,10 +3,10 @@ import { RequestHandler } from "express";
 import { Sig } from "@type/sig";
 import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
-import MongoDB from "@module/MongoDB";
+import _MongoDB from "@module/MongoDB";
 
 
-const SigDB = new MongoDB("sig");
+const SigDB = new _MongoDB("sig");
 
 export const listAll: RequestHandler = async (_, res) => {
     try {

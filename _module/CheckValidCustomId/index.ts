@@ -1,10 +1,10 @@
 import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
-import MongoDB from "@module/MongoDB";
+import _MongoDB from "@module/MongoDB";
 
 
-const UserDB = new MongoDB("user");
-const SigDB = new MongoDB("sig");
+const UserDB = new _MongoDB("user");
+const SigDB = new _MongoDB("sig");
 
 export default async function CheckValidCustomId(customId: string) {
     CheckPattern(customId);

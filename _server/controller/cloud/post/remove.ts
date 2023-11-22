@@ -7,11 +7,11 @@ import { ExtendedRequest } from "@type/request";
 import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
-import MongoDB from "@module/MongoDB";
+import _MongoDB from "@module/MongoDB";
 
 
-const PostDB = new MongoDB("post");
-const SigDB = new MongoDB("sig");
+const PostDB = new _MongoDB("post");
+const SigDB = new _MongoDB("sig");
 
 export const remove: RequestHandler = async (req: Request | ExtendedRequest, res) => {
     try {

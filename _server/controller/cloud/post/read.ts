@@ -5,10 +5,10 @@ import { Post } from "@type/post";
 import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
-import MongoDB from "@module/MongoDB";
+import _MongoDB from "@module/MongoDB";
 
 
-const PostDB = new MongoDB("post");
+const PostDB = new _MongoDB("post");
 
 export const read: RequestHandler = async (req, res) => {
     try {
