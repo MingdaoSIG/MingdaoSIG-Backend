@@ -1,14 +1,13 @@
 import { RequestHandler } from "express";
 import { isValidObjectId } from "mongoose";
 
-import { Post } from "@type/post";
 import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
-import _MongoDB from "@module/MongoDB";
+import MongoDB from "@module/MongoDB";
 
 
-const PostDB = new _MongoDB("post");
+const PostDB = new MongoDB.Post();
 
 export const read: RequestHandler = async (req, res) => {
     try {
@@ -16,7 +15,7 @@ export const read: RequestHandler = async (req, res) => {
 
         if (!isValidObjectId(id)) throw new CustomError(CustomStatus.INVALID_POST_ID, new Error("Invalid post id"));
 
-        const postData: Post | null = await PostDB.read({ id }).catch(() => null);
+        const postData = await PostDB.read({ id }).catch(() => null);
         if (!postData) throw new CustomError(CustomStatus.NOT_FOUND, new Error("Post not found"));
 
         return res.status(HttpStatus.OK).json({

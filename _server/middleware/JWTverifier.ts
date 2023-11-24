@@ -3,14 +3,13 @@ import jwt, { Secret } from "jsonwebtoken";
 import { isValidObjectId } from "mongoose";
 
 import { ExtendedRequest } from "@type/request";
-import { User } from "@type/user";
 import CustomError from "@module/CustomError";
 import { HttpStatus } from "@module/HttpStatusCode";
 import { CustomStatus } from "@module/CustomStatusCode";
-import _MongoDB from "@module/MongoDB";
+import MongoDB from "@module/MongoDB";
 
 
-const UserDB = new _MongoDB("user");
+const UserDB = new MongoDB.User();
 
 export default async function JWTverifier(req: Request, res: Response, next: NextFunction) {
     const SECRET_KEY: Secret = process.env.JWT_SECRET!;
@@ -32,7 +31,7 @@ export default async function JWTverifier(req: Request, res: Response, next: Nex
 
         checkData(decoded, ["id", "iat"]);
 
-        let userData: User;
+        let userData;
         try {
             if (!isValidObjectId(decoded.id)) throw new Error("Invalid user id");
             userData = await UserDB.read({ id: decoded.id });

@@ -7,7 +7,7 @@ import { Sort } from "@type/database";
 import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
-import MongoDB, { UserDB as _UserDB } from "@module/MongoDB";
+import MongoDB from "@module/MongoDB";
 import CheckValidPaginationOption from "@module/CheckValidPaginationOption";
 
 
@@ -48,7 +48,7 @@ async function listByPost(res: Response, search: FilterQuery<Comment>, skip?: nu
     });
 
     const usersDataMap: Record<string, User> = {};
-    const usersData: User[] = await UserDB.list({ _id: { $in: Array.from(userIds) } });
+    const usersData = await UserDB.list({ _id: { $in: Array.from(userIds) } });
     usersData.forEach((user) => {
         if (user._id) {
             usersDataMap[user._id] = user;

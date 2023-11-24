@@ -1,31 +1,31 @@
 import { JoinRequest } from "@type/joinRequest";
-import { Sig } from "@type/sig";
-import _MongoDB from "@module/MongoDB";
+import MongoDB from "@module/MongoDB";
 import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 import { Identity, User } from "@type/user";
 import SendMail from "@module/SendMail";
 
 
-const SigDB = new _MongoDB("sig");
-const UserDB = new _MongoDB("user");
+const SigDB = new MongoDB.Sig();
+const UserDB = new MongoDB.User();
 
 export default async function JoinRequest(sigId: string, userId: string, requestMessage: JoinRequest) {
     try {
-        const sigData: Sig | null = await SigDB.read({ id: sigId }).catch(() => null);
+        const sigData = await SigDB.read({ id: sigId }).catch(() => null);
         if (!sigData || sigData.removed) throw new CustomError(CustomStatus.INVALID_SIG_ID, new Error("Invalid sig id"));
 
-        const userData: User | null = await UserDB.read({ id: userId }).catch(() => null);
+        const userData = await UserDB.read({ id: userId }).catch(() => null);
         if (!userData) throw new CustomError(CustomStatus.INVALID_USER_ID, new Error("Invalid user id"));
 
         const sigName = sigData.name;
+        if (!sigName) throw new Error("Invalid sig name");
         const prettyRequestMessage = parseRequestMessage(sigName, userData, requestMessage);
         const targetEmails = Array.from(new Set(
             await Promise.all(sigData.leader?.map(async leaderId => {
-                const leaderData: User = await UserDB.read({ id: leaderId });
+                const leaderData = await UserDB.read({ id: leaderId });
                 return leaderData.email;
             }) ?? [])
-        ));
+        )).filter(item => item !== undefined) as string[];
 
         await SendMail(
             `${sigName} SIG 加入申請`,

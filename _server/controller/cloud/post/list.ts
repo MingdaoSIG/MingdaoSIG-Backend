@@ -8,13 +8,13 @@ import { Sort } from "@type/database";
 import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
-import _MongoDB from "@module/MongoDB";
+import MongoDB from "@module/MongoDB";
 import CheckValidPaginationOption from "@module/CheckValidPaginationOption";
 
 
-const PostDB = new _MongoDB("post");
-const UserDB = new _MongoDB("user");
-const SigDB = new _MongoDB("sig");
+const PostDB = new MongoDB.Post();
+const UserDB = new MongoDB.User();
+const SigDB = new MongoDB.Sig();
 
 const sortMethods = {
     mostLikes: { likes: -1 },
@@ -109,7 +109,7 @@ export const listAllByPinned: RequestHandler = async (_, res) => {
 };
 
 async function listPostBy(res: Response, search: FilterQuery<Post>, skip?: number, limit?: number, sort?: Sort) {
-    const postData: Post[] | null = await PostDB.list({
+    const postData = await PostDB.list({
         ...search,
         removed: false
     }, {
@@ -123,7 +123,7 @@ async function listPostBy(res: Response, search: FilterQuery<Post>, skip?: numbe
         userIds.add(comment.user);
     });
     const usersDataMap: Record<string, User> = {};
-    const usersData: User[] = await UserDB.list({ _id: { $in: Array.from(userIds) } });
+    const usersData = await UserDB.list({ _id: { $in: Array.from(userIds) } });
     usersData.forEach((user) => {
         if (user._id) {
             usersDataMap[user._id] = user;
@@ -135,7 +135,7 @@ async function listPostBy(res: Response, search: FilterQuery<Post>, skip?: numbe
         sigIds.add(comment.sig);
     });
     const sigsDataMap: Record<string, Sig> = {};
-    const sigsData: Sig[] = await SigDB.list({ _id: { $in: Array.from(sigIds) } });
+    const sigsData = await SigDB.list({ _id: { $in: Array.from(sigIds) } });
     sigsData.forEach((sig) => {
         if (sig._id) {
             sigsDataMap[sig._id] = sig;

@@ -1,16 +1,15 @@
 import { RequestHandler } from "express";
 
-import { Sig } from "@type/sig";
 import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
-import _MongoDB from "@module/MongoDB";
+import MongoDB from "@module/MongoDB";
 
 
-const SigDB = new _MongoDB("sig");
+const SigDB = new MongoDB.Sig();
 
 export const listAll: RequestHandler = async (_, res) => {
     try {
-        const sigData: Sig[] | null = await SigDB.list({ removed: false });
+        const sigData = await SigDB.list({ removed: false });
 
         return res.status(HttpStatus.OK).json({
             status: CustomStatus.OK,

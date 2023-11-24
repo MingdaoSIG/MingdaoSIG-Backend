@@ -1,15 +1,14 @@
 import { Request, RequestHandler } from "express";
 import { isValidObjectId } from "mongoose";
 
-import { Post } from "@type/post";
 import { ExtendedRequest } from "@type/request";
 import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
-import _MongoDB from "@module/MongoDB";
+import MongoDB from "@module/MongoDB";
 
 
-const PostDB = new _MongoDB("post");
+const PostDB = new MongoDB.Post();
 
 export const like: RequestHandler = async (req: Request | ExtendedRequest, res) => {
     try {
@@ -18,11 +17,12 @@ export const like: RequestHandler = async (req: Request | ExtendedRequest, res) 
 
         if (!isValidObjectId(id)) throw new CustomError(CustomStatus.INVALID_POST_ID, new Error("Invalid post id"));
 
-        const oldData: Post | null = await PostDB.read({ id }).catch(() => null);
+        const oldData = await PostDB.read({ id }).catch(() => null);
         if (!oldData) throw new CustomError(CustomStatus.INVALID_POST_ID, new Error("Invalid post id"));
 
         if (!oldData.like?.includes(decodedJwt.id)) {
             await PostDB.write({
+                // @ts-ignore
                 $addToSet: {
                     like: decodedJwt.id
                 },
@@ -46,11 +46,12 @@ export const dislike: RequestHandler = async (req: Request | ExtendedRequest, re
 
         if (!isValidObjectId(id)) throw new CustomError(CustomStatus.INVALID_POST_ID, new Error("Invalid post id"));
 
-        const oldData: Post | null = await PostDB.read({ id }).catch(() => null);
+        const oldData = await PostDB.read({ id }).catch(() => null);
         if (!oldData) throw new CustomError(CustomStatus.INVALID_POST_ID, new Error("Invalid post id"));
 
         if (oldData.like?.includes(decodedJwt.id)) {
             await PostDB.write({
+                // @ts-ignore
                 $pull: {
                     like: decodedJwt.id
                 },

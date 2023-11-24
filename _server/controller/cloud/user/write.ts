@@ -1,16 +1,15 @@
 import { Request, RequestHandler } from "express";
 
-import { User } from "@type/user";
 import { ExtendedRequest } from "@type/request";
 import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
-import _MongoDB from "@module/MongoDB";
+import MongoDB from "@module/MongoDB";
 import CheckRequestRequirement from "@module/CheckRequestRequirement";
 import CheckValidCustomId from "@module/CheckValidCustomId";
 
 
-const UserDB = new _MongoDB("user");
+const UserDB = new MongoDB.User();
 
 export const write: RequestHandler = async (req: Request | ExtendedRequest, res) => {
     try {
@@ -29,7 +28,7 @@ export const write: RequestHandler = async (req: Request | ExtendedRequest, res)
             customId: String(body.customId ?? userData.customId),
             description: String(body.description ?? userData.description),
         };
-        const savedData: User = await UserDB.write(dataToSave, { id: userId });
+        const savedData = await UserDB.write(dataToSave, { id: userId });
 
         return res.status(HttpStatus.OK).json({
             status: CustomStatus.OK,

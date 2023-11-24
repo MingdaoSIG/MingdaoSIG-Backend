@@ -1,16 +1,16 @@
 import axios from "axios";
 
-import { Identity, User } from "@type/user";
+import { Identity } from "@type/user";
 import CustomError from "@module/CustomError";
-import _MongoDB from "@module/MongoDB";
+import MongoDB from "@module/MongoDB";
 import { CustomStatus } from "@module/CustomStatusCode";
 import UniqueId from "@module/UniqueId";
 import CheckValidCustomId from "@module/CheckValidCustomId";
 
 
-const UserDB = new _MongoDB("user");
+const UserDB = new MongoDB.User();
 
-export default async function getUserData(email: string, avatar: string): Promise<User> {
+export default async function getUserData(email: string, avatar: string) {
     const MD_API_URL = "https://mdsrl.mingdao.edu.tw/mdpp/Sig20Login/googleUserCheck";
 
     try {
@@ -41,7 +41,7 @@ export default async function getUserData(email: string, avatar: string): Promis
             user_identity: "teach" | "stu" | "alu"
         } = responseData;
 
-        const oldData: User | null = await UserDB.read({ email: mail }).catch(() => null);
+        const oldData = await UserDB.read({ email: mail }).catch(() => null);
 
         const customId = oldData?.customId || mail.split("@")[0].toLowerCase();
         let targetCustomId = customId;
@@ -56,9 +56,9 @@ export default async function getUserData(email: string, avatar: string): Promis
         const displayName = oldData?.displayName || user_name;
         const description = oldData?.description || "";
         const follower = oldData?.follower || [];
-        const permission = oldData?.permission || 1;
+        // const permission = oldData?.permission || 1;
 
-        const newData: User = {
+        const newData = {
             customId: targetCustomId,
             email: mail,
             name: user_name,
@@ -70,9 +70,9 @@ export default async function getUserData(email: string, avatar: string): Promis
             description: description,
             avatar: avatar,
             follower: follower,
-            permission: permission
+            // permission: permission
         };
-        const savedData: User = await UserDB.write(newData, { email });
+        const savedData = await UserDB.write(newData, { email });
 
         return savedData;
     }
