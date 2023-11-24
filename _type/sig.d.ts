@@ -1,8 +1,5 @@
-import { ObjectId } from "mongoose";
-
-
 export type Sig = {
-    _id?: string | ObjectId; // ID
+    _id: string; // ID
     name: string; // sig 名稱
     description?: string; // 描述
     avatar?: string; // 大頭貼
@@ -23,7 +20,7 @@ export type SigWrite = {
 }
 
 export type SigSearch = {
-    id?: string | ObjectId | null;
+    id?: string | null;
     customId?: string | null;
 }
 

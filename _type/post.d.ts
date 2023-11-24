@@ -1,8 +1,5 @@
-import { ObjectId } from "mongoose";
-
-
 export type Post = {
-    _id?: string | ObjectId; // ID
+    _id?: string; // ID
     sig: string; // SIG
     title: string; // 標題
     cover: string; // 封面圖
@@ -29,7 +26,7 @@ export type PostWrite = {
 }
 
 export type PostSearch = {
-    id?: string | ObjectId | null;
+    id?: string | null;
 }
 
 export type PostFilter = {

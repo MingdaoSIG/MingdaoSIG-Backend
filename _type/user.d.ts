@@ -1,12 +1,9 @@
-import { ObjectId } from "mongoose";
-
-
 export type Identity = "teacher" | "student" | "alumni";
 
 export type Permission = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 
 export type User = {
-    _id?: string | ObjectId; // ID
+    _id: string; // ID
     customId?: string; // 自定義ID
     email: string; // 帳號
     name: string; // 姓名
@@ -35,7 +32,7 @@ export type UserWrite = {
 }
 
 export type UserSearch = {
-    id?: string | ObjectId | null;
+    id?: string | null;
     customId?: string | null;
     email?: string | null;
 }

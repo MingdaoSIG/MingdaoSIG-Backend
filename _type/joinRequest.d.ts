@@ -1,7 +1,6 @@
 export type JoinRequest = {
     _id: string;
     user: string;
-    
     sig: string;
     [q1: string]: string;
     [q2: string]: string;
