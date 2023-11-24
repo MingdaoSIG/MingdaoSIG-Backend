@@ -20,6 +20,7 @@ export const CustomCode = {
     4024: "Empty content",
     4025: "Invalid hashtag",
     4026: "Content size exceeded",
+    4027: "Failed to send email",
 
     4100: "Error reading user from db",
     4101: "Error writing user to db",
@@ -31,7 +32,8 @@ export const CustomCode = {
     4107: "Error writing sig to db",
     4108: "Error reading comment from db",
     4109: "Error writing comment to db",
-    4110: "Error sending email",
+    4110: "Error reading join request from db",
+    4111: "Error writing join request to db",
 
     5000: "Unknown error"
 } as const;
