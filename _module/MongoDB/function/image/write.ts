@@ -10,10 +10,10 @@ export default async function write(dataToSave: Image) {
         const code = data ? 1 : 0;
 
         if (code) {
-            return data!;
+            return data as unknown as Image;
         }
         else {
-            return (await image.create(dataToSave))!;
+            return await image.create(dataToSave) as unknown as Image;
         }
     }
     catch (error: any) {

@@ -1,3 +1,4 @@
+import { User } from "@type/user";
 import profile from "@schema/user";
 import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
@@ -23,7 +24,7 @@ async function _readData(key: string, value: any) {
             throw new Error("User not found");
         }
 
-        return data;
+        return data as unknown as User;
     }
     catch (error: any) {
         throw new CustomError(CustomStatus.ERROR_READING_USER_FROM_DB, error);
