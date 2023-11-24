@@ -2,8 +2,6 @@ import { Request, RequestHandler } from "express";
 import { isValidObjectId } from "mongoose";
 import axios from "axios";
 
-import { Post } from "@type/post";
-import { Sig } from "@type/sig";
 import { ExtendedRequest } from "@type/request";
 import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
@@ -12,8 +10,8 @@ import MongoDB from "@module/MongoDB";
 import CheckRequestRequirement from "@module/CheckRequestRequirement";
 
 
-const PostDB = new MongoDB("post");
-const SigDB = new MongoDB("sig");
+const PostDB = new MongoDB.Post();
+const SigDB = new MongoDB.Sig();
 
 const sigDefaultCover: { [key: string]: string } = {
     "651799ebfa1d45d97b139864": "https://sig-api.lazco.dev/image/653296b40b891d1f6b5b4412", // 資安
@@ -49,7 +47,7 @@ export const write: RequestHandler = async (req: Request | ExtendedRequest, res)
             ["_id", "user", "like", "priority", "pinned", "removed", "createAt", "updateAt", "__v"]
         );
 
-        const { sig: sigId, title, cover, content, hashtag }: Post = body;
+        const { sig: sigId, title, cover, content, hashtag } = body;
 
         checkHashtag(hashtag);
 
@@ -57,23 +55,23 @@ export const write: RequestHandler = async (req: Request | ExtendedRequest, res)
             throw new CustomError(CustomStatus.INVALID_BODY, new Error("No title, content or sig id"));
         }
 
-        const sigList: [Sig] = await SigDB.list({});
+        const sigList = await SigDB.list({});
         const sigData = sigList.find(sig => sig?._id?.toString() === sigId)!;
         if (!sigData) throw new CustomError(CustomStatus.INVALID_SIG_ID, new Error("Sig not found"));
         if (sigData.removed && !sigData.moderator?.includes(decodedJwt.id)) throw new CustomError(CustomStatus.FORBIDDEN, new Error("Sig removed"));
 
         if (!isValidObjectId(postId) && typeof (postId) !== "undefined") throw new CustomError(CustomStatus.INVALID_POST_ID, new Error("Invalid post id"));
 
-        const oldData: Post = await PostDB.read({ id: postId }).catch(() => null);
+        const oldData = await PostDB.read({ id: postId }).catch(() => null);
         const isOneOfModerators = sigList.flatMap(sig => sig.moderator).includes(decodedJwt.id);
         const isOneOfLeaders = sigList.flatMap(sig => sig.leader).includes(decodedJwt.id);
         const dataToSave = {
-            sig: sigId,
-            title,
-            cover: cover || sigDefaultCover[sigId] || "https://lazco.dev/sig-photo-coming-soon-picture",
-            content,
+            sig: sigId || oldData?.sig,
+            title: title || oldData?.title,
+            cover: cover || oldData?.cover || sigDefaultCover[sigId] || "https://lazco.dev/sig-photo-coming-soon-picture",
+            content: content || oldData?.content,
             user: decodedJwt.id,
-            hashtag: hashtag || [],
+            hashtag: hashtag || oldData?.hashtag || [],
         };
         if (typeof (postId) !== "undefined" && !oldData) {
             throw new CustomError(CustomStatus.INVALID_POST_ID, new Error("Invalid post id"));

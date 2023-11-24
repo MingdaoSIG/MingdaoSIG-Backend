@@ -1,6 +1,5 @@
 import { Request, RequestHandler } from "express";
 
-import { User } from "@type/user";
 import { ExtendedRequest } from "@type/request";
 import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
@@ -10,7 +9,7 @@ import CheckRequestRequirement from "@module/CheckRequestRequirement";
 import CheckValidCustomId from "@module/CheckValidCustomId";
 
 
-const UserDB = new MongoDB("user");
+const UserDB = new MongoDB.User();
 
 export const write: RequestHandler = async (req: Request | ExtendedRequest, res) => {
     try {
@@ -26,10 +25,10 @@ export const write: RequestHandler = async (req: Request | ExtendedRequest, res)
         if (body.description && body.description?.length > 250) throw new CustomError(CustomStatus.INVALID_BODY, new Error("Invalid description"));
 
         const dataToSave = {
-            customId: String(body.customId),
-            description: String(body.description),
+            customId: String(body.customId ?? userData.customId),
+            description: String(body.description ?? userData.description),
         };
-        const savedData: User = await UserDB.write(dataToSave, { id: userId });
+        const savedData = await UserDB.write(dataToSave, { id: userId });
 
         return res.status(HttpStatus.OK).json({
             status: CustomStatus.OK,

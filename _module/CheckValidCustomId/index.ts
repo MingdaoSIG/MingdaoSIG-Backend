@@ -3,8 +3,8 @@ import { CustomStatus } from "@module/CustomStatusCode";
 import MongoDB from "@module/MongoDB";
 
 
-const UserDB = new MongoDB("user");
-const SigDB = new MongoDB("sig");
+const UserDB = new MongoDB.User();
+const SigDB = new MongoDB.Sig();
 
 export default async function CheckValidCustomId(customId: string) {
     CheckPattern(customId);

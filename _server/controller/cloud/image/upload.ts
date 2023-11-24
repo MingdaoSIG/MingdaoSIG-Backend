@@ -1,14 +1,13 @@
 import { RequestHandler } from "express";
 import sharp from "sharp";
 
-import { ImageData } from "@type/image";
 import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
 import MongoDB from "@module/MongoDB";
 
 
-const ImageDB = new MongoDB("image");
+const ImageDB = new MongoDB.Image();
 
 export const upload: RequestHandler = async (req, res) => {
     try {
@@ -23,11 +22,11 @@ export const upload: RequestHandler = async (req, res) => {
                 .webp()
                 .toBuffer();
 
-        const dataToSave: ImageData = {
+        const dataToSave = {
             image: webpImage
         };
 
-        const savedData: ImageData = await ImageDB.write(dataToSave);
+        const savedData = await ImageDB.write(dataToSave);
 
         return res.status(HttpStatus.OK).json({
             status: CustomStatus.OK,

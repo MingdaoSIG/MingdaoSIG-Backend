@@ -1,8 +1,6 @@
 import { Request, RequestHandler } from "express";
 import { isValidObjectId } from "mongoose";
 
-import { Post } from "@type/post";
-import { Sig } from "@type/sig";
 import { ExtendedRequest } from "@type/request";
 import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
@@ -10,8 +8,8 @@ import { HttpStatus } from "@module/HttpStatusCode";
 import MongoDB from "@module/MongoDB";
 
 
-const PostDB = new MongoDB("post");
-const SigDB = new MongoDB("sig");
+const PostDB = new MongoDB.Post();
+const SigDB = new MongoDB.Sig();
 
 export const remove: RequestHandler = async (req: Request | ExtendedRequest, res) => {
     try {
@@ -21,10 +19,10 @@ export const remove: RequestHandler = async (req: Request | ExtendedRequest, res
 
         if (!isValidObjectId(postId)) throw new CustomError(CustomStatus.INVALID_POST_ID, new Error("Invalid post id"));
 
-        const oldData: Post | null = await PostDB.read({ id: postId }).catch(() => null);
+        const oldData = await PostDB.read({ id: postId }).catch(() => null);
         if (!oldData) throw new CustomError(CustomStatus.INVALID_POST_ID, new Error("Invalid post id"));
 
-        const sigList: [Sig] = await SigDB.list({});
+        const sigList = await SigDB.list({});
         const isModerator = sigList.flatMap(sig => sig.moderator).includes(userId);
         const sigData = sigList.find(sig => sig._id?.toString() === oldData.sig);
         const isLeader = sigData?.leader?.includes(userId);

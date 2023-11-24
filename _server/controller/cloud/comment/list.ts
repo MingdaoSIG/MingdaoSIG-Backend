@@ -11,9 +11,9 @@ import MongoDB from "@module/MongoDB";
 import CheckValidPaginationOption from "@module/CheckValidPaginationOption";
 
 
-const CommentDB = new MongoDB("comment");
-const PostDB = new MongoDB("post");
-const UserDB = new MongoDB("user");
+const CommentDB = new MongoDB.Comment();
+const PostDB = new MongoDB.Post();
+const UserDB = new MongoDB.User();
 
 export const listAllByPost: RequestHandler = async (req, res) => {
     try {
@@ -33,7 +33,7 @@ export const listAllByPost: RequestHandler = async (req, res) => {
 };
 
 async function listByPost(res: Response, search: FilterQuery<Comment>, skip?: number, limit?: number, sort?: Sort) {
-    const commentData: Comment[] | null = await CommentDB.list({
+    const commentData = await CommentDB.list({
         ...search,
         removed: false
     }, {
@@ -48,7 +48,7 @@ async function listByPost(res: Response, search: FilterQuery<Comment>, skip?: nu
     });
 
     const usersDataMap: Record<string, User> = {};
-    const usersData: User[] = await UserDB.list({ _id: { $in: Array.from(userIds) } });
+    const usersData = await UserDB.list({ _id: { $in: Array.from(userIds) } });
     usersData.forEach((user) => {
         if (user._id) {
             usersDataMap[user._id] = user;

@@ -1,7 +1,6 @@
 import { Request, RequestHandler } from "express";
 import { isValidObjectId } from "mongoose";
 
-import { Comment } from "@type/comment";
 import { ExtendedRequest } from "@type/request";
 import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
@@ -10,8 +9,8 @@ import MongoDB from "@module/MongoDB";
 import CheckRequestRequirement from "@module/CheckRequestRequirement";
 
 
-const PostDB = new MongoDB("post");
-const CommentDB = new MongoDB("comment");
+const PostDB = new MongoDB.Post();
+const CommentDB = new MongoDB.Comment();
 
 export const write: RequestHandler = async (req: Request | ExtendedRequest, res) => {
     try {
@@ -40,11 +39,11 @@ export const write: RequestHandler = async (req: Request | ExtendedRequest, res)
         const validReplyTarget = replyId === "" ? true : await CommentDB.read({ id: replyId }).catch(() => null);
         if (!validReplyTarget) throw new CustomError(CustomStatus.INVALID_REPLY_ID, new Error("Reply not found"));
 
-        const dataToSave: Comment = {
+        const dataToSave = {
             user: userId,
             post: postId,
             content: content,
-            reply: replyId,
+            reply: replyId
         };
 
         const savedComment = await CommentDB.write(dataToSave, { id: commentId });

@@ -1,10 +1,11 @@
 import { Option } from "@type/database";
+import { Comment, CommentFilter } from "@type/comment";
 import comment from "@schema/comment";
 import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 
 
-export default async function list(search: object, option?: Option) {
+export default async function list(search: CommentFilter, option?: Option) {
     try {
         const { skip, limit, sort } = option || {};
 
@@ -17,7 +18,7 @@ export default async function list(search: object, option?: Option) {
             throw new Error("Comment not found");
         }
 
-        return data;
+        return data as unknown as Comment[];
     }
     catch (error: any) {
         throw new CustomError(CustomStatus.ERROR_READING_COMMENT_FROM_DB, error);

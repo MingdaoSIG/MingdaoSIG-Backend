@@ -7,15 +7,20 @@ export const CustomCode = {
     4010: "Invalid user",
     4011: "Invalid body",
     4012: "Invalid query",
-    4013: "Invalid jwt",
+    4013: "Invalid JWT",
     4015: "Invalid google access token",
     4016: "Invalid image id",
     4017: "Invalid user id",
     4018: "Invalid post id",
     4019: "Invalid sig id",
-    4020: "Invalid custom id",
-    4021: "Custom id already exists",
-    4022: "Invalid description length",
+    4020: "Invalid reply id",
+    4021: "Invalid custom id",
+    4022: "Custom id already exists",
+    4023: "Invalid content length",
+    4024: "Empty content",
+    4025: "Invalid hashtag",
+    4026: "Content size exceeded",
+    4027: "Failed to send email",
 
     4100: "Error reading user from db",
     4101: "Error writing user to db",
@@ -25,6 +30,12 @@ export const CustomCode = {
     4105: "Error writing post to db",
     4106: "Error reading sig from db",
     4107: "Error writing sig to db",
+    4108: "Error reading comment from db",
+    4109: "Error writing comment to db",
+    4110: "Error reading join request from db",
+    4111: "Error writing join request to db",
+
+    5000: "Unknown error"
 } as const;
 
 export const CustomStatus = {
@@ -49,6 +60,7 @@ export const CustomStatus = {
     EMPTY_CONTENT: 4024,
     INVALID_HASHTAG: 4025,
     CONTENT_SIZE_EXCEEDED: 4026,
+    FAILED_TO_SEND_EMAIL: 4027,
 
     ERROR_READING_USER_FROM_DB: 4100,
     ERROR_WRITING_USER_TO_DB: 4101,
@@ -60,6 +72,8 @@ export const CustomStatus = {
     ERROR_WRITING_SIG_TO_DB: 4107,
     ERROR_READING_COMMENT_FROM_DB: 4108,
     ERROR_WRITING_COMMENT_TO_DB: 4109,
+    ERROR_READING_JOIN_REQUEST_FROM_DB: 4110,
+    ERROR_WRITING_JOIN_REQUEST_TO_DB: 4111,
 
     UNKNOWN_ERROR: 5000
 } as const;

@@ -1,33 +1,35 @@
-import { User } from "@type/user";
+import { ObjectId } from "mongoose";
+
+import { User, UserWrite } from "@type/user";
 import profile from "@schema/user";
 import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 
 
-export async function writeById(id: string, dataToSave: User) {
+export async function writeById(id: string | ObjectId, dataToSave: UserWrite) {
     return await _writeData("_id", id, dataToSave);
 }
 
-export async function writeByEmail(email: string, dataToSave: User) {
+export async function writeByEmail(email: string, dataToSave: UserWrite) {
     return await _writeData("email", email, dataToSave);
 }
 
-async function _writeData(key: string, value: any, dataToSave: any) {
+async function _writeData(key: string, value: any, dataToSave: UserWrite) {
     try {
         const data = await profile.findOne({ [key]: value });
         const code = data ? 1 : 0;
 
         if (code) {
-            return (await profile.findOneAndUpdate(
+            return await profile.findOneAndUpdate(
                 { [key]: value },
                 dataToSave,
                 {
                     new: true
                 }
-            ))!;
+            ) as unknown as User;
         }
         else {
-            return (await profile.create(dataToSave))!;
+            return await profile.create(dataToSave) as unknown as User;
         }
     }
     catch (error: any) {

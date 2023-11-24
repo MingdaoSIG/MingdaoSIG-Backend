@@ -7,7 +7,7 @@ import { HttpStatus } from "@module/HttpStatusCode";
 import MongoDB from "@module/MongoDB";
 
 
-const ImageDB = new MongoDB("image");
+const ImageDB = new MongoDB.Image();
 
 export const read: RequestHandler = async (req, res) => {
     try {

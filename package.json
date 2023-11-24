@@ -1,6 +1,6 @@
 {
     "name": "MingdaoSIG",
-    "version": "1.6.0",
+    "version": "1.9.2",
     "description": "",
     "main": "index.ts",
     "scripts": {

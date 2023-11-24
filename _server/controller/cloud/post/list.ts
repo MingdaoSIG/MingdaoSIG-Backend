@@ -12,18 +12,27 @@ import MongoDB from "@module/MongoDB";
 import CheckValidPaginationOption from "@module/CheckValidPaginationOption";
 
 
-const PostDB = new MongoDB("post");
-const UserDB = new MongoDB("user");
-const SigDB = new MongoDB("sig");
+const PostDB = new MongoDB.Post();
+const UserDB = new MongoDB.User();
+const SigDB = new MongoDB.Sig();
+
+const sortMethods = {
+    mostLikes: { likes: -1 },
+    latest: { createdAt: -1 },
+    oldest: { createdAt: 1 }
+};
 
 export const listAll: RequestHandler = async (req, res) => {
     try {
         const skip = req.query?.skip;
         const limit = req.query?.limit;
+        const sort = req.query?.sort;
 
         CheckValidPaginationOption(req);
 
-        return await listPostBy(res, { pinned: false }, (skip ? Number(skip) : 0), (limit ? Number(limit) : 0), { likes: -1 });
+        const sortMethod = sort ? (sortMethods[String(sort) as keyof typeof sortMethods] || sortMethods.mostLikes) : sortMethods.mostLikes;
+
+        return await listPostBy(res, { pinned: false }, (skip ? Number(skip) : 0), (limit ? Number(limit) : 0), sortMethod);
     }
     catch (error: any) {
         return res.status(HttpStatus.NOT_FOUND).json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });
@@ -100,7 +109,7 @@ export const listAllByPinned: RequestHandler = async (_, res) => {
 };
 
 async function listPostBy(res: Response, search: FilterQuery<Post>, skip?: number, limit?: number, sort?: Sort) {
-    const postData: Post[] | null = await PostDB.list({
+    const postData = await PostDB.list({
         ...search,
         removed: false
     }, {
@@ -114,7 +123,7 @@ async function listPostBy(res: Response, search: FilterQuery<Post>, skip?: numbe
         userIds.add(comment.user);
     });
     const usersDataMap: Record<string, User> = {};
-    const usersData: User[] = await UserDB.list({ _id: { $in: Array.from(userIds) } });
+    const usersData = await UserDB.list({ _id: { $in: Array.from(userIds) } });
     usersData.forEach((user) => {
         if (user._id) {
             usersDataMap[user._id] = user;
@@ -126,7 +135,7 @@ async function listPostBy(res: Response, search: FilterQuery<Post>, skip?: numbe
         sigIds.add(comment.sig);
     });
     const sigsDataMap: Record<string, Sig> = {};
-    const sigsData: Sig[] = await SigDB.list({ _id: { $in: Array.from(sigIds) } });
+    const sigsData = await SigDB.list({ _id: { $in: Array.from(sigIds) } });
     sigsData.forEach((sig) => {
         if (sig._id) {
             sigsDataMap[sig._id] = sig;
