@@ -11,3 +11,16 @@ export type JoinRequest = {
     updateAt?: string;
     __v?: number;
 }
+
+export type JoinRequestWrite = {
+    [K in keyof Omit<JoinRequest,
+        | "_id"
+        | "createAt"
+        | "updateAt"
+        | "__v"
+    >]?: JoinRequest[K];
+}
+
+export type JoinRequestSearch = {
+    id?: string;
+}

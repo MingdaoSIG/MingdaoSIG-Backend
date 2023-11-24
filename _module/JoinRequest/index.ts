@@ -1,4 +1,4 @@
-import { JoinRequest } from "@type/joinRequest";
+import { JoinRequestWrite } from "@type/joinRequest";
 import MongoDB from "@module/MongoDB";
 import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
@@ -9,7 +9,7 @@ import SendMail from "@module/SendMail";
 const SigDB = new MongoDB.Sig();
 const UserDB = new MongoDB.User();
 
-export default async function JoinRequest(sigId: string, userId: string, requestMessage: JoinRequest) {
+export default async function JoinRequest(sigId: string, userId: string, requestMessage: JoinRequestWrite) {
     try {
         const sigData = await SigDB.read({ id: sigId }).catch(() => null);
         if (!sigData || sigData.removed) throw new CustomError(CustomStatus.INVALID_SIG_ID, new Error("Invalid sig id"));
@@ -40,7 +40,7 @@ export default async function JoinRequest(sigId: string, userId: string, request
     }
 }
 
-function parseRequestMessage(sigName: string, userData: User, requestMessage: JoinRequest) {
+function parseRequestMessage(sigName: string, userData: User, requestMessage: JoinRequestWrite) {
     const prettierIdentity: {
         [key in Identity]: string
     } = {
