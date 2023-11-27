@@ -11,4 +11,4 @@ const joinRequestSchema = new Schema({
     state: { type: String, default: "pending" } // pending, accepted, rejected
 }, { timestamps: true });
 
-export default mongoose.model("joinRequest", joinRequestSchema, "joinRequest");
+export default mongoose.model("join-request", joinRequestSchema, "join-request");
