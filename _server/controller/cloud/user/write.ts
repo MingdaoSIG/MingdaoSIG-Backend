@@ -18,7 +18,7 @@ export const write: RequestHandler = async (req: Request | ExtendedRequest, res)
         const userId = decodedJwt.id;
         const userData = (req as ExtendedRequest).userData;
 
-        new CheckRequestRequirement(req as Request).forbiddenBody(["_id", "email", "name", "code", "class", "identity", "avatar", "permission", "removed", "createAt", "updateAt", "__v"]);
+        new CheckRequestRequirement(req as Request).includesBody(["customId", "description"], true);
 
         if (userData.customId !== body.customId) await CheckValidCustomId(body.customId);
 
