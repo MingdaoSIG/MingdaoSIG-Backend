@@ -3,12 +3,14 @@ import { ImageSearch, ImageWrite } from "@type/image";
 import { PostFilter, PostSearch, PostWrite } from "@type/post";
 import { SigFilter, SigSearch, SigWrite } from "@type/sig";
 import { CommentFilter, CommentSearch, CommentWrite } from "@type/comment";
+import { JoinRequestWrite, JoinRequestSearch } from "@type/joinRequest";
 import { Option } from "@type/database";
 import user from "@DBfunc/user";
 import image from "@DBfunc/image";
 import post from "@DBfunc/post";
 import sig from "@DBfunc/sig";
 import comment from "@DBfunc/comment";
+import joinRequest from "@DBfunc/joinRequest";
 
 
 export class UserDB {
@@ -183,11 +185,38 @@ export class CommentDB {
     }
 }
 
+export class JoinRequestDB {
+    async read(search: JoinRequestSearch) {
+        const { id } = search;
+
+        if (id) {
+            return await joinRequest.read(id);
+        }
+        else {
+            throw new Error("Search is required");
+        }
+    }
+    async write(dataToWrite: JoinRequestWrite, search?: JoinRequestSearch) {
+        const { id } = search || {};
+
+        if (id) {
+            return await joinRequest.write(id, dataToWrite);
+        }
+        else if (!id) {
+            return await joinRequest.write(null, dataToWrite);
+        }
+        else {
+            throw new Error("Search is required");
+        }
+    }
+}
+
 const MongoDB = {
     User: UserDB,
     Image: ImageDB,
     Post: PostDB,
     Sig: SigDB,
-    Comment: CommentDB
+    Comment: CommentDB,
+    JoinRequest: JoinRequestDB
 };
 export default MongoDB;

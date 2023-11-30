@@ -4,6 +4,8 @@ import mongoose from "mongoose";
 const Schema = mongoose.Schema;
 
 const joinRequestSchema = new Schema({
+    user: String,
+    sig: String,
     q1: String,
     q2: String,
     q3: String,
