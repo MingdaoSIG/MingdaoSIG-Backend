@@ -23,4 +23,6 @@ export type JoinRequestWrite = {
 
 export type JoinRequestSearch = {
     id?: string;
+    user?: string;
+    sig?: string;
 }
