@@ -1,6 +1,7 @@
 {
     "plugins": [
-        "@typescript-eslint"
+        "@typescript-eslint",
+        "import"
     ],
     "parser": "@typescript-eslint/parser",
     "extends": [
@@ -45,6 +46,12 @@
         ],
         "@typescript-eslint/no-unused-vars": "warn",
         "@typescript-eslint/no-explicit-any": "off",
-        "@typescript-eslint/ban-ts-comment": "off"
+        "@typescript-eslint/ban-ts-comment": "off",
+        "import/newline-after-import": [
+            "error",
+            {
+                "count": 2
+            }
+        ]
     }
 }
