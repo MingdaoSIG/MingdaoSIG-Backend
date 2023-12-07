@@ -1,8 +1,9 @@
 import write from "./write";
-import read from "./read";
+import { readById, readByUserIdAndSigId } from "./read";
 
 
 export default {
     write,
-    read
+    readById,
+    readByUserIdAndSigId,
 };
