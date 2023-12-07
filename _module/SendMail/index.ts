@@ -6,13 +6,17 @@ import { CustomStatus } from "@module/CustomStatusCode";
 
 const MD_API_URL = "https://mdsrl.mingdao.edu.tw/mdpp/Sig20Login/sendMail";
 
-export default async function SendMail(title: string, msg: string, target: string[]) {
+export default async function SendMail(
+    title: string,
+    msg: string,
+    target: string[]
+) {
     try {
         const requestBody = {
-            "from": "SIG 平台開發團隊",
-            "title": title,
-            "msg": msg,
-            "to": target.join(",")
+            from: "SIG 平台開發團隊",
+            title: title,
+            msg: msg,
+            to: target.join(","),
         };
         const response = await axios.postForm(MD_API_URL, requestBody);
         if (target.join("") !== response.data || response.status !== 200) {

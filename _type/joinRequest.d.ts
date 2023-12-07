@@ -2,27 +2,27 @@ export type JoinRequest = {
     _id: string;
     user: string;
     sig: string;
-    [q1: string]: string;
-    [q2: string]: string;
-    [q3: string]: string;
-    removed: boolean;
+    q1: string;
+    q2: string;
+    q3: string;
     state: "pending" | "accepted" | "rejected";
+    removed: boolean;
     createAt?: string;
     updateAt?: string;
     __v?: number;
-}
+};
 
 export type JoinRequestWrite = {
-    [K in keyof Omit<JoinRequest,
-        | "_id"
-        | "createAt"
-        | "updateAt"
-        | "__v"
-    >]?: JoinRequest[K];
-}
+    user: string;
+    sig: string;
+    q1: string;
+    q2: string;
+    q3: string;
+    state: "pending" | "accepted" | "rejected";
+};
 
 export type JoinRequestSearch = {
     id?: string;
     user?: string;
     sig?: string;
-}
+};

@@ -36,7 +36,7 @@ export const CustomCode = {
     4110: "Error reading join request from db",
     4111: "Error writing join request to db",
 
-    5000: "Unknown error"
+    5000: "Unknown error",
 } as const;
 
 export const CustomStatus = {
@@ -63,6 +63,7 @@ export const CustomStatus = {
     CONTENT_SIZE_EXCEEDED: 4026,
     FAILED_TO_SEND_EMAIL: 4027,
     ALREADY_JOINED: 4028,
+    ALREADY_APPLIED: 4029,
 
     ERROR_READING_USER_FROM_DB: 4100,
     ERROR_WRITING_USER_TO_DB: 4101,
@@ -77,5 +78,5 @@ export const CustomStatus = {
     ERROR_READING_JOIN_REQUEST_FROM_DB: 4110,
     ERROR_WRITING_JOIN_REQUEST_TO_DB: 4111,
 
-    UNKNOWN_ERROR: 5000
+    UNKNOWN_ERROR: 5000,
 } as const;

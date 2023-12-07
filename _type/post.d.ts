@@ -14,21 +14,16 @@ export type Post = {
     createAt?: string; // 建立時間
     updateAt?: string; // 更新時間
     __v?: number; // 版本
-}
+};
 
 export type PostWrite = {
-    [K in keyof Omit<Post,
-        | "_id"
-        | "createAt"
-        | "updateAt"
-        | "__v"
-    >]?: Post[K];
-}
+    [K in keyof Omit<Post, "_id" | "createAt" | "updateAt" | "__v">]?: Post[K];
+};
 
 export type PostSearch = {
     id?: string | null;
-}
+};
 
 export type PostFilter = {
     [key in keyof Post]?: any;
-}
+};

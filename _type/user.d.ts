@@ -20,23 +20,18 @@ export type User = {
     createAt?: string; // 建立時間
     updateAt?: string; // 更新時間
     __v?: number; // 版本
-}
+};
 
 export type UserWrite = {
-    [K in keyof Omit<User,
-        | "_id"
-        | "createAt"
-        | "updateAt"
-        | "__v"
-    >]?: User[K];
-}
+    [K in keyof Omit<User, "_id" | "createAt" | "updateAt" | "__v">]?: User[K];
+};
 
 export type UserSearch = {
     id?: string | null;
     customId?: string | null;
     email?: string | null;
-}
+};
 
 export type UserFilter = {
     [key in keyof User]?: any;
-}
+};
