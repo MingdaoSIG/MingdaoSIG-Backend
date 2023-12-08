@@ -3,6 +3,7 @@ import { Request } from "express";
 import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 
+
 export default function forbiddenBody(request: Request, forbiddenKeys: string[]) {
     try {
         const invalidKeys = Object.keys(request.body).filter(key => forbiddenKeys.includes(key));

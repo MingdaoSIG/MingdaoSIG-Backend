@@ -7,6 +7,7 @@ import { write } from "@controller/cloud/sig/write";
 import { listAll } from "@controller/cloud/sig/list";
 import { join } from "@controller/cloud/sig/join";
 
+
 const sig: Router = Router();
 
 sig.get("/list", listAll);
