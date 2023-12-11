@@ -12,11 +12,11 @@ const sig: Router = Router();
 
 sig.get("/list", listAll);
 
-sig.use("/@:id", rateLimiter("1m_20req"));
-sig.get("/@:id", readByCustomId);
+sig.use("/@:customId", rateLimiter("1m_20req"));
+sig.get("/@:customId", readByCustomId);
 
-sig.use("/:id", rateLimiter("1m_20req"));
-sig.get("/:id", readById);
+sig.use("/:sigId", rateLimiter("1m_20req"));
+sig.get("/:sigId", readById);
 
 sig.use(JWTverifier);
 sig.post("/:id", write);
