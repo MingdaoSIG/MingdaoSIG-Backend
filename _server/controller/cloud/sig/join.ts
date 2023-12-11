@@ -102,22 +102,14 @@ export const readJoinRequest: RequestHandler = async (
         const decodedJwt: any = (req as ExtendedRequest).JWT;
         const userId = decodedJwt.id;
 
-        const userData = await UserDB.read({ id: userId });
-        if (!userData.sig?.includes(sigId)) {
-            throw new CustomError(
-                CustomStatus.NOT_A_MEMBER,
-                new Error("Not a member")
-            );
-        }
-
         const oldJoinRequest = await JoinRequestDB.read({
             user: userId,
             sig: sigId
         }).catch(() => null);
         if (!oldJoinRequest) {
             throw new CustomError(
-                CustomStatus.NOT_A_MEMBER,
-                new Error("Not a member")
+                CustomStatus.NOT_FOUND,
+                new Error("Request not found")
             );
         }
 
