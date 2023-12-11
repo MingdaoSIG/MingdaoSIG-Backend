@@ -13,7 +13,11 @@ export default async function CheckValidCustomId(customId: string) {
 
 function CheckPattern(customId: string) {
     const regex = /^(?=.{1,25}$)[a-z0-9_]+(\.[a-z0-9_]+)*$/gm;
-    if (customId && !regex.test(customId)) throw new CustomError(CustomStatus.INVALID_BODY, new Error("Invalid custom id"));
+    if (customId && !regex.test(customId))
+        throw new CustomError(
+            CustomStatus.INVALID_BODY,
+            new Error("Invalid custom id")
+        );
 }
 
 async function CheckExists(customId: string) {
@@ -22,5 +26,9 @@ async function CheckExists(customId: string) {
 
     const alreadyExists = userData || sigData;
 
-    if (alreadyExists) throw new CustomError(CustomStatus.CUSTOM_ID_ALREADY_EXISTS, new Error("Custom id already exists"));
+    if (alreadyExists)
+        throw new CustomError(
+            CustomStatus.CUSTOM_ID_ALREADY_EXISTS,
+            new Error("Custom id already exists")
+        );
 }

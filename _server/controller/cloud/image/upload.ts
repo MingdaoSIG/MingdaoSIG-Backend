@@ -14,13 +14,18 @@ export const upload: RequestHandler = async (req, res) => {
         const rawImage: Buffer = req.body;
 
         const byteLimit = 5 * 1000 * 1000; // 5 MB
-        if (rawImage.byteLength > byteLimit) throw new CustomError(CustomStatus.CONTENT_SIZE_EXCEEDED, new Error("Content size exceeded"));
-        if (!rawImage) throw new CustomError(CustomStatus.EMPTY_CONTENT, new Error("Content is empty"));
+        if (rawImage.byteLength > byteLimit)
+            throw new CustomError(
+                CustomStatus.CONTENT_SIZE_EXCEEDED,
+                new Error("Content size exceeded")
+            );
+        if (!rawImage)
+            throw new CustomError(
+                CustomStatus.EMPTY_CONTENT,
+                new Error("Content is empty")
+            );
 
-        const webpImage =
-            await sharp(rawImage)
-                .webp()
-                .toBuffer();
+        const webpImage = await sharp(rawImage).webp().toBuffer();
 
         const dataToSave = {
             image: webpImage
@@ -34,6 +39,8 @@ export const upload: RequestHandler = async (req, res) => {
         });
     }
     catch (error: any) {
-        return res.status(HttpStatus.BAD_REQUEST).json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });
+        return res
+            .status(HttpStatus.BAD_REQUEST)
+            .json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });
     }
 };

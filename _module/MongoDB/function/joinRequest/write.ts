@@ -16,7 +16,7 @@ export default async function write(
 
         if (code) {
             return joinRequest.findOneAndUpdate({ _id: id }, dataToSave, {
-                new: true,
+                new: true
             }) as unknown as JoinRequest;
         }
         else {

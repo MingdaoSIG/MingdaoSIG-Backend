@@ -39,13 +39,13 @@ export default async function JoinRequest(
         const targetEmails = Array.from(
             new Set(
                 await Promise.all(
-                    sigData.leader?.map(async (leaderId) => {
+                    sigData.leader?.map(async leaderId => {
                         const leaderData = await UserDB.read({ id: leaderId });
                         return leaderData.email;
                     }) ?? []
                 )
             )
-        ).filter((item) => item !== undefined) as string[];
+        ).filter(item => item !== undefined) as string[];
 
         await SendMail(
             `${sigName} SIG 加入申請`,
@@ -70,14 +70,14 @@ function parseRequestMessage(
     } = {
         teacher: "老師",
         student: "學生",
-        alumni: "校友",
+        alumni: "校友"
     };
 
     const message: string[] = [];
     message.push(
         [
             "SIG Leader 您好，",
-            `我們希望您一切順利，特此通知您，您的 ${sigName} SIG 有新的加入申請。`,
+            `我們希望您一切順利，特此通知您，您的 ${sigName} SIG 有新的加入申請。`
         ].join("\n")
     );
     message.push(
@@ -86,7 +86,7 @@ function parseRequestMessage(
             `姓名：${userData.name}`,
             `身分：${prettierIdentity[userData.identity]}`,
             `班級：${userData.class}`,
-            `信箱：${userData.email}`,
+            `信箱：${userData.email}`
         ].join("\n")
     );
     message.push(["自我介紹：", requestMessage["q1"]].join("\n"));

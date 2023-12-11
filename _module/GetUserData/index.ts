@@ -11,7 +11,8 @@ import CheckValidCustomId from "@module/CheckValidCustomId";
 const UserDB = new MongoDB.User();
 
 export default async function getUserData(email: string, avatar: string) {
-    const MD_API_URL = "https://mdsrl.mingdao.edu.tw/mdpp/Sig20Login/googleUserCheck";
+    const MD_API_URL =
+        "https://mdsrl.mingdao.edu.tw/mdpp/Sig20Login/googleUserCheck";
 
     try {
         const response = await axios.postForm(MD_API_URL, {
@@ -20,9 +21,25 @@ export default async function getUserData(email: string, avatar: string) {
         const responseData = response.data;
 
         const validData =
-            checkData(responseData, ["code", "mail", "class_name", "user_name", "user_identity"]) ||
-            checkData(responseData, ["code", "mail", "user_name", "user_identity"]) ||
-            checkData(responseData, ["mail", "user_name", "user_job", "user_identity"]);
+            checkData(responseData, [
+                "code",
+                "mail",
+                "class_name",
+                "user_name",
+                "user_identity"
+            ]) ||
+            checkData(responseData, [
+                "code",
+                "mail",
+                "user_name",
+                "user_identity"
+            ]) ||
+            checkData(responseData, [
+                "mail",
+                "user_name",
+                "user_job",
+                "user_identity"
+            ]);
         if (!validData) throw new Error("Invalid data");
 
         const prettierIdentity: { [key: string]: Identity } = {
@@ -31,21 +48,28 @@ export default async function getUserData(email: string, avatar: string) {
             alu: "alumni"
         };
         const {
-            mail, user_name, code, class_name, user_job, user_identity
+            mail,
+            user_name,
+            code,
+            class_name,
+            user_job,
+            user_identity
         }: {
-            mail: string,
-            user_name: string,
-            code: string,
-            class_name: string,
-            user_job: string,
-            user_identity: "teach" | "stu" | "alu"
+            mail: string;
+            user_name: string;
+            code: string;
+            class_name: string;
+            user_job: string;
+            user_identity: "teach" | "stu" | "alu";
         } = responseData;
 
         const oldData = await UserDB.read({ email: mail }).catch(() => null);
 
         const customId = oldData?.customId || mail.split("@")[0].toLowerCase();
         let targetCustomId = customId;
-        let validId = oldData?.customId ? true : await _CheckValidCustomId(targetCustomId);
+        let validId = oldData?.customId
+            ? true
+            : await _CheckValidCustomId(targetCustomId);
         do {
             if (validId) break;
             targetCustomId = `${customId}_${UniqueId(5)}`;
@@ -69,7 +93,7 @@ export default async function getUserData(email: string, avatar: string) {
             displayName: displayName,
             description: description,
             avatar: avatar,
-            follower: follower,
+            follower: follower
             // permission: permission
         };
         const savedData = await UserDB.write(newData, { email });

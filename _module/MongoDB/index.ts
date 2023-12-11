@@ -220,6 +220,6 @@ const MongoDB = {
     Post: PostDB,
     Sig: SigDB,
     Comment: CommentDB,
-    JoinRequest: JoinRequestDB,
+    JoinRequest: JoinRequestDB
 };
 export default MongoDB;

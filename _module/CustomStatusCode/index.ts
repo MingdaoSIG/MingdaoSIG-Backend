@@ -36,7 +36,7 @@ export const CustomCode = {
     4110: "Error reading join request from db",
     4111: "Error writing join request to db",
 
-    5000: "Unknown error",
+    5000: "Unknown error"
 } as const;
 
 export const CustomStatus = {
@@ -79,5 +79,5 @@ export const CustomStatus = {
     ERROR_READING_JOIN_REQUEST_FROM_DB: 4110,
     ERROR_WRITING_JOIN_REQUEST_TO_DB: 4111,
 
-    UNKNOWN_ERROR: 5000,
+    UNKNOWN_ERROR: 5000
 } as const;

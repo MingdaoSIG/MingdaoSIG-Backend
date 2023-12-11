@@ -9,7 +9,8 @@ export default async function list(search: PostFilter, option?: Option) {
     try {
         const { skip, limit, sort } = option || {};
 
-        const data = await post.find(search)
+        const data = await post
+            .find(search)
             .sort(sort || { createdAt: -1 })
             .skip(skip || 0)
             .limit(limit || 0);

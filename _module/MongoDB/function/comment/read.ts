@@ -17,6 +17,9 @@ export default async function read(id: string | ObjectId) {
         return data as unknown as Comment;
     }
     catch (error: any) {
-        throw new CustomError(CustomStatus.ERROR_READING_COMMENT_FROM_DB, error);
+        throw new CustomError(
+            CustomStatus.ERROR_READING_COMMENT_FROM_DB,
+            error
+        );
     }
 }

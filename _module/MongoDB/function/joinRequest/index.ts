@@ -5,5 +5,5 @@ import { readById, readByUserIdAndSigId } from "./read";
 export default {
     write,
     readById,
-    readByUserIdAndSigId,
+    readByUserIdAndSigId
 };

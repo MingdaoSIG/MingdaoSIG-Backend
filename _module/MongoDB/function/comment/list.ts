@@ -9,7 +9,8 @@ export default async function list(search: CommentFilter, option?: Option) {
     try {
         const { skip, limit, sort } = option || {};
 
-        const data = await comment.find(search)
+        const data = await comment
+            .find(search)
             .sort(sort || { createdAt: -1 })
             .skip(skip || 0)
             .limit(limit || 0);
@@ -21,6 +22,9 @@ export default async function list(search: CommentFilter, option?: Option) {
         return data as unknown as Comment[];
     }
     catch (error: any) {
-        throw new CustomError(CustomStatus.ERROR_READING_COMMENT_FROM_DB, error);
+        throw new CustomError(
+            CustomStatus.ERROR_READING_COMMENT_FROM_DB,
+            error
+        );
     }
 }

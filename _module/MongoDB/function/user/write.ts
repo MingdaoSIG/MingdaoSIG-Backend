@@ -20,16 +20,16 @@ async function _writeData(key: string, value: any, dataToSave: UserWrite) {
         const code = data ? 1 : 0;
 
         if (code) {
-            return await profile.findOneAndUpdate(
+            return (await profile.findOneAndUpdate(
                 { [key]: value },
                 dataToSave,
                 {
                     new: true
                 }
-            ) as unknown as User;
+            )) as unknown as User;
         }
         else {
-            return await profile.create(dataToSave) as unknown as User;
+            return (await profile.create(dataToSave)) as unknown as User;
         }
     }
     catch (error: any) {

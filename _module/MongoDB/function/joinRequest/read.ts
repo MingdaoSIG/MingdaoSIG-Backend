@@ -45,7 +45,7 @@ async function readData(key: string, value: any) {
     try {
         const data = await joinRequest.findOne({
             [key]: value,
-            removed: false,
+            removed: false
         });
 
         if (!data) {

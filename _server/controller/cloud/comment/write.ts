@@ -12,32 +12,61 @@ import CheckRequestRequirement from "@module/CheckRequestRequirement";
 const PostDB = new MongoDB.Post();
 const CommentDB = new MongoDB.Comment();
 
-export const write: RequestHandler = async (req: Request | ExtendedRequest, res) => {
+export const write: RequestHandler = async (
+    req: Request | ExtendedRequest,
+    res
+) => {
     try {
         const { body } = req;
         const commentId = (req as Request).params.commentId;
         const decodedJwt: any = (req as ExtendedRequest).JWT;
         const userId = decodedJwt.id;
 
-        new CheckRequestRequirement(req as Request).matchBody(["post", "reply", "content"]);
+        new CheckRequestRequirement(req as Request).matchBody([
+            "post",
+            "reply",
+            "content"
+        ]);
 
         const {
             post: postId,
             reply: replyId,
             content
         }: {
-            post: string,
-            reply: string | "",
-            content: string
+            post: string;
+            reply: string | "";
+            content: string;
         } = body;
 
-        if (content.length > 250) throw new CustomError(CustomStatus.INVALID_CONTENT_LENGTH, new Error("Invalid content length"));
-        if (content.trim() === "") throw new CustomError(CustomStatus.EMPTY_CONTENT, new Error("Content is empty"));
+        if (content.length > 250)
+            throw new CustomError(
+                CustomStatus.INVALID_CONTENT_LENGTH,
+                new Error("Invalid content length")
+            );
+        if (content.trim() === "")
+            throw new CustomError(
+                CustomStatus.EMPTY_CONTENT,
+                new Error("Content is empty")
+            );
 
-        if (!isValidObjectId(postId) || !(await PostDB.read({ id: postId }).catch(() => null))) throw new CustomError(CustomStatus.INVALID_POST_ID, new Error("Post not found"));
+        if (
+            !isValidObjectId(postId) ||
+            !(await PostDB.read({ id: postId }).catch(() => null))
+        )
+            throw new CustomError(
+                CustomStatus.INVALID_POST_ID,
+                new Error("Post not found")
+            );
 
-        const validReplyTarget = replyId === "" ? true : await CommentDB.read({ id: replyId }).catch(() => null);
-        if (!validReplyTarget) throw new CustomError(CustomStatus.INVALID_REPLY_ID, new Error("Reply not found"));
+        const validReplyTarget =
+            replyId === ""
+                ? true
+                : await CommentDB.read({ id: replyId }).catch(() => null);
+        if (!validReplyTarget)
+            throw new CustomError(
+                CustomStatus.INVALID_REPLY_ID,
+                new Error("Reply not found")
+            );
 
         const dataToSave = {
             user: userId,
@@ -46,7 +75,9 @@ export const write: RequestHandler = async (req: Request | ExtendedRequest, res)
             reply: replyId
         };
 
-        const savedComment = await CommentDB.write(dataToSave, { id: commentId });
+        const savedComment = await CommentDB.write(dataToSave, {
+            id: commentId
+        });
         return res.status(HttpStatus.OK).json({
             status: CustomStatus.OK,
             id: savedComment._id,
@@ -54,6 +85,8 @@ export const write: RequestHandler = async (req: Request | ExtendedRequest, res)
         });
     }
     catch (error: any) {
-        return res.status(HttpStatus.BAD_REQUEST).json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });
+        return res
+            .status(HttpStatus.BAD_REQUEST)
+            .json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });
     }
 };

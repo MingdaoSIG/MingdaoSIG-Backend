@@ -16,7 +16,7 @@ export default async function SendMail(
             from: "SIG 平台開發團隊",
             title: title,
             msg: msg,
-            to: target.join(","),
+            to: target.join(",")
         };
         const response = await axios.postForm(MD_API_URL, requestBody);
         if (target.join("") !== response.data || response.status !== 200) {
