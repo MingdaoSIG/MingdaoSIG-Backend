@@ -4,7 +4,7 @@
     "useTabs": false,
     "singleQuote": false,
     "quoteProps": "as-needed",
-    "trailingComma": "none",
+    "trailingComma": "es5",
     "bracketSpacing": true,
     "bracketSameLine": false,
     "arrowParens": "avoid",
