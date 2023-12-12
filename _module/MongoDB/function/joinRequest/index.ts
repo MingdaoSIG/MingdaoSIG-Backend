@@ -1,9 +1,10 @@
 import write from "./write";
-import { readById, readByUserIdAndSigId } from "./read";
+import { readById, readByUserIdAndSigId, readByConfirmId } from "./read";
 
 
 export default {
     write,
     readById,
-    readByUserIdAndSigId
+    readByUserIdAndSigId,
+    readByConfirmId
 };

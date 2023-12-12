@@ -63,7 +63,7 @@ export const join: RequestHandler = async (
             user: userId,
             sig: sigId
         }).catch(() => null);
-        if (oldJoinRequest) {
+        if (oldJoinRequest && oldJoinRequest.state === "pending") {
             throw new CustomError(
                 CustomStatus.ALREADY_APPLIED,
                 new Error("Already applied")

@@ -187,13 +187,16 @@ export class CommentDB {
 
 export class JoinRequestDB {
     async read(search: JoinRequestSearch) {
-        const { id, user, sig } = search;
+        const { id, user, sig, confirmId } = search;
 
         if (id) {
             return await joinRequest.readById(id);
         }
         else if (user && sig) {
             return await joinRequest.readByUserIdAndSigId(user, sig);
+        }
+        else if (confirmId) {
+            return await joinRequest.readByConfirmId(confirmId);
         }
         else {
             throw new Error("Search is required");

@@ -14,12 +14,12 @@ export type JoinRequest = {
 };
 
 export type JoinRequestWrite = {
-    user: string;
-    sig: string;
-    q1: string;
-    q2: string;
-    q3: string;
-    state: "pending" | "accepted" | "rejected";
+    user?: string;
+    sig?: string;
+    q1?: string;
+    q2?: string;
+    q3?: string;
+    state?: "pending" | "accepted" | "rejected";
 };
 
 export type JoinRequestSearch = {
