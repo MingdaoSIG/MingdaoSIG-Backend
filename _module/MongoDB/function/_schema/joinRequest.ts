@@ -11,7 +11,8 @@ const joinRequestSchema = new Schema(
         q2: String,
         q3: String,
         removed: { type: Boolean, default: false },
-        state: { type: String, default: "pending" } // pending, accepted, rejected
+        state: { type: String, default: "pending" }, // pending, accepted, rejected
+        confirmId: String
     },
     { timestamps: true }
 );

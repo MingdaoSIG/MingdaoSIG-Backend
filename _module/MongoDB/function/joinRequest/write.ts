@@ -1,4 +1,5 @@
 import { ObjectId } from "mongoose";
+import { v4 as uuid } from "uuid";
 
 import { JoinRequest, JoinRequestWrite } from "@type/joinRequest";
 import joinRequest from "@schema/joinRequest";
@@ -20,9 +21,10 @@ export default async function write(
             }) as unknown as JoinRequest;
         }
         else {
-            return (await joinRequest.create(
-                dataToSave
-            )) as unknown as JoinRequest;
+            return (await joinRequest.create({
+                ...dataToSave,
+                confirmId: uuid()
+            })) as unknown as JoinRequest;
         }
     }
     catch (error: any) {

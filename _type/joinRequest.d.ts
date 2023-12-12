@@ -6,6 +6,7 @@ export type JoinRequest = {
     q2: string;
     q3: string;
     state: "pending" | "accepted" | "rejected";
+    confirmId?: string;
     removed: boolean;
     createAt?: string;
     updateAt?: string;
@@ -25,4 +26,5 @@ export type JoinRequestSearch = {
     id?: string;
     user?: string;
     sig?: string;
+    confirmId?: string;
 };
