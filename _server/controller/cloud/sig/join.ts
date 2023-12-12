@@ -6,7 +6,7 @@ import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
 import CheckRequestRequirement from "@module/CheckRequestRequirement";
-import JoinRequest from "@module/JoinRequest";
+import NewJoinRequest from "@module/NewJoinRequest";
 import MongoDB from "@module/MongoDB";
 
 
@@ -79,8 +79,9 @@ export const join: RequestHandler = async (
             state: "pending"
         });
 
-        await JoinRequest(sigId, userId, requestData);
+        await NewJoinRequest(sigId, userId, requestData);
 
+        requestData.confirmId = undefined;
         return res.status(HttpStatus.OK).json({
             status: CustomStatus.OK,
             data: requestData
@@ -113,6 +114,7 @@ export const readJoinRequest: RequestHandler = async (
             );
         }
 
+        oldJoinRequest.confirmId = undefined;
         return res.status(HttpStatus.OK).json({
             status: CustomStatus.OK,
             state: oldJoinRequest.state,

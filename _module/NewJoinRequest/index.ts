@@ -1,4 +1,4 @@
-import { JoinRequestWrite } from "@type/joinRequest";
+import { JoinRequest } from "@type/joinRequest";
 import MongoDB from "@module/MongoDB";
 import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
@@ -9,25 +9,27 @@ import SendMail from "@module/SendMail";
 const SigDB = new MongoDB.Sig();
 const UserDB = new MongoDB.User();
 
-export default async function JoinRequest(
+export default async function NewJoinRequest(
     sigId: string,
     userId: string,
-    requestMessage: JoinRequestWrite
+    requestMessage: JoinRequest
 ) {
     try {
         const sigData = await SigDB.read({ id: sigId }).catch(() => null);
-        if (!sigData || sigData.removed)
+        if (!sigData || sigData.removed) {
             throw new CustomError(
                 CustomStatus.INVALID_SIG_ID,
                 new Error("Invalid sig id")
             );
+        }
 
         const userData = await UserDB.read({ id: userId }).catch(() => null);
-        if (!userData)
+        if (!userData) {
             throw new CustomError(
                 CustomStatus.INVALID_USER_ID,
                 new Error("Invalid user id")
             );
+        }
 
         const sigName = sigData.name;
         if (!sigName) throw new Error("Invalid sig name");
@@ -53,7 +55,7 @@ export default async function JoinRequest(
             targetEmails
         );
 
-        return true; // TODO: requestId: string
+        return true;
     }
     catch (error) {
         throw new CustomError(CustomStatus.FAILED_TO_SEND_EMAIL, error);
@@ -63,7 +65,7 @@ export default async function JoinRequest(
 function parseRequestMessage(
     sigName: string,
     userData: User,
-    requestMessage: JoinRequestWrite
+    requestMessage: JoinRequest
 ) {
     const prettierIdentity: {
         [key in Identity]: string;
@@ -97,6 +99,12 @@ function parseRequestMessage(
     );
     message.push("祝順利！");
     message.push("SIG 平台開發團隊");
+    message.push(
+        [
+            `Decline：${requestMessage["confirmId"]}`,
+            `Accept：${requestMessage["confirmId"]}`
+        ].join("\n")
+    );
 
     return message.join("\n\n");
 }
