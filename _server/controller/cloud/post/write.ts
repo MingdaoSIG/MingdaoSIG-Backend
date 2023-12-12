@@ -12,6 +12,7 @@ import CheckRequestRequirement from "@module/CheckRequestRequirement";
 
 const PostDB = new MongoDB.Post();
 const SigDB = new MongoDB.Sig();
+const UserDB = new MongoDB.User();
 
 const sigDefaultCover: { [key: string]: string } = {
     "651799ebfa1d45d97b139864":
@@ -66,6 +67,7 @@ export const write: RequestHandler = async (
         const { body } = req;
         const postId = (req as Request).params.id;
         const decodedJwt: any = (req as ExtendedRequest).JWT;
+        const userId = decodedJwt.id;
 
         new CheckRequestRequirement(req as Request).forbiddenBody([
             "_id",
@@ -104,7 +106,7 @@ export const write: RequestHandler = async (
                 CustomStatus.INVALID_SIG_ID,
                 new Error("Sig not found")
             );
-        if (sigData.removed && !sigData.moderator?.includes(decodedJwt.id))
+        if (sigData.removed && !sigData.moderator?.includes(userId))
             throw new CustomError(
                 CustomStatus.FORBIDDEN,
                 new Error("Sig removed")
@@ -119,22 +121,13 @@ export const write: RequestHandler = async (
         const oldData = await PostDB.read({ id: postId }).catch(() => null);
         const isOneOfModerators = sigList
             .flatMap(sig => sig.moderator)
-            .includes(decodedJwt.id);
+            .includes(userId);
         const isOneOfLeaders = sigList
             .flatMap(sig => sig.leader)
-            .includes(decodedJwt.id);
-        const dataToSave = {
-            sig: sigId || oldData?.sig,
-            title: title || oldData?.title,
-            cover:
-                cover ||
-                oldData?.cover ||
-                sigDefaultCover[sigId] ||
-                "https://lazco.dev/sig-photo-coming-soon-picture",
-            content: content || oldData?.content,
-            user: decodedJwt.id,
-            hashtag: hashtag || oldData?.hashtag || []
-        };
+            .includes(userId);
+        const userData = await UserDB.read({ id: userId }).catch(() => null);
+        const isOneOfMembers = userData?.sig?.includes(sigId);
+
         if (typeof postId !== "undefined" && !oldData) {
             throw new CustomError(
                 CustomStatus.INVALID_POST_ID,
@@ -144,23 +137,33 @@ export const write: RequestHandler = async (
         else if (
             !isOneOfModerators &&
             !isOneOfLeaders &&
-            oldData?.user !== decodedJwt.id
+            !isOneOfMembers &&
+            oldData?.user !== userId
         ) {
             throw new CustomError(
                 CustomStatus.FORBIDDEN,
                 new Error("Not leader, moderator or author")
             );
         }
-        else if (
-            typeof postId !== "undefined" &&
-            oldData?.user !== decodedJwt.id
-        ) {
+        else if (typeof postId !== "undefined" && oldData?.user !== userId) {
             throw new CustomError(
                 CustomStatus.FORBIDDEN,
                 new Error("Not author")
             );
         }
 
+        const dataToSave = {
+            sig: sigId || oldData?.sig,
+            title: title || oldData?.title,
+            cover:
+                cover ||
+                oldData?.cover ||
+                sigDefaultCover[sigId] ||
+                "https://lazco.dev/sig-photo-coming-soon-picture",
+            content: content || oldData?.content,
+            user: userId,
+            hashtag: hashtag || oldData?.hashtag || []
+        };
         const writeOptions = postId ? { id: postId } : undefined;
         const savedData = await PostDB.write(dataToSave, writeOptions);
         return res.status(HttpStatus.OK).json({
