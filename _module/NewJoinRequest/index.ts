@@ -101,8 +101,8 @@ function parseRequestMessage(
     message.push("SIG 平台開發團隊");
     message.push(
         [
-            `Decline：${requestMessage["confirmId"]}`,
-            `Accept：${requestMessage["confirmId"]}`
+            `Decline：${requestMessage["confirmId"]}?accept=true`,
+            `Accept：${requestMessage["confirmId"]}?accept=false`
         ].join("\n")
     );
 
