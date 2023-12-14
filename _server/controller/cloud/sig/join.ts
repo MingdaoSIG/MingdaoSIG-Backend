@@ -84,6 +84,7 @@ export const join: RequestHandler = async (
         requestData.confirmId = undefined;
         return res.status(HttpStatus.OK).json({
             status: CustomStatus.OK,
+            id: requestData._id,
             data: requestData
         });
     }
