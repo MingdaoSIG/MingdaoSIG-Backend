@@ -14,9 +14,7 @@ export const confirmJoinRequest: RequestHandler = async (req, res) => {
         const confirmId = req.params.confirmId;
         const accept = req.query.accept;
 
-        const accepted =
-            accept === "true" ? true : accept === "false" ? false : null;
-        if (typeof accepted !== "boolean") {
+        if (accept !== "true"&& accept !== "false") {
             throw new CustomError(
                 CustomStatus.INVALID_QUERY,
                 new Error("Invalid query")
@@ -40,7 +38,7 @@ export const confirmJoinRequest: RequestHandler = async (req, res) => {
         }
 
         const dataToSave = {
-            state: accepted
+            state: accept === "true"
                 ? "accepted"
                 : ("rejected" as "accepted" | "rejected")
         };
