@@ -33,11 +33,7 @@ export default async function NewJoinRequest(
 
         const sigName = sigData.name;
         if (!sigName) throw new Error("Invalid sig name");
-        const prettyRequestMessage = parseRequestMessage(
-            sigName,
-            userData,
-            requestMessage
-        );
+
         const targetEmails = Array.from(
             new Set(
                 await Promise.all(
@@ -49,11 +45,27 @@ export default async function NewJoinRequest(
             )
         ).filter(item => item !== undefined) as string[];
 
-        await SendMail(
-            `${sigName} SIG 加入申請`,
-            prettyRequestMessage,
-            targetEmails
-        );
+        await SendMail({
+            title: `${sigName} SIG 加入申請`,
+            msg: {
+                sig: {
+                    name: sigName
+                },
+                user: {
+                    name: userData.name,
+                    identity: prettierIdentity(userData.identity),
+                    class: userData.class,
+                    email: userData.email
+                },
+                question: {
+                    q1: requestMessage["q1"],
+                    q2: requestMessage["q2"],
+                    q3: requestMessage["q3"]
+                },
+                confirmId: requestMessage["confirmId"]!
+            },
+            to: targetEmails
+        });
 
         return true;
     }
@@ -62,49 +74,14 @@ export default async function NewJoinRequest(
     }
 }
 
-function parseRequestMessage(
-    sigName: string,
-    userData: User,
-    requestMessage: JoinRequest
-) {
-    const prettierIdentity: {
-        [key in Identity]: string;
+function prettierIdentity(identity: string) {
+    const list: {
+        [key in Identity as string]: string;
     } = {
         teacher: "老師",
         student: "學生",
         alumni: "校友"
     };
 
-    const message: string[] = [];
-    message.push(
-        [
-            "SIG Leader 您好，",
-            `我們希望您一切順利，特此通知您，您的 ${sigName} SIG 有新的加入申請。`
-        ].join("\n")
-    );
-    message.push(
-        [
-            "以下是申請人的詳細資訊：",
-            `姓名：${userData.name}`,
-            `身分：${prettierIdentity[userData.identity]}`,
-            `班級：${userData.class}`,
-            `信箱：${userData.email}`
-        ].join("\n")
-    );
-    message.push(["自我介紹：", requestMessage["q1"]].join("\n"));
-    message.push(["申請加入原因：", requestMessage["q2"]].join("\n"));
-    message.push(["感興趣的議題：", requestMessage["q3"]].join("\n"));
-    message.push(
-        "非常感謝您能夠儘快審核並回覆此申請。如果您有任何問題或需要進一步的資訊，請隨時與我們聯繫。"
-    );
-    message.push("祝順利！");
-    message.push("SIG 平台開發團隊");
-    message.push(
-        [
-            `Decline：${requestMessage["confirmId"]}?accept=true`,
-            `Accept：${requestMessage["confirmId"]}?accept=false`
-        ].join("\n")
-    );
-
-    return message.join("\n\n");
+    return list[identity];
 }
