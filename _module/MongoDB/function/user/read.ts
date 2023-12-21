@@ -5,18 +5,18 @@ import { CustomStatus } from "@module/CustomStatusCode";
 
 
 export async function readByEmail(email: string) {
-    return await _readData("email", email);
+    return await readData("email", email);
 }
 
 export async function readById(id: string) {
-    return await _readData("_id", id);
+    return await readData("_id", id);
 }
 
 export async function readByCustomId(id: string) {
-    return await _readData("customId", id);
+    return await readData("customId", id);
 }
 
-async function _readData(key: string, value: any) {
+async function readData(key: string, value: any) {
     try {
         const data = await profile.findOne({ [key]: value });
 

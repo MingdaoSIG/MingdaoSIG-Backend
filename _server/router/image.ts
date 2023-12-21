@@ -14,10 +14,13 @@ image.get("/:id", read);
 
 image.use("/", rateLimiter("1m_10req"));
 image.use("/", JWTverifier);
-image.use("/", bodyParser.raw({
-    type: "*/*",
-    limit: "1gb"
-}));
+image.use(
+    "/",
+    bodyParser.raw({
+        type: "*/*",
+        limit: "1gb"
+    })
+);
 image.post("/", upload);
 
 export default image;

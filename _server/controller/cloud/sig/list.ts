@@ -17,6 +17,8 @@ export const listAll: RequestHandler = async (_, res) => {
         });
     }
     catch (error: any) {
-        return res.status(HttpStatus.NOT_FOUND).json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });
+        return res
+            .status(HttpStatus.NOT_FOUND)
+            .json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });
     }
 };

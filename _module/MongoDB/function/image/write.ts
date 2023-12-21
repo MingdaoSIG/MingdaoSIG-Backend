@@ -13,7 +13,7 @@ export default async function write(dataToSave: Image) {
             return data as unknown as Image;
         }
         else {
-            return await image.create(dataToSave) as unknown as Image;
+            return (await image.create(dataToSave)) as unknown as Image;
         }
     }
     catch (error: any) {

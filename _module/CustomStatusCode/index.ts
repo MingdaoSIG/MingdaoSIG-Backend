@@ -21,6 +21,10 @@ export const CustomCode = {
     4025: "Invalid hashtag",
     4026: "Content size exceeded",
     4027: "Failed to send email",
+    4028: "Already joined",
+    4029: "Already applied",
+    4030: "Not a member",
+    4031: "Already confirmed",
 
     4100: "Error reading user from db",
     4101: "Error writing user to db",
@@ -61,6 +65,10 @@ export const CustomStatus = {
     INVALID_HASHTAG: 4025,
     CONTENT_SIZE_EXCEEDED: 4026,
     FAILED_TO_SEND_EMAIL: 4027,
+    ALREADY_JOINED: 4028,
+    ALREADY_APPLIED: 4029,
+    NOT_A_MEMBER: 4030,
+    ALREADY_CONFIRMED: 4031,
 
     ERROR_READING_USER_FROM_DB: 4100,
     ERROR_WRITING_USER_TO_DB: 4101,

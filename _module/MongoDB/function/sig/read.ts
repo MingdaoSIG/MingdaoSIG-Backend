@@ -7,14 +7,14 @@ import { CustomStatus } from "@module/CustomStatusCode";
 
 
 export async function readById(id: string | ObjectId) {
-    return await _readData("_id", id);
+    return await readData("_id", id);
 }
 
 export async function readByCustomId(id: string | ObjectId) {
-    return await _readData("customId", id);
+    return await readData("customId", id);
 }
 
-async function _readData(key: string, value: any) {
+async function readData(key: string, value: any) {
     try {
         const data = await sig.findOne({ [key]: value });
 

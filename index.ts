@@ -24,5 +24,7 @@ catch (error: any) {
 async function connectMongoDB(uri: string) {
     mongoose.set("strictQuery", false);
     const db = await mongoose.connect(uri);
-    console.log(`Server : successfully connected to MongoDB, Database name: "${db.connections[0].name}"`);
+    console.log(
+        `Server : successfully connected to MongoDB, Database name: "${db.connections[0].name}"`
+    );
 }

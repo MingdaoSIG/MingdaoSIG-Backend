@@ -10,17 +10,17 @@ export const ping: RequestHandler = async (req, res) => {
     const { mainVersion, developmentVersion } = await GetOnlineAppVersion();
 
     res.status(200).json({
-        "service": "up",
-        "uptime": ReadableTime(Math.round(performance.now()))["string"],
-        "version": {
-            "current": packageJSON.version,
-            "latest": {
-                "main": mainVersion,
-                "development": developmentVersion
+        service: "up",
+        uptime: ReadableTime(Math.round(performance.now()))["string"],
+        version: {
+            current: packageJSON.version,
+            latest: {
+                main: mainVersion,
+                development: developmentVersion
             },
-            "upToDate": {
-                "main": mainVersion === packageJSON.version,
-                "development": developmentVersion === packageJSON.version
+            upToDate: {
+                main: mainVersion === packageJSON.version,
+                development: developmentVersion === packageJSON.version
             }
         }
     });

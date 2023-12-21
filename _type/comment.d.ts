@@ -9,21 +9,19 @@ export type Comment = {
     createAt?: string; // 創建時間，記錄評論的創建時間
     updateAt?: string; // 更新時間，記錄評論的最後更新時間
     __v?: number; // 版本，用於記錄評論的版本號
-}
+};
 
 export type CommentWrite = {
-    [K in keyof Omit<Comment,
-        | "_id"
-        | "createAt"
-        | "updateAt"
-        | "__v"
+    [K in keyof Omit<
+        Comment,
+        "_id" | "createAt" | "updateAt" | "__v"
     >]?: Comment[K];
-}
+};
 
 export type CommentSearch = {
     id?: string | null;
-}
+};
 
 export type CommentFilter = {
     [key in keyof Comment]?: any;
-}
+};

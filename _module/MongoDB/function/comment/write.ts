@@ -6,22 +6,21 @@ import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 
 
-export default async function write(id: string | ObjectId | null, dataToSave: CommentWrite) {
+export default async function write(
+    id: string | ObjectId | null,
+    dataToSave: CommentWrite
+) {
     try {
         const data = await comment.findOne({ _id: id });
         const code = data ? 1 : 0;
 
         if (code) {
-            return await comment.findOneAndUpdate(
-                { _id: id },
-                dataToSave,
-                {
-                    new: true
-                }
-            ) as unknown as Comment;
+            return (await comment.findOneAndUpdate({ _id: id }, dataToSave, {
+                new: true
+            })) as unknown as Comment;
         }
         else {
-            return await comment.create(dataToSave) as unknown as Comment;
+            return (await comment.create(dataToSave)) as unknown as Comment;
         }
     }
     catch (error: any) {

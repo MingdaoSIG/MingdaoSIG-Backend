@@ -16,7 +16,10 @@ export const login: RequestHandler = async (req, res) => {
         const googleToken: string = req.body.googleToken;
 
         const googleUserData = await getGoogleUserData(googleToken);
-        const userData = await getUserData(googleUserData.email, googleUserData.picture);
+        const userData = await getUserData(
+            googleUserData.email,
+            googleUserData.picture
+        );
 
         const jwt = signJWT({ id: userData._id });
         return res.status(HttpStatus.OK).json({
@@ -26,6 +29,8 @@ export const login: RequestHandler = async (req, res) => {
         });
     }
     catch (error: any) {
-        return res.status(HttpStatus.BAD_REQUEST).json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });
+        return res
+            .status(HttpStatus.BAD_REQUEST)
+            .json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });
     }
 };

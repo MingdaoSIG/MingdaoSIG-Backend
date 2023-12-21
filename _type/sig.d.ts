@@ -8,22 +8,17 @@ export type Sig = {
     moderator?: string[]; // 管理者
     leader?: string[]; // 領導者
     removed?: boolean; // 刪除
-}
+};
 
 export type SigWrite = {
-    [K in keyof Omit<Sig,
-        | "_id"
-        | "createAt"
-        | "updateAt"
-        | "__v"
-    >]?: Sig[K];
-}
+    [K in keyof Omit<Sig, "_id" | "createAt" | "updateAt" | "__v">]?: Sig[K];
+};
 
 export type SigSearch = {
     id?: string | null;
     customId?: string | null;
-}
+};
 
 export type SigFilter = {
     [key in keyof Sig]?: any;
-}
+};

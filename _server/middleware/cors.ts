@@ -13,7 +13,11 @@ const config = {
     headers: ["*"]
 };
 
-export default function configuredCors(req: Request, res: Response, next: NextFunction) {
+export default function configuredCors(
+    req: Request,
+    res: Response,
+    next: NextFunction
+) {
     cors({
         origin: "*",
         allowedHeaders: config.headers
