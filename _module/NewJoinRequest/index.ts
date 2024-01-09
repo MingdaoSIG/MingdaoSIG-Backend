@@ -1,9 +1,9 @@
+import { Identity } from "@type/user";
 import { JoinRequest } from "@type/joinRequest";
 import MongoDB from "@module/MongoDB";
 import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
-import { Identity, User } from "@type/user";
-import SendMail from "@module/SendMail";
+import { SendPretty } from "@module/SendMail";
 
 
 const SigDB = new MongoDB.Sig();
@@ -45,7 +45,7 @@ export default async function NewJoinRequest(
             )
         ).filter(item => item !== undefined) as string[];
 
-        await SendMail({
+        await SendPretty({
             title: `${sigName} SIG 加入申請`,
             msg: {
                 sig: {
