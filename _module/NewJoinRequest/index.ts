@@ -3,7 +3,7 @@ import { JoinRequest } from "@type/joinRequest";
 import MongoDB from "@module/MongoDB";
 import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
-import { SendPretty } from "@module/SendMail";
+import { SendPretty, SendText } from "@module/SendMail";
 
 
 const SigDB = new MongoDB.Sig();
@@ -32,7 +32,6 @@ export default async function NewJoinRequest(
         }
 
         const sigName = sigData.name;
-        if (!sigName) throw new Error("Invalid sig name");
 
         const targetEmails = Array.from(
             new Set(
@@ -43,7 +42,7 @@ export default async function NewJoinRequest(
                     }) ?? []
                 )
             )
-        ).filter(item => item !== undefined) as string[];
+        ).filter(item => item !== undefined);
 
         await SendPretty({
             title: `${sigName} SIG 加入申請`,
@@ -66,6 +65,12 @@ export default async function NewJoinRequest(
             },
             to: targetEmails
         });
+
+        await SendText(
+            "SIG 申請遞交通知",
+            `您的 ${sigName} 加入申請已經成功遞交至 SIG Leader，請靜候 Leader 審核`,
+            [userData.email]
+        );
 
         return true;
     }
