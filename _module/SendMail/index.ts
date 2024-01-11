@@ -62,8 +62,8 @@ export async function SendText(
             msg: message,
             to: target.join(",")
         };
-        const response = await axios.postForm(MAIL_TEXT_API_URL, requestBody);
-        if (target.join("") !== response.data || response.status !== 200) {
+        const response = await axios.post(MAIL_TEXT_API_URL, requestBody);
+        if (response.data !== "" || response.status !== 200) {
             throw new Error("Error sending email");
         }
         return true;
