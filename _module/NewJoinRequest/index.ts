@@ -68,7 +68,7 @@ export default async function NewJoinRequest(
 
         await SendText(
             "SIG 申請遞交通知",
-            `您的 ${sigName} 加入申請已經成功遞交至 SIG Leader，請靜候 Leader 審核`,
+            `您的${sigName} SIG 加入申請已經成功遞交至 SIG Leader，請靜候 Leader 審核。`,
             [userData.email]
         );
 

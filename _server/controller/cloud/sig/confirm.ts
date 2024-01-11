@@ -103,8 +103,8 @@ async function sendNotification(userId: string, sigId: string, state: string) {
     const userEmail = userData.email;
     await SendText(
         "SIG 申請結果通知",
-        `您的 ${sigName} 加入申請已${
-            state === "accepted" ? "通過" : "被拒絕"
+        `您的${sigName} SIG 加入申請${
+            state === "accepted" ? "已通過" : "被拒絕"
         }。`,
         [userEmail]
     );
