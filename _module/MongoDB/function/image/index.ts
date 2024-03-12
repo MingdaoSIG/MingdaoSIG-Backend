@@ -3,6 +3,6 @@ import write from "./write";
 
 
 export default {
-    read,
-    write
+  read,
+  write
 };

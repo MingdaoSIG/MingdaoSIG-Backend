@@ -7,32 +7,32 @@ import { CustomStatus } from "@module/CustomStatusCode";
 
 
 export async function writeById(id: string | ObjectId, dataToSave: UserWrite) {
-    return await _writeData("_id", id, dataToSave);
+  return await _writeData("_id", id, dataToSave);
 }
 
 export async function writeByEmail(email: string, dataToSave: UserWrite) {
-    return await _writeData("email", email, dataToSave);
+  return await _writeData("email", email, dataToSave);
 }
 
 async function _writeData(key: string, value: any, dataToSave: UserWrite) {
-    try {
-        const data = await profile.findOne({ [key]: value });
-        const code = data ? 1 : 0;
+  try {
+    const data = await profile.findOne({ [key]: value });
+    const code = data ? 1 : 0;
 
-        if (code) {
-            return (await profile.findOneAndUpdate(
-                { [key]: value },
-                dataToSave,
-                {
-                    new: true
-                }
-            )) as unknown as User;
+    if (code) {
+      return (await profile.findOneAndUpdate(
+        { [key]: value },
+        dataToSave,
+        {
+          new: true
         }
-        else {
-            return (await profile.create(dataToSave)) as unknown as User;
-        }
+      )) as unknown as User;
     }
-    catch (error: any) {
-        throw new CustomError(CustomStatus.ERROR_WRITING_USER_TO_DB, error);
+    else {
+      return (await profile.create(dataToSave)) as unknown as User;
     }
+  }
+  catch (error: any) {
+    throw new CustomError(CustomStatus.ERROR_WRITING_USER_TO_DB, error);
+  }
 }

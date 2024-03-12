@@ -10,37 +10,37 @@ import MongoDB from "@module/MongoDB";
 const ImageDB = new MongoDB.Image();
 
 export const upload: RequestHandler = async (req, res) => {
-    try {
-        const rawImage: Buffer = req.body;
+  try {
+    const rawImage: Buffer = req.body;
 
-        const byteLimit = 5 * 1000 * 1000; // 5 MB
-        if (rawImage.byteLength > byteLimit)
-            throw new CustomError(
-                CustomStatus.CONTENT_SIZE_EXCEEDED,
-                new Error("Content size exceeded")
-            );
-        if (!rawImage)
-            throw new CustomError(
-                CustomStatus.EMPTY_CONTENT,
-                new Error("Content is empty")
-            );
+    const byteLimit = 5 * 1000 * 1000; // 5 MB
+    if (rawImage.byteLength > byteLimit)
+      throw new CustomError(
+        CustomStatus.CONTENT_SIZE_EXCEEDED,
+        new Error("Content size exceeded")
+      );
+    if (!rawImage)
+      throw new CustomError(
+        CustomStatus.EMPTY_CONTENT,
+        new Error("Content is empty")
+      );
 
-        const webpImage = await sharp(rawImage).webp().toBuffer();
+    const webpImage = await sharp(rawImage).webp().toBuffer();
 
-        const dataToSave = {
-            image: webpImage
-        };
+    const dataToSave = {
+      image: webpImage
+    };
 
-        const savedData = await ImageDB.write(dataToSave);
+    const savedData = await ImageDB.write(dataToSave);
 
-        return res.status(HttpStatus.OK).json({
-            status: CustomStatus.OK,
-            id: savedData._id!
-        });
-    }
-    catch (error: any) {
-        return res
-            .status(HttpStatus.BAD_REQUEST)
-            .json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });
-    }
+    return res.status(HttpStatus.OK).json({
+      status: CustomStatus.OK,
+      id: savedData._id!
+    });
+  }
+  catch (error: any) {
+    return res
+      .status(HttpStatus.BAD_REQUEST)
+      .json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });
+  }
 };

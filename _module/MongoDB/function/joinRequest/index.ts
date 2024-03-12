@@ -3,8 +3,8 @@ import { readById, readByUserIdAndSigId, readByConfirmId } from "./read";
 
 
 export default {
-    write,
-    readById,
-    readByUserIdAndSigId,
-    readByConfirmId
+  write,
+  readById,
+  readByUserIdAndSigId,
+  readByConfirmId
 };
