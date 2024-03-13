@@ -15,6 +15,7 @@ import CheckValidPaginationOption from "@module/CheckValidPaginationOption";
 const PostDB = new MongoDB.Post();
 const UserDB = new MongoDB.User();
 const SigDB = new MongoDB.Sig();
+const CommentDB = new MongoDB.Comment();
 
 const sortMethods = {
   mostLikes: { likes: -1 },
@@ -186,8 +187,8 @@ async function listPostBy(
   );
 
   const userIds = new Set<string>();
-  postData?.forEach(comment => {
-    userIds.add(comment.user);
+  postData?.forEach(post => {
+    userIds.add(post.user);
   });
   const usersDataMap: Record<string, User> = {};
   const usersData = await UserDB.list({ _id: { $in: Array.from(userIds) } });
@@ -198,29 +199,51 @@ async function listPostBy(
   });
 
   const sigIds = new Set<string>();
-  postData?.forEach(comment => {
-    sigIds.add(comment.sig);
+  postData?.forEach(post => {
+    sigIds.add(post.sig);
   });
   const sigsDataMap: Record<string, Sig> = {};
-  const sigsData = await SigDB.list({ _id: { $in: Array.from(sigIds) } });
+  const sigsData = await SigDB.list({
+    _id: { $in: Array.from(sigIds) },
+    removed: false
+  });
   sigsData.forEach(sig => {
     if (sig._id) {
       sigsDataMap[sig._id] = sig;
     }
   });
 
-  const fullPostData = postData?.map(comment => {
-    comment = JSON.parse(JSON.stringify(comment));
+  const postIds = new Set<string>();
+  postData?.forEach(post => {
+    postIds.add(post._id!);
+  });
+  const commentNumberMap: Record<string, number> = {};
+  const commentData = await CommentDB.list({
+    post: { $in: Array.from(postIds) },
+    removed: false
+  });
+  commentData.forEach(comment => {
+    if (commentNumberMap[comment.post]) {
+      commentNumberMap[comment.post]++;
+    }
+    else {
+      commentNumberMap[comment.post] = 1;
+    }
+  });
+
+  const fullPostData = postData?.map(post => {
+    post = JSON.parse(JSON.stringify(post));
     return {
-      ...comment,
+      ...post,
       user: {
-        _id: usersDataMap[comment.user]?._id,
-        name: usersDataMap[comment.user]?.name
+        _id: usersDataMap[post.user]?._id,
+        name: usersDataMap[post.user]?.name
       },
       sig: {
-        _id: sigsDataMap[comment.sig]?._id,
-        name: sigsDataMap[comment.sig]?.name
-      }
+        _id: sigsDataMap[post.sig]?._id,
+        name: sigsDataMap[post.sig]?.name
+      },
+      comments: commentNumberMap[post._id!] ?? 0
     };
   });
 
