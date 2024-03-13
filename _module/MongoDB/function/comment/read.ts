@@ -7,19 +7,19 @@ import { CustomStatus } from "@module/CustomStatusCode";
 
 
 export default async function read(id: string | ObjectId) {
-    try {
-        const data = await comment.findOne({ _id: id, removed: false });
+  try {
+    const data = await comment.findOne({ _id: id, removed: false });
 
-        if (!data) {
-            throw new Error("Comment not found");
-        }
+    if (!data) {
+      throw new Error("Comment not found");
+    }
 
-        return data as unknown as Comment;
-    }
-    catch (error: any) {
-        throw new CustomError(
-            CustomStatus.ERROR_READING_COMMENT_FROM_DB,
-            error
-        );
-    }
+    return data as unknown as Comment;
+  }
+  catch (error: any) {
+    throw new CustomError(
+      CustomStatus.ERROR_READING_COMMENT_FROM_DB,
+      error
+    );
+  }
 }

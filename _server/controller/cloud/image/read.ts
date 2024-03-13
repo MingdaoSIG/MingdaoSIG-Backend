@@ -10,32 +10,32 @@ import MongoDB from "@module/MongoDB";
 const ImageDB = new MongoDB.Image();
 
 export const read: RequestHandler = async (req, res) => {
-    try {
-        const id: string = req.params.id!;
+  try {
+    const id: string = req.params.id!;
 
-        if (!id || !isValidObjectId(id))
-            throw new CustomError(
-                CustomStatus.INVALID_IMAGE_ID,
-                new Error("Invalid image id")
-            );
+    if (!id || !isValidObjectId(id))
+      throw new CustomError(
+        CustomStatus.INVALID_IMAGE_ID,
+        new Error("Invalid image id")
+      );
 
-        const imageData: Buffer | null = await ImageDB.read({ id }).catch(
-            () => null
-        );
-        if (!imageData)
-            throw new CustomError(
-                CustomStatus.NOT_FOUND,
-                new Error("Image not found")
-            );
+    const imageData: Buffer | null = await ImageDB.read({ id }).catch(
+      () => null
+    );
+    if (!imageData)
+      throw new CustomError(
+        CustomStatus.NOT_FOUND,
+        new Error("Image not found")
+      );
 
-        return res
-            .status(HttpStatus.OK)
-            .contentType("image/webp")
-            .send(imageData);
-    }
-    catch (error: any) {
-        return res
-            .status(HttpStatus.NOT_FOUND)
-            .json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });
-    }
+    return res
+      .status(HttpStatus.OK)
+      .contentType("image/webp")
+      .send(imageData);
+  }
+  catch (error: any) {
+    return res
+      .status(HttpStatus.NOT_FOUND)
+      .json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });
+  }
 };

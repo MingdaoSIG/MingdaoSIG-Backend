@@ -8,17 +8,17 @@ import MongoDB from "@module/MongoDB";
 const SigDB = new MongoDB.Sig();
 
 export const listAll: RequestHandler = async (_, res) => {
-    try {
-        const sigData = await SigDB.list({ removed: false });
+  try {
+    const sigData = await SigDB.list({ removed: false });
 
-        return res.status(HttpStatus.OK).json({
-            status: CustomStatus.OK,
-            data: sigData
-        });
-    }
-    catch (error: any) {
-        return res
-            .status(HttpStatus.NOT_FOUND)
-            .json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });
-    }
+    return res.status(HttpStatus.OK).json({
+      status: CustomStatus.OK,
+      data: sigData
+    });
+  }
+  catch (error: any) {
+    return res
+      .status(HttpStatus.NOT_FOUND)
+      .json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });
+  }
 };

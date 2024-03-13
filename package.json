@@ -1,14 +1,14 @@
 {
     "name": "MingdaoSIG",
-    "version": "2.1.1",
+    "version": "2.3.0",
     "description": "",
     "main": "index.ts",
     "scripts": {
         "build": "tsc && tsc-alias",
+        "build:watch": "tsc && (concurrently \"tsc -w\" \"tsc-alias -w\")",
         "start": "node dist/index.js",
-        "dev:build": "tsc --watch",
-        "dev:start": "nodemon --delay 3 --watch dist --exec 'npx tsc-alias && npm start'",
-        "dev": "concurrently \"npm run dev:build\" \"npm run dev:start\"",
+        "start:dev": "nodemon --delay 1 dist/index.js",
+        "dev": "concurrently \"npm run build:watch\" \"npm run start:dev\"",
         "check-and-fix-lint": "(echo '\n---\n\nScanning for lint error...' && eslint .) || (echo '\n\n---\n\nFound lint error, working on it...' && eslint . --fix) || echo \"\n\nWARNING: There are some error that can't be fixed automatically!\"",
         "lintfix": "npm run --silent check-and-fix-lint"
     },
@@ -43,6 +43,7 @@
         "eslint-plugin-import": "^2.29.0",
         "nodemon": "^3.0.1",
         "prettier": "^2.8.8",
+        "prettier-eslint": "^16.3.0",
         "typescript": "^4.9.5"
     }
 }

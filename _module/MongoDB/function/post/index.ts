@@ -4,7 +4,7 @@ import write from "./write";
 
 
 export default {
-    write,
-    read,
-    list
+  write,
+  read,
+  list
 };

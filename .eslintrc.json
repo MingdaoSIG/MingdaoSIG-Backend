@@ -1,61 +1,61 @@
 {
-    "plugins": [
-        "@typescript-eslint",
-        "import"
+  "plugins": [
+    "@typescript-eslint",
+    "import"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended"
+  ],
+  "ignorePatterns": [
+    "dist/"
+  ],
+  "env": {
+    "browser": true,
+    "es2021": true
+  },
+  "rules": {
+    "semi": [
+      "error",
+      "always"
     ],
-    "parser": "@typescript-eslint/parser",
-    "extends": [
-        "eslint:recommended",
-        "plugin:@typescript-eslint/recommended"
+    "indent": [
+      "error",
+      2,
+      {
+        "SwitchCase": 1
+      }
     ],
-    "ignorePatterns": [
-        "dist/"
+    "quotes": [
+      "error",
+      "double"
     ],
-    "env": {
-        "browser": true,
-        "es2021": true
-    },
-    "rules": {
-        "semi": [
-            "error",
-            "always"
-        ],
-        "indent": [
-            "error",
-            4,
-            {
-                "SwitchCase": 1
-            }
-        ],
-        "quotes": [
-            "error",
-            "double"
-        ],
-        "brace-style": [
-            "error",
-            "stroustrup"
-        ],
-        "no-console": [
-            "warn",
-            {
-                "allow": [
-                    "warn",
-                    "error"
-                ]
-            }
-        ],
-        "comma-dangle": [
-            "warn",
-            "never"
-        ],
-        "@typescript-eslint/no-unused-vars": "warn",
-        "@typescript-eslint/no-explicit-any": "off",
-        "@typescript-eslint/ban-ts-comment": "off",
-        "import/newline-after-import": [
-            "error",
-            {
-                "count": 2
-            }
+    "brace-style": [
+      "error",
+      "stroustrup"
+    ],
+    "no-console": [
+      "warn",
+      {
+        "allow": [
+          "warn",
+          "error"
         ]
-    }
+      }
+    ],
+    "comma-dangle": [
+      "warn",
+      "never"
+    ],
+    "@typescript-eslint/no-unused-vars": "warn",
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/ban-ts-comment": "off",
+    "import/newline-after-import": [
+      "error",
+      {
+        "count": 2
+      }
+    ]
+  }
 }

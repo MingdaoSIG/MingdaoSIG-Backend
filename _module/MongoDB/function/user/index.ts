@@ -4,10 +4,10 @@ import list from "./list";
 
 
 export default {
-    readByEmail,
-    readById,
-    readByCustomId,
-    writeById,
-    writeByEmail,
-    list
+  readByEmail,
+  readById,
+  readByCustomId,
+  writeById,
+  writeByEmail,
+  list
 };

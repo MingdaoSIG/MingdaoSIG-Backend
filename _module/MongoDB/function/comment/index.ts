@@ -4,7 +4,7 @@ import list from "./list";
 
 
 export default {
-    read,
-    write,
-    list
+  read,
+  write,
+  list
 };

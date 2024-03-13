@@ -7,24 +7,24 @@ import { CustomStatus } from "@module/CustomStatusCode";
 
 
 export async function readById(id: string | ObjectId) {
-    return await readData("_id", id);
+  return await readData("_id", id);
 }
 
 export async function readByCustomId(id: string | ObjectId) {
-    return await readData("customId", id);
+  return await readData("customId", id);
 }
 
 async function readData(key: string, value: any) {
-    try {
-        const data = await sig.findOne({ [key]: value });
+  try {
+    const data = await sig.findOne({ [key]: value });
 
-        if (!data) {
-            throw new Error("Sig not found");
-        }
+    if (!data) {
+      throw new Error("Sig not found");
+    }
 
-        return data as unknown as Sig;
-    }
-    catch (error: any) {
-        throw new CustomError(CustomStatus.ERROR_READING_SIG_FROM_DB, error);
-    }
+    return data as unknown as Sig;
+  }
+  catch (error: any) {
+    throw new CustomError(CustomStatus.ERROR_READING_SIG_FROM_DB, error);
+  }
 }
