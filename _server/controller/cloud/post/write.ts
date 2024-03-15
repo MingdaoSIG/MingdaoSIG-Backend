@@ -119,37 +119,34 @@ export const write: RequestHandler = async (
       );
 
     const oldData = await PostDB.read({ id: postId }).catch(() => null);
-    const isOneOfModerators = sigList
+    const isModerator = sigList
       .flatMap(sig => sig.moderator)
       .includes(userId);
-    const isOneOfLeaders = sigList
-      .flatMap(sig => sig.leader)
-      .includes(userId);
+    const isLeader = sigList.flatMap(sig => sig.leader).includes(userId);
     const userData = await UserDB.read({ id: userId }).catch(() => null);
-    const isOneOfMembers = userData?.sig?.includes(sigId);
+    const isMember = userData?.sig?.includes(sigId);
 
-    if (typeof postId !== "undefined" && !oldData) {
-      throw new CustomError(
-        CustomStatus.INVALID_POST_ID,
-        new Error("Invalid post id")
-      );
+    if (oldData) {
+      if (oldData.user !== userId) {
+        throw new CustomError(
+          CustomStatus.FORBIDDEN,
+          new Error("Not author")
+        );
+      }
     }
-    else if (
-      !isOneOfModerators &&
-            !isOneOfLeaders &&
-            !isOneOfMembers &&
-            oldData?.user !== userId
-    ) {
-      throw new CustomError(
-        CustomStatus.FORBIDDEN,
-        new Error("Not leader, moderator or author")
-      );
-    }
-    else if (typeof postId !== "undefined" && oldData?.user !== userId) {
-      throw new CustomError(
-        CustomStatus.FORBIDDEN,
-        new Error("Not author")
-      );
+    else {
+      if (postId) {
+        throw new CustomError(
+          CustomStatus.INVALID_POST_ID,
+          new Error("Invalid post id")
+        );
+      }
+      else if ((!isModerator || !isLeader) && !isMember) {
+        throw new CustomError(
+          CustomStatus.FORBIDDEN,
+          new Error("Not sig leader, moderator or member")
+        );
+      }
     }
 
     const dataToSave = {

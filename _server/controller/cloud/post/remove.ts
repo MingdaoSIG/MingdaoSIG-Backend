@@ -41,19 +41,12 @@ export const remove: RequestHandler = async (
       sig => sig._id?.toString() === oldData.sig
     );
     const isLeader = sigData?.leader?.includes(userId);
-    try {
-      if (oldData.user !== userId)
-        throw new CustomError(
-          CustomStatus.INVALID_USER,
-          new Error("Not author")
-        );
-    }
-    catch (error) {
-      if (!isModerator && !isLeader)
-        throw new CustomError(
-          CustomStatus.FORBIDDEN,
-          new Error("Not leader or moderator")
-        );
+
+    if (oldData.user !== userId && (!isModerator || !isLeader)) {
+      throw new CustomError(
+        CustomStatus.INVALID_USER,
+        new Error("Not author")
+      );
     }
 
     await PostDB.write(
