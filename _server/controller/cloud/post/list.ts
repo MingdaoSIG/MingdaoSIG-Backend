@@ -204,8 +204,7 @@ async function listPostBy(
   });
   const sigsDataMap: Record<string, Sig> = {};
   const sigsData = await SigDB.list({
-    _id: { $in: Array.from(sigIds) },
-    removed: false
+    _id: { $in: Array.from(sigIds) }
   });
   sigsData.forEach(sig => {
     if (sig._id) {
