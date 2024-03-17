@@ -86,37 +86,43 @@ export const write: RequestHandler = async (
     checkHashtag(hashtag);
 
     if (
-      !sigId ||
-            !title ||
-            !content ||
-            title.trim() === "" ||
-            content.trim() === "" ||
-            (cover && !(await isValidCover(cover)))
+      !isValidObjectId(sigId) ||
+            (title &&
+                title.trim() === "" &&
+                content &&
+                content.trim() === "" &&
+                !(await isValidCover(cover)))
     ) {
       throw new CustomError(
         CustomStatus.INVALID_BODY,
-        new Error("No title, content or sig id")
+        new Error("Title, content, cover or sig id is invalid")
       );
     }
 
     const sigList = await SigDB.list({});
     const sigData = sigList.find(sig => sig?._id?.toString() === sigId)!;
-    if (!sigData)
-      throw new CustomError(
-        CustomStatus.INVALID_SIG_ID,
-        new Error("Sig not found")
-      );
-    if (sigData.removed && !sigData.moderator?.includes(userId))
-      throw new CustomError(
-        CustomStatus.FORBIDDEN,
-        new Error("Sig removed")
-      );
+    if (sigId) {
+      if (!sigData) {
+        throw new CustomError(
+          CustomStatus.INVALID_SIG_ID,
+          new Error("Sig not found")
+        );
+      }
+      // removed sig only allow moderator
+      if (sigData.removed && !sigData.moderator?.includes(userId)) {
+        throw new CustomError(
+          CustomStatus.FORBIDDEN,
+          new Error("Sig removed")
+        );
+      }
+    }
 
-    if (!isValidObjectId(postId) && typeof postId !== "undefined")
+    if (!isValidObjectId(postId)) {
       throw new CustomError(
         CustomStatus.INVALID_POST_ID,
         new Error("Invalid post id")
       );
+    }
 
     const oldData = await PostDB.read({ id: postId }).catch(() => null);
     const isModerator = sigList
@@ -127,7 +133,10 @@ export const write: RequestHandler = async (
     const isMember = userData?.sig?.includes(sigId);
 
     if (oldData) {
-      if (oldData.user !== userId) {
+      if (
+        oldData.user !== userId &&
+                oldData.sig !== "652d60b842cdf6a660c2b778" // 公告
+      ) {
         throw new CustomError(
           CustomStatus.FORBIDDEN,
           new Error("Not author")
@@ -141,7 +150,7 @@ export const write: RequestHandler = async (
           new Error("Invalid post id")
         );
       }
-      else if ((!isModerator || !isLeader) && !isMember) {
+      else if (!isModerator && !isLeader && !isMember) {
         throw new CustomError(
           CustomStatus.FORBIDDEN,
           new Error("Not sig leader, moderator or member")
@@ -158,7 +167,7 @@ export const write: RequestHandler = async (
                 sigDefaultCover[sigId] ||
                 "https://lazco.dev/sig-photo-coming-soon-picture",
       content: content || oldData?.content,
-      user: userId,
+      user: oldData?.user || userId,
       hashtag: hashtag || oldData?.hashtag || []
     };
     const writeOptions = postId ? { id: postId } : undefined;

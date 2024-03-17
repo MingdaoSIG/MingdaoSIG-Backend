@@ -42,7 +42,7 @@ export const remove: RequestHandler = async (
     );
     const isLeader = sigData?.leader?.includes(userId);
 
-    if (oldData.user !== userId && (!isModerator || !isLeader)) {
+    if (oldData.user !== userId && !isModerator && !isLeader) {
       throw new CustomError(
         CustomStatus.INVALID_USER,
         new Error("Not author")
