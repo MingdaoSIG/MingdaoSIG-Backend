@@ -117,13 +117,6 @@ export const write: RequestHandler = async (
       }
     }
 
-    if (!isValidObjectId(postId)) {
-      throw new CustomError(
-        CustomStatus.INVALID_POST_ID,
-        new Error("Invalid post id")
-      );
-    }
-
     const oldData = await PostDB.read({ id: postId }).catch(() => null);
     const isModerator = sigList
       .flatMap(sig => sig.moderator)
@@ -133,6 +126,13 @@ export const write: RequestHandler = async (
     const isMember = userData?.sig?.includes(sigId);
 
     if (oldData) {
+      if (!isValidObjectId(postId)) {
+        throw new CustomError(
+          CustomStatus.INVALID_POST_ID,
+          new Error("Invalid post id")
+        );
+      }
+
       if (
         oldData.user !== userId &&
                 oldData.sig !== "652d60b842cdf6a660c2b778" // 公告
