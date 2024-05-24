@@ -12,15 +12,19 @@ import { likes } from "@controller/cloud/information/likes";
 
 const information: Router = Router();
 
-information.use("/", rateLimiter("1m_20req"));
-
+information.use("/user", rateLimiter("1m_20req"));
 information.get("/user", users);
+information.use("/user/posted", rateLimiter("1m_20req"));
 information.get("/user/posted", postUsers);
+information.use("/user/sig", rateLimiter("1m_20req"));
 information.get("/user/sig", usersOfEachSigs);
 
+information.use("/post", rateLimiter("1m_20req"));
 information.get("/post", posts);
+information.use("/post/sig", rateLimiter("1m_20req"));
 information.get("/post/sig", postsOfEachSigs);
 
+information.use("/like", rateLimiter("1m_20req"));
 information.get("/like", likes);
 
 export default information;
