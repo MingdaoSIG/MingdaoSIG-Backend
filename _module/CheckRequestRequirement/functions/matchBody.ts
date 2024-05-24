@@ -17,14 +17,6 @@ export default function matchBody(request: Request, requiredBody: string[]) {
         )}]`
       );
     }
-
-    if (Object.keys(body).length > requiredBody.length) {
-      throw new Error(
-        `Only allowed ${
-          requiredBody.length
-        } items in the body: [${requiredBody.join(", ")}]`
-      );
-    }
   }
   catch (error) {
     throw new CustomError(CustomStatus.INVALID_BODY, error);
