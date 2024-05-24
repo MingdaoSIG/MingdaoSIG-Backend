@@ -29,7 +29,7 @@ export const write: RequestHandler = async (
         new Error("Invalid sig id")
       );
 
-    new CheckRequestRequirement(req as Request).includesBody(
+    new CheckRequestRequirement(req as Request).onlyIncludesBody(
       // ["customId", "description"],
       ["description"],
       true

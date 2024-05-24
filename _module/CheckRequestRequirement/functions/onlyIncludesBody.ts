@@ -4,7 +4,7 @@ import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 
 
-export default function includesBody(
+export default function onlyIncludesBody(
   request: Request,
   requiredBody: string[],
   strict: boolean = false

@@ -23,7 +23,7 @@ export const write: RequestHandler = async (
     const userId = decodedJwt.id;
     const userData = (req as ExtendedRequest).userData;
 
-    new CheckRequestRequirement(req as Request).includesBody(
+    new CheckRequestRequirement(req as Request).onlyIncludesBody(
       // ["customId", "description"],
       ["description"],
       true

@@ -10,6 +10,7 @@ import sig from "./sig";
 import user from "./user";
 import comment from "./comment";
 import ping from "./ping";
+import information from "./information";
 
 
 const router: Router = Router();
@@ -21,6 +22,7 @@ router.use("/post", post);
 router.use("/comment", comment);
 router.use("/image", image);
 router.use("/ping", ping);
+router.use("/information", information);
 
 router.use("/needauth", JWTverifier);
 router.get("/needauth", (_: Request, res: Response) => {
