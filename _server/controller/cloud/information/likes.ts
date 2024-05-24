@@ -10,9 +10,9 @@ const analysis = new Analysis();
 
 export const likes: RequestHandler = async (req, res) => {
   try {
-    new CheckRequestRequirement(req).onlyIncludesBody(["date"]);
+    new CheckRequestRequirement(req).onlyIncludesQuery(["date"]);
 
-    const { date } = req.body;
+    const date = req.query.date as string;
 
     const result = await analysis.likes(undefined, new Date(date));
     const { title, content } = result;

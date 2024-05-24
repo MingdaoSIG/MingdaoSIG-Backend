@@ -25,8 +25,7 @@ export const write: RequestHandler = async (
 
     new CheckRequestRequirement(req as Request).onlyIncludesBody(
       // ["customId", "description"],
-      ["description"],
-      true
+      ["description"]
     );
 
     // if (userData.customId !== customId) {

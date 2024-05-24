@@ -10,9 +10,9 @@ const analysis = new Analysis();
 
 export const posts: RequestHandler = async (req, res) => {
   try {
-    new CheckRequestRequirement(req).onlyIncludesBody(["date"]);
+    new CheckRequestRequirement(req).onlyIncludesQuery(["date"]);
 
-    const { date } = req.body;
+    const date = req.query.date as string;
 
     const result = await analysis.posts(undefined, new Date(date));
     const { title, content } = result;
@@ -30,9 +30,9 @@ export const posts: RequestHandler = async (req, res) => {
 
 export const postsOfEachSigs: RequestHandler = async (req, res) => {
   try {
-    new CheckRequestRequirement(req).onlyIncludesBody(["date"]);
+    new CheckRequestRequirement(req).onlyIncludesQuery(["date"]);
 
-    const { date } = req.body;
+    const date = req.query.date as string;
 
     const result = await analysis.posts_of_each_sigs(
       undefined,

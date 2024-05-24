@@ -6,7 +6,7 @@ import { CustomStatus } from "@module/CustomStatusCode";
 
 export default function matchQuery(request: Request, requiredQuery: string[]) {
   try {
-    const query = new URL(request.url);
+    const query = request.query;
 
     if (!query) throw new Error("Query is empty");
 
@@ -17,16 +17,8 @@ export default function matchQuery(request: Request, requiredQuery: string[]) {
         )}]`
       );
     }
-
-    if (Object.keys(query).length > requiredQuery.length) {
-      throw new Error(
-        `Only allowed ${
-          requiredQuery.length
-        } items in the query: [${requiredQuery.join(", ")}]`
-      );
-    }
   }
-  catch (error: any) {
+  catch (error) {
     throw new CustomError(CustomStatus.INVALID_QUERY, error);
   }
 }

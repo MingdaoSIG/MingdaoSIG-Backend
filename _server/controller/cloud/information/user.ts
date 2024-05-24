@@ -10,9 +10,9 @@ const analysis = new Analysis();
 
 export const users: RequestHandler = async (req, res) => {
   try {
-    new CheckRequestRequirement(req).onlyIncludesBody(["date"]);
+    new CheckRequestRequirement(req).onlyIncludesQuery(["date"]);
 
-    const { date } = req.body;
+    const date = req.query.date as string;
 
     const result = await analysis.users(undefined, new Date(date));
     const { title, content } = result;
@@ -30,9 +30,9 @@ export const users: RequestHandler = async (req, res) => {
 
 export const postUsers: RequestHandler = async (req, res) => {
   try {
-    new CheckRequestRequirement(req).onlyIncludesBody(["date"]);
+    new CheckRequestRequirement(req).onlyIncludesQuery(["date"]);
 
-    const { date } = req.body;
+    const date = req.query.date as string;
 
     const result = await analysis.posted_users(undefined, new Date(date));
     const { title, content } = result;
@@ -50,9 +50,9 @@ export const postUsers: RequestHandler = async (req, res) => {
 
 export const usersOfEachSigs: RequestHandler = async (req, res) => {
   try {
-    new CheckRequestRequirement(req).onlyIncludesBody(["date"]);
+    new CheckRequestRequirement(req).onlyIncludesQuery(["date"]);
 
-    const { date } = req.body;
+    const date = req.query.date as string;
 
     const result = await analysis.sig_users(undefined, new Date(date));
     const { title, content } = result;

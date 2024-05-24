@@ -6,23 +6,15 @@ import { CustomStatus } from "@module/CustomStatusCode";
 
 export default function onlyIncludesBody(
   request: Request,
-  requiredBody: string[],
-  strict: boolean = false
+  requiredBody: string[]
 ) {
   try {
     const body = request.body;
 
-    if (!body) throw new Error("Body is empty");
+    if (!body || Object.keys(body).length === 0)
+      throw new Error("Body is empty");
 
-    if (strict && !onlyIncludesRequiredBody(body, requiredBody)) {
-      throw new Error(
-        `Only the following items are allowed for this route: [${requiredBody.join(
-          ", "
-        )}]`
-      );
-    }
-
-    if (!includesRequiredBody(body, requiredBody)) {
+    if (!onlyIncludesRequiredBody(body, requiredBody)) {
       throw new Error(
         `Only the following items are allowed for this route: [${requiredBody.join(
           ", "
@@ -41,12 +33,6 @@ export default function onlyIncludesBody(
   catch (error) {
     throw new CustomError(CustomStatus.INVALID_BODY, error);
   }
-}
-
-function includesRequiredBody(body: object, requiredBody: string[]) {
-  return requiredBody.some((item: string) =>
-    Object.keys(body).includes(item)
-  );
 }
 
 function onlyIncludesRequiredBody(body: object, requiredBody: string[]) {
