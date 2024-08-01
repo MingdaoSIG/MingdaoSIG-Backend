@@ -1,7 +1,7 @@
 import { Router } from "express";
 
 import JWTverifier from "@middleware/JWTverifier";
-import rateLimiter from "@middleware/rateLimiter";
+import { rateLimiter, RateLimiterOption } from "@middleware/rateLimiter";
 import { write } from "@controller/cloud/post/write";
 import { read } from "@controller/cloud/post/read";
 import { remove } from "@controller/cloud/post/remove";
@@ -28,11 +28,11 @@ post.get("/:id", read);
 
 post.use("/", JWTverifier);
 
-post.use("/:id/like", rateLimiter("1m_20req"));
+post.use("/:id/like", rateLimiter(RateLimiterOption._1m_100req));
 post.post("/:id/like", like);
 post.delete("/:id/like", dislike);
 
-post.use("/", rateLimiter("1m_10req"));
+post.use("/", rateLimiter(RateLimiterOption._1m_50req));
 post.post("/", write);
 
 post.post("/:id", write);
