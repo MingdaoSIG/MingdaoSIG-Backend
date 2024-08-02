@@ -1,12 +1,12 @@
 import { Router } from "express";
 
-import rateLimiter from "@middleware/rateLimiter";
+import { rateLimiter, RateLimiterOption } from "@middleware/rateLimiter";
 import { ping as _ping } from "@controller/cloud/ping";
 
 
 const ping: Router = Router();
 
-ping.use("/login", rateLimiter("1m_10req"));
+ping.use("/login", rateLimiter(RateLimiterOption._1m_50req));
 ping.get("/", _ping);
 
 export default ping;
