@@ -13,10 +13,10 @@ const sig: Router = Router();
 
 sig.get("/list", listAll);
 
-sig.use("/@:customId", rateLimiter(RateLimiterOption._1m_100req));
+sig.use("/@:customId", rateLimiter(RateLimiterOption._1m_200req));
 sig.get("/@:customId", readByCustomId);
 
-sig.use("/:sigId", rateLimiter(RateLimiterOption._1m_100req));
+sig.use("/:sigId", rateLimiter(RateLimiterOption._1m_200req));
 sig.get("/:sigId", readById);
 
 sig.get("/confirm/:confirmId", confirmJoinRequest);

@@ -9,10 +9,10 @@ import { read } from "@controller/cloud/image/read";
 
 const image: Router = Router();
 
-image.use("/:id", rateLimiter(RateLimiterOption._1m_600req));
+image.use("/:id", rateLimiter(RateLimiterOption._1m_1200req));
 image.get("/:id", read);
 
-image.use("/", rateLimiter(RateLimiterOption._1m_50req));
+image.use("/", rateLimiter(RateLimiterOption._1m_100req));
 image.use("/", JWTverifier);
 image.use(
   "/",
