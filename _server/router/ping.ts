@@ -6,7 +6,7 @@ import { ping as _ping } from "@controller/cloud/ping";
 
 const ping: Router = Router();
 
-ping.use("/login", rateLimiter(RateLimiterOption._1m_50req));
+ping.use("/login", rateLimiter(RateLimiterOption._1m_100req));
 ping.get("/", _ping);
 
 export default ping;

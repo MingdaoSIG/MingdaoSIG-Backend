@@ -28,11 +28,11 @@ post.get("/:id", read);
 
 post.use("/", JWTverifier);
 
-post.use("/:id/like", rateLimiter(RateLimiterOption._1m_100req));
+post.use("/:id/like", rateLimiter(RateLimiterOption._1m_200req));
 post.post("/:id/like", like);
 post.delete("/:id/like", dislike);
 
-post.use("/", rateLimiter(RateLimiterOption._1m_50req));
+post.use("/", rateLimiter(RateLimiterOption._1m_100req));
 post.post("/", write);
 
 post.post("/:id", write);
