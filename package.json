@@ -48,8 +48,5 @@
     },
     "sharp": {
         "prebuilds": true
-    },
-    "engines": {
-        "pnpm": "^9.9.0"
     }
 }
