@@ -16,6 +16,10 @@ export async function readByCustomId(id: string) {
   return await readData("customId", id);
 }
 
+export async function readByCode(code: string) {
+  return await readData("code", code);
+}
+
 async function readData(key: string, value: any) {
   try {
     const data = await profile.findOne({ [key]: value });
