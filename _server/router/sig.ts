@@ -9,6 +9,8 @@ import { join, readJoinRequest } from "@controller/cloud/sig/join";
 import { confirmJoinRequest } from "@controller/cloud/sig/confirm";
 import { addLeader } from "@controller/cloud/sig/addLeader";
 import { addModerator } from "@controller/cloud/sig/addModerator";
+import { deleteLeader } from "@controller/cloud/sig/deleteLeader";
+import { deleteModerator } from "@controller/cloud/sig/deleteModerator";
 
 
 const sig: Router = Router();
@@ -29,5 +31,7 @@ sig.get("/:sigId/join", readJoinRequest);
 sig.post("/:sigId/join", join);
 sig.post("/:sigId/leader", addLeader);
 sig.post("/:sigId/moderator", addModerator);
+sig.delete("/:sigId/leader", deleteLeader);
+sig.delete("/:sigId/moderator", deleteModerator);
 
 export default sig;
