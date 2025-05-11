@@ -30,6 +30,7 @@ export type UserSearch = {
     id?: string | null;
     customId?: string | null;
     email?: string | null;
+    code?: string | null;
 };
 
 export type UserFilter = {

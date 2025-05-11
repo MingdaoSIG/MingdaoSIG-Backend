@@ -15,7 +15,7 @@ import joinRequest from "@DBfunc/joinRequest";
 
 export class UserDB {
   async read(search: UserSearch) {
-    const { email, id, customId } = search;
+    const { email, id, customId, code } = search;
 
     if (id) {
       return await user.readById(id);
@@ -25,6 +25,9 @@ export class UserDB {
     }
     else if (email) {
       return await user.readByEmail(email);
+    }
+    else if (code) {
+      return await user.readByCode(code);
     }
     else {
       throw new Error("Search is required");
