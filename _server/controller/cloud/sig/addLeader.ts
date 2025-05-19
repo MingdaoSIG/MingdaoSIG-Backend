@@ -45,9 +45,7 @@ export const addLeader: RequestHandler = async (
     }
 
     const userData = extendedRequest.userData;
-
     const isPermissionTwo = userData?.permission === 2;
-
     if (!isPermissionTwo) {
       throw new CustomError(
         CustomStatus.FORBIDDEN,
