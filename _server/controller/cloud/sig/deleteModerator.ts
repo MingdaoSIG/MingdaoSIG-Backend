@@ -13,13 +13,13 @@ const SigDB = new MongoDB.Sig();
 const UserDB = new MongoDB.User();
 
 export const deleteModerator: RequestHandler = async (
-  req: Request | ExtendedRequest,
-  res
+  request: Request | ExtendedRequest,
+  response
 ) => {
   try {
-    const { moderatorId } = req.body;
-    const sigId = (req as Request).params.sigId;
-    const decodedJwt: any = (req as ExtendedRequest).JWT;
+    const extendedRequest = request as ExtendedRequest;
+    const { moderatorId } = extendedRequest.body;
+    const sigId = extendedRequest.params.sigId;
 
     if (!sigId || !isValidObjectId(sigId))
       throw new CustomError(
@@ -27,7 +27,7 @@ export const deleteModerator: RequestHandler = async (
         new Error("Invalid sig id")
       );
 
-    new CheckRequestRequirement(req as Request).onlyIncludesBody([
+    new CheckRequestRequirement(extendedRequest).onlyIncludesBody([
       "moderatorId"
     ]);
 
@@ -37,25 +37,11 @@ export const deleteModerator: RequestHandler = async (
         new Error("Invalid moderator id")
       );
 
-    const sigList = await SigDB.list({});
-    const sigData = sigList.find(sig => sig?._id?.toString() === sigId)!;
-
+    const sigData = await SigDB.read({ id: sigId }).catch(() => null);
     if (!sigData) {
       throw new CustomError(
         CustomStatus.INVALID_SIG_ID,
         new Error("Sig not found")
-      );
-    }
-
-    const userData = await UserDB.read({ id: decodedJwt.id }).catch(
-      () => null
-    );
-    const isPermissionTwo = userData?.permission === 2;
-
-    if (!isPermissionTwo) {
-      throw new CustomError(
-        CustomStatus.FORBIDDEN,
-        new Error("Not admin")
       );
     }
 
@@ -66,7 +52,16 @@ export const deleteModerator: RequestHandler = async (
       );
     }
 
-    if (!sigData.moderator || !sigData.moderator.includes(moderatorId)) {
+    const userData = extendedRequest.userData;
+    const isPermissionTwo = userData?.permission === 2;
+    if (!isPermissionTwo) {
+      throw new CustomError(
+        CustomStatus.FORBIDDEN,
+        new Error("Not admin")
+      );
+    }
+
+    if (!sigData.moderator || !sigData.moderator?.includes(moderatorId)) {
       throw new CustomError(
         CustomStatus.NOT_MODERATOR,
         new Error("User is not a moderator of this SIG")
@@ -76,7 +71,6 @@ export const deleteModerator: RequestHandler = async (
     const updatedModerators = sigData.moderator.filter(
       id => id !== moderatorId
     );
-
     const dataToSave = {
       moderator: updatedModerators
     };
@@ -89,14 +83,14 @@ export const deleteModerator: RequestHandler = async (
       );
     }
 
-    return res.status(HttpStatus.OK).json({
+    return response.status(HttpStatus.OK).json({
       status: CustomStatus.OK,
       id: savedData._id,
       data: savedData
     });
   }
   catch (error: any) {
-    return res
+    return response
       .status(HttpStatus.BAD_REQUEST)
       .json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });
   }
