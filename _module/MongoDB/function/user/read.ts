@@ -16,6 +16,7 @@ export async function readByCustomId(id: string) {
   return await readData("customId", id);
 }
 
+// might not work in the future (7 years from now)
 export async function readByCode(code: string) {
   return await readData("code", code);
 }
