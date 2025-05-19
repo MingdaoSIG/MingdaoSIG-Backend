@@ -27,6 +27,7 @@ sig.get("/confirm/:confirmId", confirmJoinRequest);
 
 sig.use(JWTverifier);
 sig.post("/:id", write);
+sig.use("/:sigId/join", rateLimiter(RateLimiterOption._1m_1200req));
 sig.get("/:sigId/join", readJoinRequest);
 sig.post("/:sigId/join", join);
 sig.post("/:sigId/leader", addLeader);
