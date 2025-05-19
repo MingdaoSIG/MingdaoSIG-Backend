@@ -7,4 +7,6 @@ dist
 # Environment Variable
 .env
 
+.DS_Store
+
 updateDatabase
