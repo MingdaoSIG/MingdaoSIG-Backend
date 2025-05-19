@@ -27,9 +27,9 @@ export const deleteLeader: RequestHandler = async (
         new Error("Invalid sig id")
       );
 
-    new CheckRequestRequirement(
-            extendedRequest as Request
-    ).onlyIncludesBody(["leaderId"]);
+    new CheckRequestRequirement(extendedRequest).onlyIncludesBody([
+      "leaderId"
+    ]);
 
     if (!leaderId || !isValidObjectId(leaderId))
       throw new CustomError(
