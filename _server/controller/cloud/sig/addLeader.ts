@@ -13,13 +13,13 @@ const SigDB = new MongoDB.Sig();
 const UserDB = new MongoDB.User();
 
 export const addLeader: RequestHandler = async (
-  req: Request | ExtendedRequest,
-  res
+  request: Request | ExtendedRequest,
+  response
 ) => {
   try {
-    const { code } = req.body;
-    const sigId = (req as Request).params.sigId;
-    const decodedJwt: any = (req as ExtendedRequest).JWT;
+    const extendedRequest = request as ExtendedRequest;
+    const { code } = extendedRequest.body;
+    const sigId = extendedRequest.params.sigId;
 
     if (!sigId || !isValidObjectId(sigId))
       throw new CustomError(
@@ -27,10 +27,9 @@ export const addLeader: RequestHandler = async (
         new Error("Invalid sig id")
       );
 
-    new CheckRequestRequirement(req as Request).onlyIncludesBody(["code"]);
+    new CheckRequestRequirement(extendedRequest).onlyIncludesBody(["code"]);
 
-    const sigList = await SigDB.list({});
-    const sigData = sigList.find(sig => sig?._id?.toString() === sigId)!;
+    const sigData = await SigDB.read({ id: sigId }).catch(() => null);
     if (!sigData) {
       throw new CustomError(
         CustomStatus.INVALID_SIG_ID,
@@ -38,9 +37,14 @@ export const addLeader: RequestHandler = async (
       );
     }
 
-    const userData = await UserDB.read({ id: decodedJwt.id }).catch(
-      () => null
-    );
+    if (sigData.removed) {
+      throw new CustomError(
+        CustomStatus.FORBIDDEN,
+        new Error("Sig removed")
+      );
+    }
+
+    const userData = extendedRequest.userData;
 
     const isPermissionTwo = userData?.permission === 2;
 
@@ -48,13 +52,6 @@ export const addLeader: RequestHandler = async (
       throw new CustomError(
         CustomStatus.FORBIDDEN,
         new Error("Not admin")
-      );
-    }
-
-    if (sigData.removed) {
-      throw new CustomError(
-        CustomStatus.FORBIDDEN,
-        new Error("Sig removed")
       );
     }
 
@@ -80,7 +77,7 @@ export const addLeader: RequestHandler = async (
     }
 
     const dataToSave = {
-      leader: [...(sigData.leader ?? []), newLeaderId]
+      leader: Array.from(new Set(sigData.leader ?? []).add(newLeaderId))
     };
 
     const savedData = await SigDB.write(dataToSave, { id: sigId });
@@ -90,14 +87,15 @@ export const addLeader: RequestHandler = async (
         new Error("Failed to add leader")
       );
     }
-    return res.status(HttpStatus.OK).json({
+
+    return response.status(HttpStatus.OK).json({
       status: CustomStatus.OK,
       id: savedData._id,
       data: savedData
     });
   }
   catch (error: any) {
-    return res
+    return response
       .status(HttpStatus.BAD_REQUEST)
       .json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });
   }
