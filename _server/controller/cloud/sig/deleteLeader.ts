@@ -13,13 +13,13 @@ const SigDB = new MongoDB.Sig();
 const UserDB = new MongoDB.User();
 
 export const deleteLeader: RequestHandler = async (
-  req: Request | ExtendedRequest,
-  res
+  request: Request | ExtendedRequest,
+  response
 ) => {
   try {
-    const { leaderId } = req.body;
-    const sigId = (req as Request).params.sigId;
-    const decodedJwt: any = (req as ExtendedRequest).JWT;
+    const extendedRequest = request as ExtendedRequest;
+    const { leaderId } = extendedRequest.body;
+    const sigId = extendedRequest.params.sigId;
 
     if (!sigId || !isValidObjectId(sigId))
       throw new CustomError(
@@ -27,9 +27,9 @@ export const deleteLeader: RequestHandler = async (
         new Error("Invalid sig id")
       );
 
-    new CheckRequestRequirement(req as Request).onlyIncludesBody([
-      "leaderId"
-    ]);
+    new CheckRequestRequirement(
+            extendedRequest as Request
+    ).onlyIncludesBody(["leaderId"]);
 
     if (!leaderId || !isValidObjectId(leaderId))
       throw new CustomError(
@@ -37,25 +37,11 @@ export const deleteLeader: RequestHandler = async (
         new Error("Invalid leader id")
       );
 
-    const sigList = await SigDB.list({});
-    const sigData = sigList.find(sig => sig?._id?.toString() === sigId)!;
+    const sigData = await SigDB.read({ id: sigId }).catch(() => null);
     if (!sigData) {
       throw new CustomError(
         CustomStatus.INVALID_SIG_ID,
         new Error("Sig not found")
-      );
-    }
-
-    const userData = await UserDB.read({ id: decodedJwt.id }).catch(
-      () => null
-    );
-
-    const isPermissionTwo = userData?.permission === 2;
-
-    if (!isPermissionTwo) {
-      throw new CustomError(
-        CustomStatus.FORBIDDEN,
-        new Error("Not admin")
       );
     }
 
@@ -66,7 +52,16 @@ export const deleteLeader: RequestHandler = async (
       );
     }
 
-    if (!sigData.leader || !sigData.leader.includes(leaderId)) {
+    const userData = extendedRequest.userData;
+    const isPermissionTwo = userData?.permission === 2;
+    if (!isPermissionTwo) {
+      throw new CustomError(
+        CustomStatus.FORBIDDEN,
+        new Error("Not admin")
+      );
+    }
+
+    if (!sigData.leader || !sigData.leader?.includes(leaderId)) {
       throw new CustomError(
         CustomStatus.NOT_LEADER,
         new Error("User is not a leader of this SIG")
@@ -74,7 +69,6 @@ export const deleteLeader: RequestHandler = async (
     }
 
     const updatedLeaders = sigData.leader.filter(id => id !== leaderId);
-
     const dataToSave = {
       leader: updatedLeaders
     };
@@ -87,14 +81,14 @@ export const deleteLeader: RequestHandler = async (
       );
     }
 
-    return res.status(HttpStatus.OK).json({
+    return response.status(HttpStatus.OK).json({
       status: CustomStatus.OK,
       id: savedData._id,
       data: savedData
     });
   }
   catch (error: any) {
-    return res
+    return response
       .status(HttpStatus.BAD_REQUEST)
       .json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });
   }
