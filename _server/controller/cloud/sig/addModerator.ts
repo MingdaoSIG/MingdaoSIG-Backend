@@ -19,8 +19,7 @@ export const addModerator: RequestHandler = async (
   try {
     const extendedRequest = request as ExtendedRequest;
     const { code } = extendedRequest.body;
-    const sigId = (extendedRequest as Request).params.sigId;
-    const decodedJwt: any = extendedRequest.JWT;
+    const sigId = extendedRequest.params.sigId;
 
     if (!sigId || !isValidObjectId(sigId))
       throw new CustomError(
