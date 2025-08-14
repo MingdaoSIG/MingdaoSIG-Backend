@@ -37,16 +37,6 @@ export const deleteModerator: RequestHandler = async (
       );
     }
 
-    const moderatorData = await UserDB.read({ id: moderatorId }).catch(
-      () => null
-    );
-    if (!moderatorData) {
-      throw new CustomError(
-        CustomStatus.INVALID_USER_ID,
-        new Error("Invalid moderator id")
-      );
-    }
-
     const sigData = await SigDB.read({ id: sigId }).catch(() => null);
     if (!sigData) {
       throw new CustomError(

@@ -37,16 +37,6 @@ export const deleteLeader: RequestHandler = async (
       );
     }
 
-    const leaderData = await UserDB.read({ id: leaderId }).catch(
-      () => null
-    );
-    if (!leaderData) {
-      throw new CustomError(
-        CustomStatus.INVALID_USER_ID,
-        new Error("Invalid leader id")
-      );
-    }
-
     const sigData = await SigDB.read({ id: sigId }).catch(() => null);
     if (!sigData) {
       throw new CustomError(
