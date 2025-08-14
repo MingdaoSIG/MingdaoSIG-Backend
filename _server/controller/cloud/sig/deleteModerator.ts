@@ -1,12 +1,11 @@
-import { Request, RequestHandler } from "express";
-import { isValidObjectId } from "mongoose";
-
-import { ExtendedRequest } from "@type/request";
+import CheckRequestRequirement from "@module/CheckRequestRequirement";
 import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
 import MongoDB from "@module/MongoDB";
-import CheckRequestRequirement from "@module/CheckRequestRequirement";
+import type { ExtendedRequest } from "@type/request";
+import type { Request, RequestHandler } from "express";
+import { isValidObjectId } from "mongoose";
 
 
 const SigDB = new MongoDB.Sig();
@@ -31,11 +30,22 @@ export const deleteModerator: RequestHandler = async (
       "moderatorId"
     ]);
 
-    if (!moderatorId || !isValidObjectId(moderatorId))
+    if (!moderatorId || !isValidObjectId(moderatorId)) {
       throw new CustomError(
         CustomStatus.INVALID_USER_ID,
         new Error("Invalid moderator id")
       );
+    }
+
+    const moderatorData = await UserDB.read({ id: moderatorId }).catch(
+      () => null
+    );
+    if (!moderatorData) {
+      throw new CustomError(
+        CustomStatus.INVALID_USER_ID,
+        new Error("Invalid moderator id")
+      );
+    }
 
     const sigData = await SigDB.read({ id: sigId }).catch(() => null);
     if (!sigData) {

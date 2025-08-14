@@ -1,12 +1,11 @@
-import { Request, RequestHandler } from "express";
-import { isValidObjectId } from "mongoose";
-
-import { ExtendedRequest } from "@type/request";
+import CheckRequestRequirement from "@module/CheckRequestRequirement";
 import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
 import MongoDB from "@module/MongoDB";
-import CheckRequestRequirement from "@module/CheckRequestRequirement";
+import type { ExtendedRequest } from "@type/request";
+import type { Request, RequestHandler } from "express";
+import { isValidObjectId } from "mongoose";
 
 
 const SigDB = new MongoDB.Sig();
@@ -31,11 +30,22 @@ export const deleteLeader: RequestHandler = async (
       "leaderId"
     ]);
 
-    if (!leaderId || !isValidObjectId(leaderId))
+    if (!leaderId || !isValidObjectId(leaderId)) {
       throw new CustomError(
         CustomStatus.INVALID_USER_ID,
         new Error("Invalid leader id")
       );
+    }
+
+    const leaderData = await UserDB.read({ id: leaderId }).catch(
+      () => null
+    );
+    if (!leaderData) {
+      throw new CustomError(
+        CustomStatus.INVALID_USER_ID,
+        new Error("Invalid leader id")
+      );
+    }
 
     const sigData = await SigDB.read({ id: sigId }).catch(() => null);
     if (!sigData) {
