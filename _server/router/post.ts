@@ -10,7 +10,8 @@ import {
   listAll,
   listAllBySig,
   listAllByUserLike,
-  listAllByPinned
+  listAllByPinned,
+  listAllByTimeRange
 } from "@controller/cloud/post/list";
 import { dislike, like } from "@controller/cloud/post/like";
 
@@ -23,6 +24,7 @@ post.get("/list/user/:id", listAllByUser);
 post.get("/list/user/:id/like", listAllByUserLike);
 post.get("/list/sig/:id", listAllBySig);
 post.get("/list/pinned", listAllByPinned);
+post.get("/list/range", listAllByTimeRange);
 
 post.get("/:id", read);
 

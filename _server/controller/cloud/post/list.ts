@@ -251,3 +251,64 @@ async function listPostBy(
     data: fullPostData
   });
 }
+
+async function listAllByCreateTimeRange(
+  res: Response, start: Date, end: Date
+) {
+  try {
+    const postData = await PostDB.list({
+      createdAt: { $gte: start, $lte: end },
+      removed: false
+    });
+    return res.status(HttpStatus.OK).json({
+      status: CustomStatus.OK,
+      data: postData
+    });
+  }
+  catch (error: any) {
+    return res
+      .status(HttpStatus.NOT_FOUND)
+      .json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });
+  }
+}
+
+export const listAllByTimeRange: RequestHandler = async (req, res) => {
+  try {
+    const { start, end } = req.query;
+
+    if (!start || !end) {
+      throw new CustomError(
+        CustomStatus.INVALID_TIME_RANGE,
+        new Error("Start and end time are required")
+      );
+    }
+
+    const startTime = new Date(String(start));
+    const endTime = new Date(String(end));
+
+    if (isNaN(startTime.getTime()) || isNaN(endTime.getTime())) {
+      throw new CustomError(
+        CustomStatus.INVALID_TIME_RANGE,
+        new Error("Invalid time format")
+      );
+    }
+
+    if (startTime > endTime) {
+      throw new CustomError(
+        CustomStatus.INVALID_TIME_RANGE,
+        new Error("Start time must be before end time")
+      );
+    }
+
+    //change time to MongoDB time format
+    startTime.setUTCHours(0, 0, 0, 0);
+    endTime.setUTCHours(23, 59, 59, 999);
+
+    return await listAllByCreateTimeRange(res, startTime, endTime);
+  }
+  catch (error: any) {
+    return res
+      .status(HttpStatus.NOT_FOUND)
+      .json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });
+  }
+}

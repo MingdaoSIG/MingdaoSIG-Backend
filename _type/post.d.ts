@@ -11,13 +11,13 @@ export type Post = {
     priority?: number; // 重要性
     pinned?: boolean; // 推薦
     removed?: boolean; // 刪除
-    createAt?: string; // 建立時間
-    updateAt?: string; // 更新時間
+    createdAt?: string; // 建立時間
+    updatedAt?: string; // 更新時間
     __v?: number; // 版本
 };
 
 export type PostWrite = {
-    [K in keyof Omit<Post, "_id" | "createAt" | "updateAt" | "__v">]?: Post[K];
+    [K in keyof Omit<Post, "_id" | "createdAt" | "updatedAt" | "__v">]?: Post[K];
 };
 
 export type PostSearch = {
