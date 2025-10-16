@@ -311,4 +311,4 @@ export const listAllByTimeRange: RequestHandler = async (req, res) => {
       .status(HttpStatus.NOT_FOUND)
       .json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });
   }
-}
+};

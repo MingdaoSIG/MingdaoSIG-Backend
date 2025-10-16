@@ -4,22 +4,19 @@ import { JoinRequest } from "@type/joinRequest";
 import joinRequest from "@schema/joinRequest";
 import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
+import user from "../user";
 
 
 export async function readById(id: string | ObjectId) {
   return await readData("_id", id);
 }
 
-export async function readByUserIdAndSigId(
-  userId: string | ObjectId,
-  sigId: string | ObjectId
-) {
+export async function readByUserIdAndSigId(userId: string, sigId: string) {
   try {
-    const readByUser = await readData("user", userId);
-    const readBySig = await readData("sig", sigId);
+    const data = await readDataByUserAndSig(userId, sigId);
 
-    if (readByUser && readBySig) {
-      return readByUser;
+    if (data) {
+      return data;
     }
     else {
       throw new Error("JoinRequest not found");
@@ -35,6 +32,28 @@ export async function readByUserIdAndSigId(
 
 export async function readByConfirmId(confirmId: string) {
   return await readData("confirmId", confirmId);
+}
+
+async function readDataByUserAndSig(userId: string, sigId: string) {
+  try {
+    const data = await joinRequest.findOne({
+      user: userId,
+      sig: sigId,
+      removed: false
+    });
+
+    if (!data) {
+      throw new Error("JoinRequest not found");
+    }
+
+    return data as unknown as JoinRequest;
+  }
+  catch (error: any) {
+    throw new CustomError(
+      CustomStatus.ERROR_READING_JOIN_REQUEST_FROM_DB,
+      error
+    );
+  }
 }
 
 async function readData(key: string, value: any) {

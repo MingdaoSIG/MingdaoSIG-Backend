@@ -107,7 +107,8 @@ export const readJoinRequest: RequestHandler = async (
     const oldJoinRequest = await JoinRequestDB.read({
       user: userId,
       sig: sigId
-    }).catch(() => null);
+    });
+
     if (!oldJoinRequest) {
       throw new CustomError(
         CustomStatus.NOT_FOUND,
@@ -116,6 +117,7 @@ export const readJoinRequest: RequestHandler = async (
     }
 
     oldJoinRequest.confirmId = undefined;
+
     return res.status(HttpStatus.OK).json({
       status: CustomStatus.OK,
       state: oldJoinRequest.state,
