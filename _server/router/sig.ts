@@ -11,6 +11,7 @@ import { addLeader } from "@controller/cloud/sig/addLeader";
 import { addModerator } from "@controller/cloud/sig/addModerator";
 import { deleteLeader } from "@controller/cloud/sig/deleteLeader";
 import { deleteModerator } from "@controller/cloud/sig/deleteModerator";
+import { listMembers } from "@controller/cloud/sig/listMembers";
 
 
 const sig: Router = Router();
@@ -34,5 +35,6 @@ sig.post("/:sigId/leader", addLeader);
 sig.post("/:sigId/moderator", addModerator);
 sig.delete("/:sigId/leader", deleteLeader);
 sig.delete("/:sigId/moderator", deleteModerator);
+sig.get("/:sigId/members", listMembers);
 
 export default sig;
