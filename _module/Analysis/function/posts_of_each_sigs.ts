@@ -15,13 +15,15 @@ export default async function posts_of_each_sigs(
     }
   });
 
-  const sigList = await schema.sig.find({});
+  // Removed sigs are left out of the chart
+  const sigList = await schema.sig.find({ removed: false });
 
   const sigPosts: Array<{ name: string; count: number }> = [];
   for (const post of posts) {
     const sigId = post.sig;
-    const sigName = sigList.find(sig => sig._id?.toString() === sigId)!
-      .name!;
+    const sigName = sigList.find(sig => sig._id?.toString() === sigId)
+      ?.name;
+    if (!sigName) continue;
     const sigIndex = sigPosts.findIndex(sig => sig.name === sigName);
     if (sigIndex === -1) {
       sigPosts.push({ name: sigName, count: 1 });
