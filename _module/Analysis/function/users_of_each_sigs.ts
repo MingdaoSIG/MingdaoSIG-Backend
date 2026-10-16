@@ -11,7 +11,8 @@ export default async function sig_users(from: Date | undefined, to: Date) {
     }
   });
 
-  const sigList = await schema.sig.find({});
+  // Removed sigs are left out of the chart
+  const sigList = await schema.sig.find({ removed: false });
 
   const sigMembers: Array<{ name: string; count: number }> = [];
   const usersArray: Array<string> = [];
@@ -22,7 +23,8 @@ export default async function sig_users(from: Date | undefined, to: Date) {
       user.sig.forEach(sigId => {
         const sigName = sigList.find(
           sig => sig._id?.toString() === sigId
-        )!.name!;
+        )?.name;
+        if (!sigName) return;
 
         const sigIndex = sigMembers.findIndex(
           sig => sig.name === sigName
