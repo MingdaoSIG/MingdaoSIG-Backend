@@ -1,6 +1,5 @@
 import axios from "axios";
 
-
 const CACHE_TTL_MS = 10 * 60 * 1000;
 // After a failed fetch, wait this long before asking GitHub again.
 const FAILURE_RETRY_MS = 60 * 1000;
@@ -42,7 +41,7 @@ function refreshVersions() {
     inFlight = (async () => {
       const [main, development] = await Promise.allSettled([
         getBranchVersion("main"),
-        getBranchVersion("development")
+        getBranchVersion("development"),
       ]);
       const ok =
         main.status === "fulfilled" && development.status === "fulfilled";
@@ -53,7 +52,7 @@ function refreshVersions() {
         developmentVersion:
           development.status === "fulfilled"
             ? development.value
-            : cached.developmentVersion
+            : cached.developmentVersion,
       };
       nextFetchAt = Date.now() + (ok ? CACHE_TTL_MS : FAILURE_RETRY_MS);
       return cached;
@@ -68,7 +67,7 @@ async function getBranchVersion(branch: "main" | "development") {
   const API_URL = `https://raw.githubusercontent.com/MingdaoSIG/MingdaoSIG-Backend/${branch}/package.json`;
 
   const headers: Record<string, string> = {
-    Accept: "application/vnd.github.v3.raw"
+    Accept: "application/vnd.github.v3.raw",
   };
   if (process.env.GITHUB_TOKEN) {
     headers.Authorization = `token ${process.env.GITHUB_TOKEN}`;
@@ -76,7 +75,11 @@ async function getBranchVersion(branch: "main" | "development") {
 
   const response = await axios.get(API_URL, {
     headers,
-    timeout: REQUEST_TIMEOUT_MS
+    timeout: REQUEST_TIMEOUT_MS,
+    // `timeout` only starts once the request has a socket. Behind an HTTPS
+    // proxy, axios first opens a CONNECT tunnel, and a proxy that never
+    // answers would stall the first /ping forever; the signal bounds it.
+    signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
   });
 
   const version = response.data?.version;

@@ -6,10 +6,9 @@ import {
   readByCustomId,
   readById,
   readFullById,
-  readMe
+  readMe,
 } from "@controller/cloud/user/read";
 import { write } from "@controller/cloud/user/write";
-
 
 const user: Router = Router();
 

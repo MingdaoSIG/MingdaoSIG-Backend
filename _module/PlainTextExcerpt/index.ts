@@ -9,9 +9,9 @@ const HTML_ENTITIES: Record<string, string> = {
   amp: "&",
   lt: "<",
   gt: ">",
-  quot: "\"",
+  quot: '"',
   apos: "'",
-  nbsp: " "
+  nbsp: " ",
 };
 
 /**
@@ -22,7 +22,7 @@ const HTML_ENTITIES: Record<string, string> = {
  */
 export default function PlainTextExcerpt(
   markdown: unknown,
-  length = DEFAULT_LENGTH
+  length = DEFAULT_LENGTH,
 ): string {
   if (typeof markdown !== "string" || markdown === "") return "";
 
@@ -31,7 +31,7 @@ export default function PlainTextExcerpt(
     // Markdown escapes such as \* or \#: park the character in the private
     // use area so the markup rules below leave it alone, restore at the end.
     .replace(/\\([\\`*_{}[\]()#+\-.!|>~$<])/g, (_, char: string) =>
-      String.fromCharCode(ESCAPE_BASE + char.charCodeAt(0))
+      String.fromCharCode(ESCAPE_BASE + char.charCodeAt(0)),
     )
     // Fenced code blocks and display formulas (an unclosed one runs to the end)
     .replace(/^ {0,3}(```|~~~)[\s\S]*?(^ {0,3}\1|$(?![\s\S]))/gm, " ")
@@ -60,8 +60,8 @@ export default function PlainTextExcerpt(
     .replace(/\$[^$\n]+\$/g, " ")
     // HTML entities
     .replace(/&(#\d{1,7}|#x[0-9a-fA-F]{1,6}|[a-zA-Z]{2,8});/g, decodeEntity)
-    .replace(/[\uE000-\uE07F]/g, char =>
-      String.fromCharCode(char.charCodeAt(0) - ESCAPE_BASE)
+    .replace(/[\uE000-\uE07F]/g, (char) =>
+      String.fromCharCode(char.charCodeAt(0) - ESCAPE_BASE),
     )
     .replace(/\s+/g, " ")
     .trim();
@@ -69,7 +69,7 @@ export default function PlainTextExcerpt(
   const characters = Array.from(text);
   if (characters.length <= length) return text;
 
-  return characters.slice(0, length).join("").trimEnd() + "…";
+  return `${characters.slice(0, length).join("").trimEnd()}…`;
 }
 
 const cache = new Map<string, string>();
@@ -99,8 +99,7 @@ function decodeEntity(entity: string, code: string) {
         : parseInt(code.slice(1), 10);
     try {
       return String.fromCodePoint(codePoint);
-    }
-    catch {
+    } catch {
       return entity;
     }
   }

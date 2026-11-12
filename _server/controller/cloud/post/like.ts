@@ -7,93 +7,90 @@ import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
 import MongoDB from "@module/MongoDB";
 
-
 const PostDB = new MongoDB.Post();
 
-export const like: RequestHandler = async (
-  req: Request | ExtendedRequest,
-  res
+export const like: RequestHandler<Record<string, string>> = async (
+  req: Request<Record<string, string>> | ExtendedRequest,
+  res,
 ) => {
   try {
-    const id = (req as Request).params.id;
+    const id = req.params.id;
     const decodedJwt: any = (req as ExtendedRequest).JWT;
 
     if (!isValidObjectId(id))
       throw new CustomError(
         CustomStatus.INVALID_POST_ID,
-        new Error("Invalid post id")
+        new Error("Invalid post id"),
       );
 
     const oldData = await PostDB.read({ id }).catch(() => null);
     if (!oldData)
       throw new CustomError(
         CustomStatus.INVALID_POST_ID,
-        new Error("Invalid post id")
+        new Error("Invalid post id"),
       );
 
     if (!oldData.like?.includes(decodedJwt.id)) {
       await PostDB.write(
         {
-          // @ts-ignore
+          // @ts-expect-error
           $addToSet: {
-            like: decodedJwt.id
+            like: decodedJwt.id,
           },
-          likes: (oldData.like?.length || 0) + 1
+          likes: (oldData.like?.length || 0) + 1,
         },
-        { id }
+        { id },
       );
     }
 
     return res.status(HttpStatus.OK).json({
-      status: CustomStatus.OK
+      status: CustomStatus.OK,
     });
-  }
-  catch (error: any) {
+  } catch (error: any) {
     return res
       .status(HttpStatus.BAD_REQUEST)
       .json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });
   }
 };
 
-export const dislike: RequestHandler = async (
-  req: Request | ExtendedRequest,
-  res
+export const dislike: RequestHandler<Record<string, string>> = async (
+  req: Request<Record<string, string>> | ExtendedRequest,
+  res,
 ) => {
   try {
-    const id = (req as Request).params.id;
+    const id = req.params.id;
     const decodedJwt: any = (req as ExtendedRequest).JWT;
 
     if (!isValidObjectId(id))
       throw new CustomError(
         CustomStatus.INVALID_POST_ID,
-        new Error("Invalid post id")
+        new Error("Invalid post id"),
       );
 
     const oldData = await PostDB.read({ id }).catch(() => null);
     if (!oldData)
       throw new CustomError(
         CustomStatus.INVALID_POST_ID,
-        new Error("Invalid post id")
+        new Error("Invalid post id"),
       );
 
     if (oldData.like?.includes(decodedJwt.id)) {
       await PostDB.write(
         {
-          // @ts-ignore
+          // @ts-expect-error
           $pull: {
-            like: decodedJwt.id
+            like: decodedJwt.id,
           },
-          likes: (oldData.like.length || 0) - 1
+          likes: (oldData.like.length || 0) - 1,
         },
-        { id }
+        { id },
       );
     }
 
     return res.status(HttpStatus.OK).json({
-      status: CustomStatus.OK
+      status: CustomStatus.OK,
     });
-  }
-  catch (error: any) {
+  } catch (error: any) {
     return res
       .status(HttpStatus.BAD_REQUEST)
       .json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });

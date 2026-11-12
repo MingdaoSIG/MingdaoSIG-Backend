@@ -7,13 +7,12 @@ import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
 import MongoDB from "@module/MongoDB";
 
-
 const SigDB = new MongoDB.Sig();
 const UserDB = new MongoDB.User();
 
-export const listMembers: RequestHandler = async (
-  request: Request | ExtendedRequest,
-  response
+export const listMembers: RequestHandler<Record<string, string>> = async (
+  request: Request<Record<string, string>> | ExtendedRequest,
+  response,
 ) => {
   try {
     const extendedRequest = request as ExtendedRequest;
@@ -22,25 +21,19 @@ export const listMembers: RequestHandler = async (
     if (!sigId || !isValidObjectId(sigId)) {
       throw new CustomError(
         CustomStatus.INVALID_SIG_ID,
-        new Error("Invalid sig id")
+        new Error("Invalid sig id"),
       );
     }
 
     const sigData = await SigDB.read({ id: sigId }).catch(() => null);
     if (!sigData) {
-      throw new CustomError(
-        CustomStatus.NOT_FOUND,
-        new Error("Sig not found")
-      );
+      throw new CustomError(CustomStatus.NOT_FOUND, new Error("Sig not found"));
     }
 
     const userData = extendedRequest.userData;
     const isPermissionTwo = userData?.permission === 2;
     if (!isPermissionTwo) {
-      throw new CustomError(
-        CustomStatus.FORBIDDEN,
-        new Error("Not admin")
-      );
+      throw new CustomError(CustomStatus.FORBIDDEN, new Error("Not admin"));
     }
 
     // List all users that have this sig in their sig array
@@ -49,10 +42,9 @@ export const listMembers: RequestHandler = async (
     return response.status(HttpStatus.OK).json({
       status: CustomStatus.OK,
       count: members.length,
-      data: members
+      data: members,
     });
-  }
-  catch (error: any) {
+  } catch (error: any) {
     return response
       .status(HttpStatus.BAD_REQUEST)
       .json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });

@@ -5,7 +5,6 @@ import sig from "@schema/sig";
 import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 
-
 export async function readById(id: string | ObjectId) {
   return await readData("_id", id);
 }
@@ -23,8 +22,7 @@ async function readData(key: string, value: any) {
     }
 
     return data as unknown as Sig;
-  }
-  catch (error: any) {
+  } catch (error: any) {
     throw new CustomError(CustomStatus.ERROR_READING_SIG_FROM_DB, error);
   }
 }

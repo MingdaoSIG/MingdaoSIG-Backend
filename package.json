@@ -1,51 +1,46 @@
 {
-    "name": "MingdaoSIG",
-    "version": "2.9.1",
-    "description": "",
-    "main": "index.ts",
-    "scripts": {
-        "build": "tsc && tsc-alias",
-        "build:watch": "tsc && (concurrently \"tsc -w\" \"tsc-alias -w\")",
-        "start": "node dist/index.js",
-        "start:dev": "nodemon --delay 1 dist/index.js",
-        "dev": "concurrently \"npm run build:watch\" \"npm run start:dev\"",
-        "check-and-fix-lint": "(echo '\n---\n\nScanning for lint error...' && eslint .) || (echo '\n\n---\n\nFound lint error, working on it...' && eslint . --fix) || echo \"\n\nWARNING: There are some error that can't be fixed automatically!\"",
-        "lintfix": "npm run --silent check-and-fix-lint"
-    },
-    "keywords": [],
-    "author": "",
-    "license": "ISC",
-    "dependencies": {
-        "@types/jsonwebtoken": "^9.0.3",
-        "axios": "^1.5.0",
-        "body-parser": "^1.20.2",
-        "compression": "^1.8.2",
-        "cors": "^2.8.5",
-        "dotenv": "^16.3.1",
-        "express": "^4.18.2",
-        "express-rate-limit": "^6.11.2",
-        "jsonwebtoken": "^9.0.2",
-        "mongoose": "^7.5.3",
-        "morgan": "^1.10.0",
-        "sharp": "^0.32.6",
-        "tsc-alias": "^1.8.8",
-        "uuid": "^9.0.1"
-    },
-    "devDependencies": {
-        "@types/body-parser": "^1.19.3",
-        "@types/compression": "^1.8.1",
-        "@types/cors": "^2.8.14",
-        "@types/express": "^4.17.18",
-        "@types/morgan": "^1.9.5",
-        "@types/uuid": "^9.0.7",
-        "@typescript-eslint/eslint-plugin": "^6.13.2",
-        "@typescript-eslint/parser": "^5.62.0",
-        "concurrently": "^8.2.1",
-        "eslint": "^8.50.0",
-        "eslint-plugin-import": "^2.29.0",
-        "nodemon": "^3.0.1",
-        "prettier": "^2.8.8",
-        "prettier-eslint": "^16.3.0",
-        "typescript": "^4.9.5"
-    }
+  "name": "MingdaoSIG",
+  "version": "2.9.1",
+  "description": "",
+  "main": "index.ts",
+  "scripts": {
+    "build": "tsc && tsc-alias",
+    "build:watch": "tsc && (concurrently \"tsc -w\" \"tsc-alias -w\")",
+    "start": "node dist/index.js",
+    "start:dev": "nodemon --delay 1 dist/index.js",
+    "dev": "concurrently \"npm run build:watch\" \"npm run start:dev\"",
+    "check": "biome check",
+    "check:fix": "biome check --fix"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "engines": {
+    "node": "24"
+  },
+  "packageManager": "pnpm@10.34.9",
+  "dependencies": {
+    "axios": "^1.21.1",
+    "compression": "^1.8.2",
+    "cors": "^2.8.6",
+    "express": "^5.3.0",
+    "express-rate-limit": "^8.7.4",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.12.1",
+    "morgan": "^1.12.1",
+    "sharp": "^0.35.5"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.6.7",
+    "@types/compression": "^1.8.1",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/morgan": "^1.9.10",
+    "@types/node": "^24.19.2",
+    "concurrently": "^10.0.7",
+    "nodemon": "^3.1.14",
+    "tsc-alias": "^1.9.10",
+    "typescript": "^6.0.3"
+  }
 }

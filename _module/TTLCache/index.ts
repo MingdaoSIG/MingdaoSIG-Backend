@@ -14,7 +14,10 @@ type Entry<T> = {
 export default class TTLCache<T> {
   private entries = new Map<string, Entry<T>>();
 
-  constructor(private ttlMs: number, private maxEntries = 500) {}
+  constructor(
+    private ttlMs: number,
+    private maxEntries = 500,
+  ) {}
 
   getOrLoad(key: string, load: () => Promise<T>): Promise<T> {
     const now = Date.now();

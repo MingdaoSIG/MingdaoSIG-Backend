@@ -1,10 +1,9 @@
 import schema from "./schema";
 
-
 export default async function top_liked_post(
   from: Date | undefined,
   to: Date,
-  limit: number
+  limit: number,
 ) {
   const TITLE = `Top ${limit} liked posts`;
 
@@ -13,8 +12,8 @@ export default async function top_liked_post(
       removed: false,
       createdAt: {
         $gte: from ?? 0,
-        $lte: to
-      }
+        $lte: to,
+      },
     })
     .sort({ likes: -1 })
     .limit(limit);
@@ -29,6 +28,6 @@ export default async function top_liked_post(
   return {
     func: top_liked_post.name,
     title: TITLE,
-    content: postArray
+    content: postArray,
   };
 }

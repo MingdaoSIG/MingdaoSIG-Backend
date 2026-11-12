@@ -11,10 +11,9 @@ import {
   listAllBySig,
   listAllByUserLike,
   listAllByPinned,
-  listAllByTimeRange
+  listAllByTimeRange,
 } from "@controller/cloud/post/list";
 import { dislike, like } from "@controller/cloud/post/like";
-
 
 const post: Router = Router();
 

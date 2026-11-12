@@ -12,24 +12,19 @@ import sig from "@DBfunc/sig";
 import comment from "@DBfunc/comment";
 import joinRequest from "@DBfunc/joinRequest";
 
-
 export class UserDB {
   async read(search: UserSearch) {
     const { email, id, customId, code } = search;
 
     if (id) {
       return await user.readById(id);
-    }
-    else if (customId) {
+    } else if (customId) {
       return await user.readByCustomId(customId);
-    }
-    else if (email) {
+    } else if (email) {
       return await user.readByEmail(email);
-    }
-    else if (code) {
+    } else if (code) {
       return await user.readByCode(code);
-    }
-    else {
+    } else {
       throw new Error("Search is required");
     }
   }
@@ -39,11 +34,9 @@ export class UserDB {
 
     if (id) {
       return await user.writeById(id, dataToWrite);
-    }
-    else if (email) {
+    } else if (email) {
       return await user.writeByEmail(email, dataToWrite);
-    }
-    else {
+    } else {
       throw new Error("Search is required");
     }
   }
@@ -51,8 +44,7 @@ export class UserDB {
   async list(filter: UserFilter, option?: ReadOption) {
     if (filter) {
       return await user.list(filter, option);
-    }
-    else {
+    } else {
       throw new Error("Search is required");
     }
   }
@@ -64,7 +56,7 @@ export class UserDB {
   async upsertByEmail(
     email: string,
     dataToSet: UserWrite,
-    dataToInsert: UserWrite
+    dataToInsert: UserWrite,
   ) {
     return await user.upsertByEmail(email, dataToSet, dataToInsert);
   }
@@ -76,8 +68,7 @@ export class ImageDB {
 
     if (id) {
       return await image.read(id);
-    }
-    else {
+    } else {
       throw new Error("Search is required");
     }
   }
@@ -85,8 +76,7 @@ export class ImageDB {
   async write(dataToWrite: ImageWrite) {
     if (dataToWrite) {
       return await image.write(dataToWrite);
-    }
-    else {
+    } else {
       throw new Error("Data to write is required");
     }
   }
@@ -98,8 +88,7 @@ export class PostDB {
 
     if (id) {
       return await post.read(id, option);
-    }
-    else {
+    } else {
       throw new Error("Search is required");
     }
   }
@@ -109,11 +98,9 @@ export class PostDB {
 
     if (id) {
       return await post.write(id, dataToWrite);
-    }
-    else if (!id) {
+    } else if (!id) {
       return await post.write(null, dataToWrite);
-    }
-    else {
+    } else {
       throw new Error("Search is required");
     }
   }
@@ -121,8 +108,7 @@ export class PostDB {
   async list(filter: PostFilter, option?: Option) {
     if (filter) {
       return await post.list(filter, option);
-    }
-    else {
+    } else {
       throw new Error("Search is required");
     }
   }
@@ -134,11 +120,9 @@ export class SigDB {
 
     if (id) {
       return await sig.readById(id);
-    }
-    else if (customId) {
+    } else if (customId) {
       return await sig.readByCustomId(customId);
-    }
-    else {
+    } else {
       throw new Error("Search is required");
     }
   }
@@ -148,8 +132,7 @@ export class SigDB {
 
     if (id) {
       return await sig.write(id, dataToWrite);
-    }
-    else {
+    } else {
       throw new Error("Search is required");
     }
   }
@@ -157,8 +140,7 @@ export class SigDB {
   async list(filter: SigFilter, option?: ReadOption) {
     if (filter) {
       return await sig.list(filter, option);
-    }
-    else {
+    } else {
       throw new Error("Search is required");
     }
   }
@@ -170,8 +152,7 @@ export class CommentDB {
 
     if (id) {
       return await comment.read(id);
-    }
-    else {
+    } else {
       throw new Error("Search is required");
     }
   }
@@ -181,11 +162,9 @@ export class CommentDB {
 
     if (id) {
       return await comment.write(id, dataToWrite);
-    }
-    else if (!id) {
+    } else if (!id) {
       return await comment.write(null, dataToWrite);
-    }
-    else {
+    } else {
       throw new Error("Search is required");
     }
   }
@@ -193,8 +172,7 @@ export class CommentDB {
   async list(filter: CommentFilter, option?: Option) {
     if (filter) {
       return await comment.list(filter, option);
-    }
-    else {
+    } else {
       throw new Error("Search is required");
     }
   }
@@ -210,14 +188,11 @@ export class JoinRequestDB {
 
     if (id) {
       return await joinRequest.readById(id);
-    }
-    else if (user && sig) {
+    } else if (user && sig) {
       return await joinRequest.readByUserIdAndSigId(user, sig);
-    }
-    else if (confirmId) {
+    } else if (confirmId) {
       return await joinRequest.readByConfirmId(confirmId);
-    }
-    else {
+    } else {
       throw new Error("Search is required");
     }
   }
@@ -226,11 +201,9 @@ export class JoinRequestDB {
 
     if (id) {
       return await joinRequest.write(id, dataToWrite);
-    }
-    else if (!id) {
+    } else if (!id) {
       return await joinRequest.write(null, dataToWrite);
-    }
-    else {
+    } else {
       throw new Error("Search is required");
     }
   }
@@ -250,6 +223,6 @@ const MongoDB = {
   Post: PostDB,
   Sig: SigDB,
   Comment: CommentDB,
-  JoinRequest: JoinRequestDB
+  JoinRequest: JoinRequestDB,
 };
 export default MongoDB;

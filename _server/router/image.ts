@@ -1,5 +1,4 @@
-import { Router } from "express";
-import bodyParser from "body-parser";
+import express, { Router } from "express";
 
 import JWTverifier from "@middleware/JWTverifier";
 import { rateLimiter, RateLimiterOption } from "@middleware/rateLimiter";
@@ -7,10 +6,9 @@ import {
   ALLOWED_IMAGE_TYPES,
   MAX_UPLOAD_BYTES,
   checkUploadHeaders,
-  upload
+  upload,
 } from "@controller/cloud/image/upload";
 import { read } from "@controller/cloud/image/read";
-
 
 const image: Router = Router();
 
@@ -22,11 +20,11 @@ image.use("/", JWTverifier);
 image.post(
   "/",
   checkUploadHeaders,
-  bodyParser.raw({
+  express.raw({
     type: ALLOWED_IMAGE_TYPES,
-    limit: MAX_UPLOAD_BYTES
+    limit: MAX_UPLOAD_BYTES,
   }),
-  upload
+  upload,
 );
 
 export default image;

@@ -7,14 +7,13 @@ import signJWT from "@module/SignJWT";
 import getUserData, { getUserDataBySession } from "@module/GetUserData";
 import getGoogleUserData from "@module/GetGoogleUserData";
 
-
 export const login: RequestHandler = async (req, res) => {
   try {
     // const checker = new CheckRequestRequirement(req);
     // checker.matchBody(["googleToken", "session"]);
 
-    const googleToken: string = req.body.googleToken;
-    const session: string = req.body.session;
+    const googleToken: string = req.body?.googleToken;
+    const session: string = req.body?.session;
 
     if (!googleToken && !session) {
       return res
@@ -26,17 +25,16 @@ export const login: RequestHandler = async (req, res) => {
       const googleUserData = await getGoogleUserData(googleToken);
       const userData = await getUserData(
         googleUserData.email,
-        googleUserData.picture
+        googleUserData.picture,
       );
 
       const jwt = signJWT({ id: userData._id });
       return res.status(HttpStatus.OK).json({
         status: CustomStatus.OK,
-        authorization: "Bearer " + jwt,
-        data: userData
+        authorization: `Bearer ${jwt}`,
+        data: userData,
       });
-    }
-    else if (session) {
+    } else if (session) {
       const userData = await getUserDataBySession(session);
       if (!userData) {
         return res
@@ -46,12 +44,11 @@ export const login: RequestHandler = async (req, res) => {
       const jwt = signJWT({ id: userData._id });
       return res.status(HttpStatus.OK).json({
         status: CustomStatus.OK,
-        authorization: "Bearer " + jwt,
-        data: userData
+        authorization: `Bearer ${jwt}`,
+        data: userData,
       });
     }
-  }
-  catch (error: any) {
+  } catch (error: any) {
     return res
       .status(HttpStatus.BAD_REQUEST)
       .json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });

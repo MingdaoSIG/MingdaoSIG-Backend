@@ -5,7 +5,6 @@ import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 import leanDefaults from "@DBfunc/_helper/leanDefaults";
 
-
 // Read only: returns plain objects (lean) with schema defaults filled in.
 export default async function list(search: CommentFilter, option?: Option) {
   try {
@@ -22,14 +21,10 @@ export default async function list(search: CommentFilter, option?: Option) {
       throw new Error("Comment not found");
     }
 
-    return data.map(item =>
-      leanDefaults(comment, item)
+    return data.map((item) =>
+      leanDefaults(comment, item),
     ) as unknown as Comment[];
-  }
-  catch (error: any) {
-    throw new CustomError(
-      CustomStatus.ERROR_READING_COMMENT_FROM_DB,
-      error
-    );
+  } catch (error: any) {
+    throw new CustomError(CustomStatus.ERROR_READING_COMMENT_FROM_DB, error);
   }
 }

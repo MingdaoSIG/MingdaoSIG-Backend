@@ -1,0 +1,72 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.6.7/schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "files": {
+    "ignoreUnknown": true,
+    // Code and JSON only, like the frontend (YAML and Markdown stay as is).
+    "includes": [
+      "**/*.ts",
+      "**/*.js",
+      "**/*.json",
+      "**/*.jsonc",
+      "!**/node_modules",
+      "!**/dist"
+    ]
+  },
+  // Same formatting as the frontend (MingdaoSIG-Frontend/biome.json).
+  "formatter": {
+    "formatWithErrors": false,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 80,
+    "lineEnding": "lf",
+    "bracketSpacing": true,
+    "attributePosition": "auto"
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "preset": "recommended",
+      "style": {
+        // Type-only imports are dropped from the build either way (the
+        // frontend turns this off too).
+        "useImportType": "off",
+        // Would need refactors; kept as warnings until they are fixed.
+        "noNonNullAssertion": "warn"
+      },
+      "suspicious": {
+        // Off in the old ESLint config as well; there are ~100 existing uses.
+        "noExplicitAny": "off"
+      }
+    }
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "double",
+      "quoteProperties": "asNeeded",
+      "trailingCommas": "all",
+      "semicolons": "always",
+      "arrowParentheses": "always",
+      "bracketSpacing": true,
+      "bracketSameLine": false
+    }
+  },
+  "json": {
+    "formatter": {
+      "trailingCommas": "none"
+    }
+  },
+  "assist": {
+    "actions": {
+      "source": {
+        // Sorting imports would change the order modules load in (and run
+        // their top-level code). Turn on in a change of its own.
+        "organizeImports": "off"
+      }
+    }
+  }
+}

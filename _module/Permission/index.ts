@@ -1,7 +1,6 @@
 import { Sig } from "@type/sig";
 import { User } from "@type/user";
 
-
 export const ANNOUNCEMENT_SIG_ID = "652d60b842cdf6a660c2b778"; // 公告
 export const ADMIN_PERMISSION = 2;
 
@@ -31,7 +30,7 @@ export function canPostToSig(
   user: User | null | undefined,
   userId: string,
   sig: Sig,
-  sigList: Sig[]
+  sigList: Sig[],
 ) {
   if (isAdmin(user)) return true;
 
@@ -39,7 +38,7 @@ export function canPostToSig(
   if (sigId === ANNOUNCEMENT_SIG_ID) return isSigModerator(sig, userId);
 
   const isMember = Boolean(user?.sig?.includes(sigId));
-  const isAnyModerator = sigList.some(item => isSigModerator(item, userId));
+  const isAnyModerator = sigList.some((item) => isSigModerator(item, userId));
 
   return isMember || isSigLeader(sig, userId) || isAnyModerator;
 }

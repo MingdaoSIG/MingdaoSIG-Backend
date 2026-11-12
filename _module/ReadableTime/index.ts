@@ -20,17 +20,22 @@
  * console.log(result.string); // "3 years, 9 months, 1 day, 10 hours, 17 minutes, 36 seconds"
  */
 export default function ReadableTime(milliseconds: number): {
-    specific: {
-        year: number;
-        month: number;
-        day: number;
-        hour: number;
-        minute: number;
-        second: number;
-    };
-    string: string;
+  specific: {
+    year: number;
+    month: number;
+    day: number;
+    hour: number;
+    minute: number;
+    second: number;
+  };
+  string: string;
 } {
-  let year, month, day, hour, minute, second;
+  let year: number,
+    month: number,
+    day: number,
+    hour: number,
+    minute: number,
+    second: number;
 
   second = Math.floor(milliseconds / 1000);
   minute = Math.floor(second / 60);
@@ -41,7 +46,6 @@ export default function ReadableTime(milliseconds: number): {
   hour = hour % 24;
   month = Math.floor(day / 30);
   day = day % 30;
-  // eslint-disable-next-line prefer-const
   year = Math.floor(month / 12);
   month = month % 12;
 
@@ -52,7 +56,7 @@ export default function ReadableTime(milliseconds: number): {
       day,
       hour,
       minute,
-      second
+      second,
     },
     string: [
       year && `${year} ${year === 1 ? "year" : "years"}`,
@@ -60,9 +64,9 @@ export default function ReadableTime(milliseconds: number): {
       day && `${day} ${day === 1 ? "day" : "days"}`,
       hour && `${hour} ${hour === 1 ? "hour" : "hours"}`,
       minute && `${minute} ${minute === 1 ? "minute" : "minutes"}`,
-      second && `${second} ${second === 1 ? "second" : "seconds"}`
+      second && `${second} ${second === 1 ? "second" : "seconds"}`,
     ]
       .filter(Boolean)
-      .join(", ")
+      .join(", "),
   };
 }

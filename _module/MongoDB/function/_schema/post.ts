@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 
-
 const Schema = mongoose.Schema;
 
 const postSchema = new Schema(
@@ -15,9 +14,9 @@ const postSchema = new Schema(
     likes: { type: Number, default: 0 },
     priority: { type: Number, default: 0 },
     pinned: { type: Boolean, default: false },
-    removed: { type: Boolean, default: false }
+    removed: { type: Boolean, default: false },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // One index per query shape. Built at startup by @module/EnsureIndexes.

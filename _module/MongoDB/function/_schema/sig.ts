@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 
-
 const Schema = mongoose.Schema;
 
 const sigSchema = new Schema({
@@ -11,7 +10,7 @@ const sigSchema = new Schema({
   customId: String,
   moderator: [String],
   leader: [String],
-  removed: { type: Boolean, default: false }
+  removed: { type: Boolean, default: false },
 });
 
 export default mongoose.model("sig", sigSchema, "sig");

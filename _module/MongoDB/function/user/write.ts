@@ -5,7 +5,6 @@ import profile from "@schema/user";
 import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 
-
 export async function writeById(id: string | ObjectId, dataToSave: UserWrite) {
   return await _writeData("_id", id, dataToSave);
 }
@@ -21,16 +20,15 @@ export async function writeByEmail(email: string, dataToSave: UserWrite) {
 export async function upsertByEmail(
   email: string,
   dataToSet: UserWrite,
-  dataToInsert: UserWrite
+  dataToInsert: UserWrite,
 ) {
   try {
     return (await profile.findOneAndUpdate(
       { email },
       { $set: dataToSet, $setOnInsert: dataToInsert },
-      { upsert: true, new: true, sort: { _id: 1 } }
+      { upsert: true, returnDocument: "after", sort: { _id: 1 } },
     )) as unknown as User;
-  }
-  catch (error: any) {
+  } catch (error: any) {
     throw new CustomError(CustomStatus.ERROR_WRITING_USER_TO_DB, error);
   }
 }
@@ -41,19 +39,13 @@ async function _writeData(key: string, value: any, dataToSave: UserWrite) {
     const code = data ? 1 : 0;
 
     if (code) {
-      return (await profile.findOneAndUpdate(
-        { [key]: value },
-        dataToSave,
-        {
-          new: true
-        }
-      )) as unknown as User;
-    }
-    else {
+      return (await profile.findOneAndUpdate({ [key]: value }, dataToSave, {
+        returnDocument: "after",
+      })) as unknown as User;
+    } else {
       return (await profile.create(dataToSave)) as unknown as User;
     }
-  }
-  catch (error: any) {
+  } catch (error: any) {
     throw new CustomError(CustomStatus.ERROR_WRITING_USER_TO_DB, error);
   }
 }
