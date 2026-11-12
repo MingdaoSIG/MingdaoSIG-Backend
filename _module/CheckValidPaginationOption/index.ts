@@ -13,8 +13,9 @@ export default function CheckValidPaginationOption(
   const skip = req.query?.skip;
   const limit = req.query?.limit;
 
-  // ! Without skip and limit the caller gets every item. The admin post page
-  // ! (GET /post/list with no query) depends on this. Remove once it paginates.
+  // Nothing to check. The caller picks the default page size: 50 for
+  // GET /post/list and /post/list/admin; the user, like and SIG post lists
+  // still return every item.
   if (skip === undefined && limit === undefined) return true;
 
   // Each value that is present is checked on its own, so sending only

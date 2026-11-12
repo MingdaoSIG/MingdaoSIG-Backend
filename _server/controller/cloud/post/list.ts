@@ -23,6 +23,9 @@ const sortMethods = {
   oldest: { createdAt: 1 },
 };
 
+// Page size of GET /post/list when the caller sends no `limit`.
+const DEFAULT_LIST_LIMIT = 50;
+
 // GET /post/list/admin
 const ADMIN_DEFAULT_LIMIT = 50;
 const ADMIN_MAX_LIMIT = 100;
@@ -56,7 +59,7 @@ export const listAll: RequestHandler<Record<string, string>> = async (
       res,
       { pinned: false },
       skip ? Number(skip) : 0,
-      limit ? Number(limit) : 0,
+      limit ? Number(limit) : DEFAULT_LIST_LIMIT,
       sortMethod,
     );
   } catch (error: any) {
