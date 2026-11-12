@@ -1,2 +1,6 @@
 onlyBuiltDependencies:
   - sharp
+overrides:
+  # GHSA-g3hv-75wg-m249: no fixed 10.x; 11 keeps the CommonJS `minimatch`
+  # export nodemon requires. nodemon is a dev-only dependency.
+  nodemon>minimatch: ^11.0.1

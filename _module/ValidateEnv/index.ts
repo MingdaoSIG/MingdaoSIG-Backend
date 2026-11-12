@@ -7,6 +7,18 @@ const RECOMMENDED: Record<string, string> = {
   GITHUB_TOKEN: "/ping fetches the latest versions from GitHub without a token",
 };
 
+// Web push needs all three (VAPID keys and a mailto: subject); without them
+// it is off and /push answers 503.
+const WEB_PUSH = [
+  "WEB_PUSH_PUBLIC_KEY",
+  "WEB_PUSH_PRIVATE_KEY",
+  "WEB_PUSH_SUBJECT",
+] as const;
+
+// Umami traffic on the admin overview needs both; without them
+// /admin/traffic answers 503 and the frontend hides the card.
+const UMAMI = ["UMAMI_DATABASE_URL", "UMAMI_WEBSITE_ID"] as const;
+
 export type Env = {
   MONGO_URI: string;
   JWT_SECRET: string;
@@ -43,6 +55,24 @@ export default function ValidateEnv(): Env {
     if (!process.env[name]) {
       console.warn(`Config : ${name} is not set, ${impact}.`);
     }
+  }
+
+  const missingPush = WEB_PUSH.filter((name) => !process.env[name]?.trim());
+  if (missingPush.length > 0) {
+    console.warn(
+      `Config : ${missingPush.join(", ")} ${
+        missingPush.length === 1 ? "is" : "are"
+      } not set, web push is disabled.`,
+    );
+  }
+
+  const missingUmami = UMAMI.filter((name) => !process.env[name]?.trim());
+  if (missingUmami.length > 0) {
+    console.warn(
+      `Config : ${missingUmami.join(", ")} ${
+        missingUmami.length === 1 ? "is" : "are"
+      } not set, /admin/traffic is disabled.`,
+    );
   }
 
   return {

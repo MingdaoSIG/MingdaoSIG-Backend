@@ -27,11 +27,37 @@ export const AUDIT_ACTIONS = [
   "sig.member.remove",
   "join.accept",
   "join.reject",
+  "series.remove",
+  "report.resolve",
+  "report.dismiss",
+  "post.move",
+  "sig.merge",
+  "rollover.apply",
+  "user.update",
+  "badge.update",
+  "user.suspend",
+  "user.unsuspend",
+  "banner.update",
+  "broadcast.send",
+  "keyword.update",
 ] as const;
 
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
 
-export type AuditTargetKind = "post" | "comment" | "user" | "sig" | "join";
+export type AuditTargetKind =
+  | "post"
+  | "comment"
+  | "user"
+  | "sig"
+  | "join"
+  | "series"
+  | "report"
+  // Site-wide actions such as the year rollover (id names the action).
+  | "site"
+  | "badge"
+  | "banner"
+  | "broadcast"
+  | "setting";
 
 export interface AuditEntryInput {
   /** user id of whoever performed the action */

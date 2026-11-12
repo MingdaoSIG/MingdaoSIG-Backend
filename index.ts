@@ -8,8 +8,17 @@ import { prefetchOnlineAppVersion } from "@module/GetOnlineAppVersion";
 import {
   attachServer,
   isShuttingDown,
+  onShutdown,
   shutdown,
 } from "@module/GracefulShutdown";
+import { pushConfig } from "@module/WebPush";
+import { backfillSigDefaults } from "@module/SigDefaults";
+import { seedBadges } from "@module/Badge";
+import { closeUmami, umamiConfig } from "@module/UmamiTraffic";
+import {
+  startDigestScheduler,
+  stopDigestScheduler,
+} from "@module/WeeklyDigest";
 
 // Like dotenv: values already set in the environment win over .env, and a
 // missing .env is fine (deployments set the variables directly).
@@ -33,6 +42,10 @@ process.on("SIGTERM", () => shutdown("SIGTERM"));
 process.on("SIGINT", () => shutdown("SIGINT"));
 
 const env = ValidateEnv();
+// Reads the WEB_PUSH_* and UMAMI_* values now, so invalid ones are reported
+// at startup.
+pushConfig();
+umamiConfig();
 
 async function start() {
   const connected = await ConnectMongoDB(env.MONGO_URI, {
@@ -57,7 +70,17 @@ async function start() {
   EnsureIndexes().catch((error) => {
     console.error("MongoDB : index build stopped:", error);
   });
+  // One-time data migrations: idempotent, they only fill missing fields.
+  backfillSigDefaults().catch((error) => {
+    console.error("SigDefaults : backfill failed:", error);
+  });
+  seedBadges().catch((error) => {
+    console.error("Badge : seed failed:", error);
+  });
   prefetchOnlineAppVersion();
+  startDigestScheduler();
+  onShutdown(stopDigestScheduler);
+  onShutdown(closeUmami);
 }
 
 start().catch((error) => {

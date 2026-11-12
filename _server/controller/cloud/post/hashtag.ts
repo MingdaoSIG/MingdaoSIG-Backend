@@ -99,7 +99,7 @@ export const listTopHashtags: RequestHandler<Record<string, string>> = async (
       ? Number(req.query.limit)
       : DEFAULT_TOP_LIMIT;
 
-    const tags = await topCache.getOrLoad("all", countTags);
+    const tags = await allTagCounts();
 
     return res.status(HttpStatus.OK).json({
       status: CustomStatus.OK,
@@ -111,6 +111,14 @@ export const listTopHashtags: RequestHandler<Record<string, string>> = async (
       .json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });
   }
 };
+
+/**
+ * Every tag of the non-removed posts with its post count, most used first
+ * (cached for 5 minutes). Also used by the unified GET /search.
+ */
+export function allTagCounts() {
+  return topCache.getOrLoad("all", countTags);
+}
 
 async function countTags(): Promise<TagCount[]> {
   const posts = await PostDB.list(

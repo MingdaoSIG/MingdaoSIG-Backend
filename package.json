@@ -1,6 +1,6 @@
 {
   "name": "MingdaoSIG",
-  "version": "2.12.0",
+  "version": "2.13.0",
   "description": "",
   "main": "index.ts",
   "scripts": {
@@ -28,7 +28,9 @@
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.12.1",
     "morgan": "^1.12.1",
-    "sharp": "^0.35.5"
+    "pg": "^8.23.1",
+    "sharp": "^0.35.5",
+    "web-push": "^3.6.7"
   },
   "devDependencies": {
     "@biomejs/biome": "2.6.7",
@@ -38,6 +40,8 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/morgan": "^1.9.10",
     "@types/node": "^24.19.2",
+    "@types/pg": "^8.23.1",
+    "@types/web-push": "^3.6.4",
     "concurrently": "^10.0.7",
     "nodemon": "^3.1.14",
     "tsc-alias": "^1.9.10",

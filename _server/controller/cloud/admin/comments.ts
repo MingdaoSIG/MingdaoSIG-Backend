@@ -82,28 +82,44 @@ export const listComments: RequestHandler = async (req, res) => {
   }
 };
 
+/**
+ * Sets `removed` on one comment and records it when something changed.
+ * `current` is the comment as it is now (null when there is none). Also used
+ * by report handling (POST /admin/reports/:id/resolve).
+ */
+export async function setCommentRemoved(
+  actor: string,
+  id: string,
+  removed: boolean,
+  meta: Record<string, unknown> = {},
+) {
+  const { changed, current } = await AdminDB.setCommentRemoved(id, removed);
+
+  if (changed) {
+    await recordAudit({
+      actor,
+      action: removed ? "comment.remove" : "comment.restore",
+      target: {
+        kind: "comment",
+        id,
+        label: Array.from(String(changed.content ?? ""))
+          .slice(0, LABEL_LENGTH)
+          .join(""),
+      },
+      meta: { post: changed.post ?? "", user: changed.user ?? "", ...meta },
+    });
+  }
+
+  return { changed: Boolean(changed), current };
+}
+
 function setRemoved(removed: boolean): RequestHandler {
   return async (req, res) => {
     try {
       const id = pathId(req);
 
-      const { changed, current } = await AdminDB.setCommentRemoved(id, removed);
+      const { current } = await setCommentRemoved(callerId(req), id, removed);
       if (!current) fail(CustomStatus.NOT_FOUND, "Comment not found");
-
-      if (changed) {
-        await recordAudit({
-          actor: callerId(req),
-          action: removed ? "comment.remove" : "comment.restore",
-          target: {
-            kind: "comment",
-            id,
-            label: Array.from(String(changed.content ?? ""))
-              .slice(0, LABEL_LENGTH)
-              .join(""),
-          },
-          meta: { post: changed.post ?? "", user: changed.user ?? "" },
-        });
-      }
 
       return res.status(HttpStatus.OK).json({
         status: CustomStatus.OK,

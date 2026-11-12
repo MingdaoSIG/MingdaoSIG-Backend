@@ -4,8 +4,18 @@ import { Filter } from "@type/database";
 import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
 import MongoDB from "@module/MongoDB";
-import { ADMIN_PERMISSION } from "@module/Permission";
+import {
+  ADMIN_PERMISSION,
+  CONTENT_MODERATOR_PERMISSION,
+  ROLES,
+  Role,
+  permissionForRole,
+  roleOf,
+} from "@module/Permission";
 import { recordAudit } from "@module/Audit";
+import { badgeKeys } from "@module/Badge";
+import { activeSuspension, suspensionView } from "@module/Suspension";
+import { objectBody } from "../_body";
 import {
   callerId,
   containsPattern,
@@ -21,19 +31,46 @@ import {
 
 const AdminDB = new MongoDB.Admin();
 
-const ROLES = ["all", "admin"] as const;
-const MEMBER_PERMISSION = 1;
+const ROLE_FILTERS = ["all", "admin", "moderator"] as const;
+const FLAGS = ["0", "1"] as const;
 
-// GET /admin/users (admin): the list includes email and code.
+/** `suspension` as the admin pages get it: while it is in force, else null. */
+function currentSuspension(stored: unknown) {
+  const active = activeSuspension(stored);
+  return active
+    ? {
+        ...suspensionView(active),
+        by: active.by ?? "",
+        createdAt: active.createdAt ?? null,
+      }
+    : null;
+}
+
+// GET /admin/users (admin, content moderator): the list includes email and
+// code. `role=moderator` lists the content moderators (permission 3);
+// `suspended=1` only users with a suspension in force (停權中).
 export const listUsers: RequestHandler = async (req, res) => {
   try {
     const { skip, limit } = pagination(req);
     const q = queryText(req);
-    const role = queryEnum(req, "role", ROLES, "all");
+    const role = queryEnum(req, "role", ROLE_FILTERS, "all");
     const sig = queryId(req, "sig");
+    const suspended = queryEnum(req, "suspended", FLAGS, "0") === "1";
 
     const filter: Filter = {};
+    if (suspended) {
+      Object.assign(filter, { "suspension.type": { $exists: true } });
+      filter.$and = [
+        {
+          $or: [
+            { "suspension.until": null },
+            { "suspension.until": { $gt: new Date() } },
+          ],
+        },
+      ];
+    }
     if (role === "admin") filter.permission = ADMIN_PERMISSION;
+    if (role === "moderator") filter.permission = CONTENT_MODERATOR_PERMISSION;
     if (sig) filter.sig = sig;
     if (q) {
       const pattern = containsPattern(q);
@@ -59,8 +96,10 @@ export const listUsers: RequestHandler = async (req, res) => {
         identity: user.identity ?? "",
         avatar: user.avatar ?? "",
         permission: user.permission ?? null,
+        role: roleOf(user),
         badge: user.badge ?? [],
         sig: user.sig ?? [],
+        suspension: currentSuspension(user.suspension),
         createdAt: user.createdAt ?? null,
       })),
       total,
@@ -70,7 +109,7 @@ export const listUsers: RequestHandler = async (req, res) => {
   }
 };
 
-// GET /admin/users/:id (admin)
+// GET /admin/users/:id (admin, content moderator)
 export const readUser: RequestHandler = async (req, res) => {
   try {
     const id = pathId(req);
@@ -102,6 +141,8 @@ export const readUser: RequestHandler = async (req, res) => {
       status: CustomStatus.OK,
       data: {
         ...user,
+        role: roleOf(user),
+        suspension: currentSuspension(user.suspension),
         postCount: activity.postCount,
         commentCount: activity.commentCount,
         managedSigs,
@@ -113,22 +154,44 @@ export const readUser: RequestHandler = async (req, res) => {
   }
 };
 
-// POST /admin/users/:id/permission { admin } (admin)
+/**
+ * The role a permission request asks for: `{ role }` (contract v4 §5.2) or
+ * the older `{ admin }` (v3 §3.3), exactly one of them.
+ */
+function requestedRole(body: Record<string, unknown>): Role {
+  const keys = Object.keys(body);
+  if (keys.length !== 1)
+    fail(CustomStatus.INVALID_BODY, "Send exactly one of: role, admin");
+
+  if ("role" in body) {
+    if (!ROLES.includes(body.role as Role))
+      fail(
+        CustomStatus.INVALID_BODY,
+        `role must be one of: ${ROLES.join(", ")}`,
+      );
+    return body.role as Role;
+  }
+  if (typeof body.admin !== "boolean")
+    fail(CustomStatus.INVALID_BODY, "admin must be true or false");
+  return body.admin ? "admin" : "user";
+}
+
+// POST /admin/users/:id/permission { role } | { admin } (admin)
 export const setPermission: RequestHandler = async (req, res) => {
   try {
     const id = pathId(req);
-    const { admin } = exactBody(req, ["admin"]);
-    if (typeof admin !== "boolean")
-      fail(CustomStatus.INVALID_BODY, "admin must be true or false");
+    const role = requestedRole(
+      objectBody(req, ["role", "admin"], { nonEmpty: true }),
+    );
 
     const actor = callerId(req);
-    if (!admin && id === actor)
+    if (role !== "admin" && id === actor)
       fail(CustomStatus.FORBIDDEN, "You cannot remove your own admin role");
 
-    const permission = admin ? ADMIN_PERMISSION : MEMBER_PERMISSION;
+    const permission = permissionForRole(role);
     let before: any;
 
-    if (admin) {
+    if (role === "admin") {
       before = await AdminDB.setPermission(id, permission);
     } else {
       if ((await AdminDB.countAdmins()) <= 1) await refuseIfLastAdmin(id);
@@ -145,14 +208,14 @@ export const setPermission: RequestHandler = async (req, res) => {
       }
     }
 
-    // Recorded when the admin role changes (not for 0 or a missing value
-    // becoming 1).
-    if (before && (before.permission === ADMIN_PERMISSION) !== admin) {
+    // Recorded when the role changes (not for 0 or a missing value becoming
+    // 1, which are both "user").
+    if (before && roleOf(before) !== role) {
       await recordAudit({
         actor,
         action: "user.permission",
         target: { kind: "user", id, label: before.name ?? "" },
-        meta: { admin },
+        meta: { role, admin: role === "admin" },
       });
     } else if (!before) {
       const user = await AdminDB.usersByIds([id], { _id: 1 });
@@ -161,7 +224,7 @@ export const setPermission: RequestHandler = async (req, res) => {
 
     return res.status(HttpStatus.OK).json({
       status: CustomStatus.OK,
-      data: { _id: id, permission },
+      data: { _id: id, permission, role },
     });
   } catch (error) {
     return sendError(res, error);
@@ -176,22 +239,32 @@ async function refuseIfLastAdmin(id: string) {
     fail(CustomStatus.FORBIDDEN, "There must be at least one admin");
 }
 
-// POST /admin/users/:id/badges { badges } (admin)
+// POST /admin/users/:id/badges { badges } (admin): keys of badges in the
+// badge collection that are not retired (contract v4 §5.9). Badges the user
+// already has stay valid even when retired (or from before the collection).
 export const setBadges: RequestHandler = async (req, res) => {
   try {
     const id = pathId(req);
     const { badges } = exactBody(req, ["badges"]);
-
-    const allowed = AdminDB.badgeValues();
     if (
       !Array.isArray(badges) ||
-      !badges.every(
-        (badge) => typeof badge === "string" && allowed.includes(badge),
-      )
+      !badges.every((badge) => typeof badge === "string")
     )
+      fail(CustomStatus.INVALID_BODY, "badges must be a list of badge keys");
+
+    const [keys, current] = await Promise.all([
+      badgeKeys(),
+      AdminDB.usersByIds([id], { badge: 1 }),
+    ]);
+    if (!current.has(id)) fail(CustomStatus.NOT_FOUND, "User not found");
+    const held = new Set<string>((current.get(id).badge ?? []).map(String));
+    const unknown = (badges as string[]).filter(
+      (badge) => !keys.active.has(badge) && !held.has(badge),
+    );
+    if (unknown.length > 0)
       fail(
         CustomStatus.INVALID_BODY,
-        `badges must be a list of: ${allowed.join(", ")}`,
+        `Unknown or retired badges: ${unknown.join(", ")}`,
       );
 
     const next = Array.from(new Set(badges as string[]));

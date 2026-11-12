@@ -13,8 +13,8 @@ const CommentDB = new MongoDB.Comment();
 /**
  * The post list item shape shared by GET /post/list and every other public
  * post list (SIG, user, likes, pinned, hashtag, search): the stored post with
- * the author's and the SIG's `_id` and `name`, the comment count and a plain
- * text `excerpt`. Keeps the order of `postData`.
+ * the author's and the SIG's `_id` and `name`, the comment count, `views`
+ * and a plain text `excerpt`. Keeps the order of `postData`.
  */
 export async function toPostListItems(postData: Post[]) {
   const userIds = new Set<string>();
@@ -65,6 +65,7 @@ export async function toPostListItems(postData: Post[]) {
         name: sigsDataMap[post.sig]?.name,
       },
       comments: commentNumberMap[postId] ?? 0,
+      views: post.views ?? 0,
       // Plain text preview, so list views do not need the full content.
       excerpt: CachedPlainTextExcerpt(
         `${postId}:${new Date(post.updatedAt ?? 0).getTime()}:${

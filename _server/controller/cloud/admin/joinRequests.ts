@@ -7,6 +7,7 @@ import MongoDB from "@module/MongoDB";
 import { canManageSig, isAdmin, managedSigsFilter } from "@module/Permission";
 import { recordAudit } from "@module/Audit";
 import { decideJoinRequest } from "@controller/cloud/sig/confirm";
+import { joinRequestAnswers } from "@module/SigSettings";
 import {
   caller,
   callerId,
@@ -85,6 +86,9 @@ export const listJoinRequests: RequestHandler = async (req, res) => {
             _id: request.sig ?? "",
             name: sigs.get(String(request.sig))?.name ?? "",
           },
+          // Labelled answers (contract v4 §5.6); older requests get the
+          // default labels.
+          answers: joinRequestAnswers(request),
           q1: request.q1 ?? "",
           q2: request.q2 ?? "",
           q3: request.q3 ?? "",

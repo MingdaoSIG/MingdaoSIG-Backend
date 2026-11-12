@@ -1,9 +1,9 @@
 import { NextFunction, Request, RequestHandler, Response } from "express";
 import { ipKeyGenerator, rateLimit } from "express-rate-limit";
-import jwt, { Secret } from "jsonwebtoken";
 
 import { HttpStatus } from "@module/HttpStatusCode";
 import { CustomCode, CustomStatus } from "@module/CustomStatusCode";
+import { userIdFromJwt } from "@module/OptionalJwt";
 
 const WINDOW_MS = 60 * 1000;
 
@@ -22,25 +22,6 @@ function tierLimit(tier: Tier) {
   const { max, env } = TIER_LIMITS[tier];
   const override = Number(process.env[env]);
   return Number.isInteger(override) && override > 0 ? override : max;
-}
-
-function userIdFromJwt(req: Request): string | null {
-  const authHeader = req.header("authorization");
-  if (!authHeader?.startsWith("Bearer ")) return null;
-
-  try {
-    const decoded = jwt.verify(
-      authHeader.replace("Bearer ", ""),
-      process.env.JWT_SECRET as Secret,
-      { algorithms: ["HS256"] },
-    );
-    if (typeof decoded === "string" || typeof decoded.id !== "string") {
-      return null;
-    }
-    return decoded.id;
-  } catch {
-    return null;
-  }
 }
 
 // IPv4 addresses are used as they are. IPv6 addresses are grouped by /56

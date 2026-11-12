@@ -4,12 +4,17 @@ import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
 import MongoDB from "@module/MongoDB";
 import TTLCache from "@module/TTLCache";
-import { sendError } from "./_shared";
+import { countOpenReports } from "@module/Report";
+import { isAdmin } from "@module/Permission";
+import { caller, sendError } from "./_shared";
 
 const AdminDB = new MongoDB.Admin();
 
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
-const cache = new TTLCache<object>(60 * 1000, 1);
+const cache = new TTLCache<Awaited<ReturnType<typeof loadOverview>>>(
+  60 * 1000,
+  1,
+);
 
 const sigItem = (sig: any) => ({
   _id: String(sig._id),
@@ -52,11 +57,22 @@ async function loadOverview() {
   };
 }
 
-// GET /admin/overview (admin). Cached for 60 s.
-export const overview: RequestHandler = async (_req, res) => {
+// GET /admin/overview (admin, content moderator). Cached for 60 s, except
+// `openReports`, which is counted on every call so the 檢舉 badge updates as
+// soon as one is handled. Content moderators get only the posts, comments
+// and open-report numbers (contract v4 §5.2).
+export const overview: RequestHandler = async (req, res) => {
   try {
-    const data = await cache.getOrLoad("overview", loadOverview);
-    return res.status(HttpStatus.OK).json({ status: CustomStatus.OK, data });
+    const [data, openReports] = await Promise.all([
+      cache.getOrLoad("overview", loadOverview),
+      countOpenReports(),
+    ]);
+    const visible = isAdmin(caller(req))
+      ? { ...data, openReports }
+      : { posts: data.posts, comments: data.comments, openReports };
+    return res
+      .status(HttpStatus.OK)
+      .json({ status: CustomStatus.OK, data: visible });
   } catch (error) {
     return sendError(res, error);
   }

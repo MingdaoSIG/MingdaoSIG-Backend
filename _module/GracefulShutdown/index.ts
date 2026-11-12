@@ -8,6 +8,9 @@ let shuttingDown = false;
 let shutdownPromise: Promise<void> | undefined;
 let httpServer: Server | undefined;
 const activeResponses = new Set<ServerResponse>();
+const shutdownTasks: (() => Promise<unknown> | unknown)[] = [];
+// Background tasks (the digest scheduler) get this long to stop.
+const TASK_TIMEOUT_MS = 3000;
 
 export function isShuttingDown() {
   return shuttingDown;
@@ -32,9 +35,17 @@ export function attachServer(server: Server) {
 }
 
 /**
- * Stops accepting connections, lets in-flight requests finish (up to
- * timeoutMs), closes the MongoDB connection and exits. Safe to call more
- * than once; later calls wait for the first one.
+ * Registers a task to run first on shutdown, e.g. stopping a scheduler. Its
+ * errors are logged; the shutdown waits for it up to a few seconds.
+ */
+export function onShutdown(task: () => Promise<unknown> | unknown) {
+  shutdownTasks.push(task);
+}
+
+/**
+ * Runs the onShutdown tasks, stops accepting connections, lets in-flight
+ * requests finish (up to timeoutMs), closes the MongoDB connection and
+ * exits. Safe to call more than once; later calls wait for the first one.
  */
 export function shutdown(
   reason: string,
@@ -46,6 +57,7 @@ export function shutdown(
   console.warn(`Server : ${reason} received, shutting down`);
 
   shutdownPromise = (async () => {
+    await runShutdownTasks(Math.min(timeoutMs, TASK_TIMEOUT_MS));
     if (httpServer) await drain(httpServer, timeoutMs);
 
     try {
@@ -62,6 +74,31 @@ export function shutdown(
   })();
 
   return shutdownPromise;
+}
+
+async function runShutdownTasks(timeoutMs: number) {
+  if (shutdownTasks.length === 0) return;
+  const tasks = Promise.allSettled(
+    shutdownTasks.map(async (task) => {
+      try {
+        await task();
+      } catch (error: any) {
+        console.error(`Server : shutdown task failed: ${error?.message}`);
+      }
+    }),
+  );
+
+  let timer: NodeJS.Timeout | undefined;
+  const timedOut = new Promise<boolean>((resolve) => {
+    timer = setTimeout(() => resolve(true), timeoutMs);
+  });
+  const didTimeOut = await Promise.race([tasks.then(() => false), timedOut]);
+  clearTimeout(timer);
+  if (didTimeOut) {
+    console.warn(
+      `Server : shutdown tasks still running after ${timeoutMs} ms, continuing`,
+    );
+  }
 }
 
 async function drain(server: Server, timeoutMs: number) {

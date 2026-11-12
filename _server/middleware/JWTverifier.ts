@@ -7,6 +7,12 @@ import CustomError from "@module/CustomError";
 import { HttpStatus } from "@module/HttpStatusCode";
 import { CustomStatus } from "@module/CustomStatusCode";
 import MongoDB from "@module/MongoDB";
+import {
+  activeSuspension,
+  clearExpiredSuspension,
+  isMuteRestricted,
+  sendSuspended,
+} from "@module/Suspension";
 import { User } from "@type/user";
 
 const UserDB = new MongoDB.User();
@@ -53,12 +59,34 @@ export default async function JWTverifier(
     customReq.JWT = decoded;
     customReq.userData = userData;
 
+    const refused = suspensionToEnforce(req, userData);
+    if (refused) return sendSuspended(res, refused);
+
     next();
   } catch (error) {
     return res.status(HttpStatus.UNAUTHORIZED).json({
       status: (error as CustomError).statusCode || CustomStatus.UNKNOWN_ERROR,
     });
   }
+}
+
+/**
+ * The suspension that refuses this request (contract v4 §5.1), or null: a
+ * ban refuses every JWT route, a mute only the write routes in
+ * @module/Suspension. An expired suspension counts as none and is cleared.
+ */
+function suspensionToEnforce(req: Request, userData: User) {
+  if (!userData.suspension) return null;
+
+  const active = activeSuspension(userData.suspension);
+  if (!active) {
+    clearExpiredSuspension(String(userData._id));
+    (userData as any).suspension = undefined;
+    return null;
+  }
+
+  if (active.type === "ban") return active;
+  return isMuteRestricted(req.method, req.originalUrl) ? active : null;
 }
 
 function checkData(

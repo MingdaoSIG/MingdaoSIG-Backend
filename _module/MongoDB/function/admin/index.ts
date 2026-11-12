@@ -3,13 +3,15 @@
 import overview from "./overview";
 import { listPosts, setPostFlag, userIdsMatching } from "./posts";
 import {
-  badgeValues,
+  badgeUserCounts,
   countAdmins,
   listUsers,
   readFullUser,
+  readUserProfile,
   removeSigMembership,
   setBadges,
   setPermission,
+  updateUserProfile,
   userActivity,
 } from "./users";
 import { listComments, setCommentRemoved } from "./comments";
@@ -28,7 +30,7 @@ export default {
   listPosts,
   setPostFlag,
   userIdsMatching,
-  badgeValues,
+  badgeUserCounts,
   countAdmins,
   listUsers,
   readFullUser,
@@ -36,6 +38,8 @@ export default {
   setBadges,
   setPermission,
   userActivity,
+  readUserProfile,
+  updateUserProfile,
   listComments,
   setCommentRemoved,
   imageExists,
