@@ -31,6 +31,7 @@ export default async function EnsureIndexes(): Promise<void> {
         if (isShuttingDown() || connectionLost()) return;
 
         try {
+          await dropIfUniquenessChanged(model.collection, fields, options);
           const name = await model.collection.createIndex(
             fields as Record<string, 1 | -1>,
             options
@@ -55,6 +56,30 @@ export default async function EnsureIndexes(): Promise<void> {
   finally {
     running = false;
   }
+}
+
+/**
+ * createIndex fails when an index with the same key already exists with
+ * other options. When a schema turns a plain index into a unique one (as
+ * user.email and user.customId did), drop the old one first. The unique
+ * build then fails safely (and is logged) if duplicates exist.
+ */
+async function dropIfUniquenessChanged(
+  collection: mongoose.mongo.Collection,
+  fields: object,
+  options: { unique?: boolean } | undefined
+) {
+  const existing = await collection.indexes().catch(() => []);
+  const key = JSON.stringify(fields);
+  const match = existing.find(
+    index => index.name !== "_id_" && JSON.stringify(index.key) === key
+  );
+  if (!match || Boolean(match.unique) === Boolean(options?.unique)) return;
+
+  await collection.dropIndex(String(match.name));
+  console.log(
+    `MongoDB : dropped index ${collection.collectionName}.${match.name} to rebuild it with unique: ${Boolean(options?.unique)}`
+  );
 }
 
 function connectionLost() {
