@@ -4,6 +4,7 @@ import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
 import MongoDB from "@module/MongoDB";
 import { isAdmin, managedSigsFilter } from "@module/Permission";
+import { sigIdsWithDiscordWebhook } from "@module/DiscordWebhook";
 import { caller, callerId, fail, sendError } from "./_shared";
 
 const AdminDB = new MongoDB.Admin();
@@ -30,7 +31,7 @@ export const listSigs: RequestHandler = async (req, res) => {
     );
     const ids = sigs.map((sig) => String(sig._id));
 
-    const [people, members, pending] = await Promise.all([
+    const [people, members, pending, withWebhook] = await Promise.all([
       AdminDB.usersByIds(
         sigs.flatMap((sig) => [
           ...(sig.leader ?? []),
@@ -40,6 +41,7 @@ export const listSigs: RequestHandler = async (req, res) => {
       ),
       AdminDB.memberCounts(ids),
       AdminDB.pendingJoinRequestCounts(ids),
+      sigIdsWithDiscordWebhook(ids),
     ]);
 
     // In the SIG's own order; ids of deleted users are left out.
@@ -70,6 +72,8 @@ export const listSigs: RequestHandler = async (req, res) => {
           leaders: peopleFor(sig.leader),
           moderators: peopleFor(sig.moderator),
           pendingJoinRequests: pending[id] ?? 0,
+          // Never the URL itself (contract v4 §3.6)
+          discordWebhookSet: withWebhook.has(id),
         };
       }),
     });

@@ -79,6 +79,8 @@ export async function resolveFeaturedPosts(ids: unknown, sigId: string) {
 export async function withShowcase(sigData: any) {
   const data =
     typeof sigData?.toJSON === "function" ? sigData.toJSON() : { ...sigData };
+  // Never the Discord webhook (§3.6), even if a query selected it.
+  delete data.discordWebhook;
   data.featuredPosts = await resolveFeaturedPosts(
     data.featuredPosts,
     String(data._id),

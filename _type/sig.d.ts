@@ -9,6 +9,7 @@ export type Sig = {
   leader?: string[]; // 領導者
   removed?: boolean; // 刪除
   featuredPosts?: string[]; // 精選成果（貼文 id，依序）
+  discordWebhook?: string; // Discord 公告 webhook（私密，不回傳）
 };
 
 export type SigWrite = {
