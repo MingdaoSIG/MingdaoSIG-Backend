@@ -4,8 +4,16 @@ import { Filter } from "@type/database";
 import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
 import MongoDB from "@module/MongoDB";
-import { ADMIN_PERMISSION } from "@module/Permission";
+import {
+  ADMIN_PERMISSION,
+  CONTENT_MODERATOR_PERMISSION,
+  ROLES,
+  Role,
+  permissionForRole,
+  roleOf,
+} from "@module/Permission";
 import { recordAudit } from "@module/Audit";
+import { objectBody } from "../_body";
 import {
   callerId,
   containsPattern,
@@ -21,19 +29,20 @@ import {
 
 const AdminDB = new MongoDB.Admin();
 
-const ROLES = ["all", "admin"] as const;
-const MEMBER_PERMISSION = 1;
+const ROLE_FILTERS = ["all", "admin", "moderator"] as const;
 
-// GET /admin/users (admin): the list includes email and code.
+// GET /admin/users (admin, content moderator): the list includes email and
+// code. `role=moderator` lists the content moderators (permission 3).
 export const listUsers: RequestHandler = async (req, res) => {
   try {
     const { skip, limit } = pagination(req);
     const q = queryText(req);
-    const role = queryEnum(req, "role", ROLES, "all");
+    const role = queryEnum(req, "role", ROLE_FILTERS, "all");
     const sig = queryId(req, "sig");
 
     const filter: Filter = {};
     if (role === "admin") filter.permission = ADMIN_PERMISSION;
+    if (role === "moderator") filter.permission = CONTENT_MODERATOR_PERMISSION;
     if (sig) filter.sig = sig;
     if (q) {
       const pattern = containsPattern(q);
@@ -59,6 +68,7 @@ export const listUsers: RequestHandler = async (req, res) => {
         identity: user.identity ?? "",
         avatar: user.avatar ?? "",
         permission: user.permission ?? null,
+        role: roleOf(user),
         badge: user.badge ?? [],
         sig: user.sig ?? [],
         createdAt: user.createdAt ?? null,
@@ -70,7 +80,7 @@ export const listUsers: RequestHandler = async (req, res) => {
   }
 };
 
-// GET /admin/users/:id (admin)
+// GET /admin/users/:id (admin, content moderator)
 export const readUser: RequestHandler = async (req, res) => {
   try {
     const id = pathId(req);
@@ -102,6 +112,7 @@ export const readUser: RequestHandler = async (req, res) => {
       status: CustomStatus.OK,
       data: {
         ...user,
+        role: roleOf(user),
         postCount: activity.postCount,
         commentCount: activity.commentCount,
         managedSigs,
@@ -113,22 +124,44 @@ export const readUser: RequestHandler = async (req, res) => {
   }
 };
 
-// POST /admin/users/:id/permission { admin } (admin)
+/**
+ * The role a permission request asks for: `{ role }` (contract v4 §5.2) or
+ * the older `{ admin }` (v3 §3.3), exactly one of them.
+ */
+function requestedRole(body: Record<string, unknown>): Role {
+  const keys = Object.keys(body);
+  if (keys.length !== 1)
+    fail(CustomStatus.INVALID_BODY, "Send exactly one of: role, admin");
+
+  if ("role" in body) {
+    if (!ROLES.includes(body.role as Role))
+      fail(
+        CustomStatus.INVALID_BODY,
+        `role must be one of: ${ROLES.join(", ")}`,
+      );
+    return body.role as Role;
+  }
+  if (typeof body.admin !== "boolean")
+    fail(CustomStatus.INVALID_BODY, "admin must be true or false");
+  return body.admin ? "admin" : "user";
+}
+
+// POST /admin/users/:id/permission { role } | { admin } (admin)
 export const setPermission: RequestHandler = async (req, res) => {
   try {
     const id = pathId(req);
-    const { admin } = exactBody(req, ["admin"]);
-    if (typeof admin !== "boolean")
-      fail(CustomStatus.INVALID_BODY, "admin must be true or false");
+    const role = requestedRole(
+      objectBody(req, ["role", "admin"], { nonEmpty: true }),
+    );
 
     const actor = callerId(req);
-    if (!admin && id === actor)
+    if (role !== "admin" && id === actor)
       fail(CustomStatus.FORBIDDEN, "You cannot remove your own admin role");
 
-    const permission = admin ? ADMIN_PERMISSION : MEMBER_PERMISSION;
+    const permission = permissionForRole(role);
     let before: any;
 
-    if (admin) {
+    if (role === "admin") {
       before = await AdminDB.setPermission(id, permission);
     } else {
       if ((await AdminDB.countAdmins()) <= 1) await refuseIfLastAdmin(id);
@@ -145,14 +178,14 @@ export const setPermission: RequestHandler = async (req, res) => {
       }
     }
 
-    // Recorded when the admin role changes (not for 0 or a missing value
-    // becoming 1).
-    if (before && (before.permission === ADMIN_PERMISSION) !== admin) {
+    // Recorded when the role changes (not for 0 or a missing value becoming
+    // 1, which are both "user").
+    if (before && roleOf(before) !== role) {
       await recordAudit({
         actor,
         action: "user.permission",
         target: { kind: "user", id, label: before.name ?? "" },
-        meta: { admin },
+        meta: { role, admin: role === "admin" },
       });
     } else if (!before) {
       const user = await AdminDB.usersByIds([id], { _id: 1 });
@@ -161,7 +194,7 @@ export const setPermission: RequestHandler = async (req, res) => {
 
     return res.status(HttpStatus.OK).json({
       status: CustomStatus.OK,
-      data: { _id: id, permission },
+      data: { _id: id, permission, role },
     });
   } catch (error) {
     return sendError(res, error);
