@@ -21,6 +21,7 @@ import {
   listAllByHashtag,
   listTopHashtags,
 } from "@controller/cloud/post/hashtag";
+import { sitemap } from "@controller/cloud/post/sitemap";
 
 const post: Router = Router();
 
@@ -35,6 +36,7 @@ post.get("/list/pinned", listAllByPinned);
 post.get("/list/hashtag/:tag", listAllByHashtag);
 post.get("/hashtags/top", listTopHashtags);
 post.get("/search", search);
+post.get("/sitemap", sitemap);
 // Admin pages only: JWT required, then permission 2.
 post.get("/list/admin", JWTverifier, adminOnly, listForAdmin);
 post.get("/list/range", JWTverifier, adminOnly, listAllByTimeRange);
