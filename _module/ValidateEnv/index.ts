@@ -2,7 +2,8 @@ const REQUIRED = ["MONGO_URI", "JWT_SECRET"] as const;
 
 // Missing these does not stop the server, but a feature degrades.
 const RECOMMENDED: Record<string, string> = {
-  FRONTEND_BASE_URL: "join request emails will link to an invalid URL",
+  FRONTEND_BASE_URL:
+    "join request and comment notification emails will link to an invalid URL",
   GITHUB_TOKEN: "/ping fetches the latest versions from GitHub without a token",
 };
 

@@ -8,6 +8,7 @@ import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
 import MongoDB from "@module/MongoDB";
 import CheckRequestRequirement from "@module/CheckRequestRequirement";
+import notifyNewComment from "@module/CommentNotification";
 import { checkContent } from "./_shared";
 
 const PostDB = new MongoDB.Post();
@@ -23,6 +24,7 @@ export const write: RequestHandler<Record<string, string>> = async (
     const { body } = req;
     const decodedJwt: any = (req as ExtendedRequest).JWT;
     const userId = decodedJwt.id;
+    const userData = (req as ExtendedRequest).userData;
 
     new CheckRequestRequirement(req as Request).matchBody([
       "post",
@@ -41,7 +43,7 @@ export const write: RequestHandler<Record<string, string>> = async (
       );
     const postData = await PostDB.read(
       { id: postId },
-      { lean: true, projection: { _id: 1 } },
+      { lean: true, projection: { title: 1, user: 1 } },
     ).catch(() => null);
     if (!postData)
       throw new CustomError(
@@ -56,6 +58,14 @@ export const write: RequestHandler<Record<string, string>> = async (
       post: postId,
       content: content,
       reply: parent ? String(parent._id) : "",
+    });
+
+    notifyNewComment({
+      actorId: userId,
+      actorName: userData?.name,
+      post: { _id: postId, title: postData.title, user: postData.user },
+      content,
+      parentAuthorId: parent?.user,
     });
 
     return res.status(HttpStatus.OK).json({
