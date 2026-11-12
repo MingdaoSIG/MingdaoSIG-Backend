@@ -21,6 +21,8 @@ const joinRequestSchema = new Schema(
     q1: String,
     q2: String,
     q3: String,
+    // Why the platform decided the request itself (a SIG merge).
+    note: String,
     removed: { type: Boolean, default: false },
     state: { type: String, default: "pending" }, // pending, accepted, rejected
     confirmId: String,

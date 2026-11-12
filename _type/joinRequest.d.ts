@@ -8,6 +8,7 @@ export type JoinRequest = {
   user: string;
   sig: string;
   answers?: JoinAnswer[];
+  note?: string;
   q1: string;
   q2: string;
   q3: string;

@@ -24,6 +24,13 @@ import {
 } from "@controller/cloud/admin/comments";
 import { listSigs } from "@controller/cloud/admin/sigs";
 import { createSig } from "@controller/cloud/admin/sigCreate";
+import {
+  applyRolloverHandler,
+  batchLeaders,
+  mergeSig,
+  movePostsHandler,
+  previewRollover,
+} from "@controller/cloud/admin/sigOps";
 import { decide, listJoinRequests } from "@controller/cloud/admin/joinRequests";
 import { listAuditEntries } from "@controller/cloud/admin/audit";
 import { previewDigest } from "@controller/cloud/admin/digest";
@@ -40,6 +47,7 @@ admin.get("/overview", adminOnly, overview);
 
 admin.get("/posts", adminOnly, listPosts);
 admin.post("/posts/batch", adminOnly, batchPosts);
+admin.post("/posts/move", adminOnly, movePostsHandler);
 admin.post("/posts/:id/pin", adminOnly, pinPost);
 admin.post("/posts/:id/remove", adminOnly, removePost);
 admin.post("/posts/:id/restore", adminOnly, restorePost);
@@ -54,6 +62,11 @@ admin.post("/comments/:id/remove", adminOnly, removeComment);
 admin.post("/comments/:id/restore", adminOnly, restoreComment);
 
 admin.post("/sigs", adminOnly, createSig);
+admin.post("/sigs/leaders/batch", adminOnly, batchLeaders);
+admin.post("/sigs/:id/merge", adminOnly, mergeSig);
+
+admin.get("/rollover/preview", adminOnly, previewRollover);
+admin.post("/rollover/apply", adminOnly, applyRolloverHandler);
 
 // Admin, or SIG manager (scoped)
 admin.get("/sigs", listSigs);
