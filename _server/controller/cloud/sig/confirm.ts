@@ -5,6 +5,7 @@ import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
 import { SendText } from "@module/SendMail";
+import { notifyJoinResult } from "@module/NotifyEvents";
 import { JoinRequest } from "@type/joinRequest";
 
 const UserDB = new MongoDB.User();
@@ -74,7 +75,8 @@ async function confirm(res: Response, confirmId: string, accept: boolean) {
  * - A request that is no longer pending throws ALREADY_CONFIRMED (4031).
  * - Accepting needs the SIG to exist and not be removed (INVALID_SIG_ID).
  * - Accepting adds the SIG to the applicant's `sig` list.
- * - The applicant gets the result email; a failed email is logged only.
+ * - The applicant gets the result email and a `join_result` notification;
+ *   a failed email or notification is logged only.
  *
  * Returns the updated request.
  */
@@ -126,6 +128,12 @@ export async function decideJoinRequest(
       },
     );
   }
+
+  notifyJoinResult({
+    applicantId: String(oldJoinRequest.user),
+    sigId: String(oldJoinRequest.sig),
+    accepted: savedData.state === "accepted",
+  });
 
   // The decision is saved; a failed notification must not report failure.
   await sendNotification(
