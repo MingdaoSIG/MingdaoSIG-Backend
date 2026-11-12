@@ -82,7 +82,7 @@ async function listByPost(
   const usersDataMap: Record<string, User> = {};
   const usersData = await UserDB.list(
     { _id: { $in: Array.from(userIds) } },
-    { lean: true, projection: { customId: 1, avatar: 1 } },
+    { lean: true, projection: { customId: 1, name: 1, avatar: 1 } },
   );
   usersData.forEach((user) => {
     if (user._id) {
@@ -95,6 +95,7 @@ async function listByPost(
       ...comment,
       user: {
         customId: usersDataMap[comment.user]?.customId,
+        name: usersDataMap[comment.user]?.name,
         avatar: usersDataMap[comment.user]?.avatar,
       },
     };
