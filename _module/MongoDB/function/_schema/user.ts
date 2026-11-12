@@ -18,7 +18,8 @@ const userSchema = new Schema(
       type: [
         {
           type: String,
-          enum: ["developer", "10.21_user"],
+          // Same list as the frontend (app/[userID]/(User)/config/badge.ts).
+          enum: ["developer", "10.21_user", "bug_hunter"],
         },
       ],
       default: [],
