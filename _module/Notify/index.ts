@@ -40,7 +40,8 @@ export type NotificationTargetKind =
   | "join"
   | "report"
   | "user" // system: your account (suspensions)
-  | "broadcast"; // system: an admin or SIG broadcast
+  | "broadcast" // system: an admin or SIG broadcast
+  | "issue"; // system: an issue report (問題回報)
 
 export interface NotifyInput {
   recipient: string;
