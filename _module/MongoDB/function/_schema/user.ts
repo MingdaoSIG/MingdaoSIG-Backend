@@ -29,6 +29,24 @@ const userSchema = new Schema(
     // Email me when someone comments on my post or replies to my comment.
     // Private: returned by /login and /user/me, set through POST /user.
     notifyComments: { type: Boolean, default: true },
+    // Push and email notification settings (@module/NotificationSettings).
+    // Only the keys a user changed are stored; missing keys mean the
+    // defaults. Private, like notifyComments.
+    notificationSettings: {
+      push: {
+        comment: Boolean,
+        reply: Boolean,
+        like: Boolean,
+        join_request: Boolean,
+        join_result: Boolean,
+        feedback: Boolean,
+        event: Boolean,
+      },
+      email: {
+        comment: Boolean,
+        digest: Boolean,
+      },
+    },
   },
   { timestamps: true },
 );

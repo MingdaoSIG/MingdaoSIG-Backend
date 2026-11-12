@@ -1,3 +1,9 @@
+// Only the keys a user changed (@module/NotificationSettings has the list).
+type StoredNotificationSettings = {
+  push?: Record<string, boolean | undefined>;
+  email?: Record<string, boolean | undefined>;
+};
+
 export type Identity = "teacher" | "student" | "alumni";
 
 export type Permission = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
@@ -18,6 +24,7 @@ export type User = {
   follower?: string[]; // 追隨者
   permission?: Permission; // 權限
   notifyComments?: boolean; // 有人留言時寄信通知（未設定視為 true）
+  notificationSettings?: StoredNotificationSettings; // 通知設定（未設定的項目用預設值）
   createAt?: string; // 建立時間
   updateAt?: string; // 更新時間
   __v?: number; // 版本
