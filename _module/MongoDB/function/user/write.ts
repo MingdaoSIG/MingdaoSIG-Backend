@@ -14,6 +14,27 @@ export async function writeByEmail(email: string, dataToSave: UserWrite) {
   return await _writeData("email", email, dataToSave);
 }
 
+/**
+ * Atomic create-if-missing by email: fields in `dataToSet` are written either
+ * way, fields in `dataToInsert` only when the document is created.
+ */
+export async function upsertByEmail(
+  email: string,
+  dataToSet: UserWrite,
+  dataToInsert: UserWrite
+) {
+  try {
+    return (await profile.findOneAndUpdate(
+      { email },
+      { $set: dataToSet, $setOnInsert: dataToInsert },
+      { upsert: true, new: true, sort: { _id: 1 } }
+    )) as unknown as User;
+  }
+  catch (error: any) {
+    throw new CustomError(CustomStatus.ERROR_WRITING_USER_TO_DB, error);
+  }
+}
+
 async function _writeData(key: string, value: any, dataToSave: UserWrite) {
   try {
     const data = await profile.findOne({ [key]: value });
