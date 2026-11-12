@@ -9,7 +9,7 @@ const GOOGLE_USERINFO_URL = "https://www.googleapis.com/oauth2/v3/userinfo";
 const GOOGLE_TOKENINFO_URL = "https://oauth2.googleapis.com/tokeninfo";
 
 // Comma-separated OAuth client ids whose access tokens are accepted. Read on
-// use, because dotenv loads after this module.
+// use, because .env is loaded after this module.
 function allowedGoogleClientIds() {
   return (process.env.GOOGLE_CLIENT_IDS || "")
     .split(",")
@@ -17,7 +17,7 @@ function allowedGoogleClientIds() {
     .filter(Boolean);
 }
 
-// Runs once after start-up code (including dotenv) has finished.
+// Runs once after start-up code (including loading .env) has finished.
 setImmediate(() => {
   if (allowedGoogleClientIds().length === 0) {
     console.warn(

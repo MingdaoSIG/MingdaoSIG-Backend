@@ -1,5 +1,5 @@
+import { randomUUID } from "crypto";
 import { ObjectId } from "mongoose";
-import { v4 as uuid } from "uuid";
 
 import { JoinRequest, JoinRequestWrite } from "@type/joinRequest";
 import joinRequest from "@schema/joinRequest";
@@ -23,7 +23,7 @@ export default async function write(
     else {
       return (await joinRequest.create({
         ...dataToSave,
-        confirmId: uuid()
+        confirmId: randomUUID()
       })) as unknown as JoinRequest;
     }
   }

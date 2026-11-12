@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import dotenv from "dotenv";
+import { existsSync } from "fs";
 
 import server from "./_server";
 import ValidateEnv from "@module/ValidateEnv";
@@ -13,7 +13,9 @@ import {
 } from "@module/GracefulShutdown";
 
 
-dotenv.config();
+// Like dotenv: values already set in the environment win over .env, and a
+// missing .env is fine (deployments set the variables directly).
+if (existsSync(".env")) process.loadEnvFile(".env");
 
 // A closed stdout/stderr (EPIPE) must not turn every log line into an
 // uncaught exception that logs again and spins the CPU.

@@ -9,7 +9,7 @@ import { CustomCode, CustomStatus } from "@module/CustomStatusCode";
 const WINDOW_MS = 60 * 1000;
 
 // Requests per minute for each tier. Each tier can be raised or lowered with
-// an optional env var (read lazily, because dotenv loads after the routers).
+// an optional env var (read lazily, because .env is loaded after the routers).
 const TIER_LIMITS = {
   read: { max: 300, env: "RATE_LIMIT_READ_PER_MIN" },
   write: { max: 60, env: "RATE_LIMIT_WRITE_PER_MIN" },
