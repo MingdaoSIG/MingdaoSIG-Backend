@@ -55,6 +55,11 @@ import {
 import { decide, listJoinRequests } from "@controller/cloud/admin/joinRequests";
 import { listAuditEntries } from "@controller/cloud/admin/audit";
 import { listReports, resolveReport } from "@controller/cloud/admin/reports";
+import {
+  listIssueReports,
+  readIssueReport,
+  updateIssueReport,
+} from "@controller/cloud/admin/issueReports";
 import { previewDigest } from "@controller/cloud/admin/digest";
 
 // Admin panel API (contract v3 §3, v4 §5). Every route needs a JWT; GETs
@@ -118,6 +123,10 @@ admin.post("/keyword-filter", adminOnly, writeKeywordFilter);
 
 admin.get("/reports", contentModeratorOnly, listReports);
 admin.post("/reports/:id/resolve", contentModeratorOnly, resolveReport);
+
+admin.get("/issue-reports", adminOnly, listIssueReports);
+admin.get("/issue-reports/:id", adminOnly, readIssueReport);
+admin.post("/issue-reports/:id", adminOnly, updateIssueReport);
 
 admin.get("/badges", adminOnly, listAdminBadges);
 admin.post("/badges", adminOnly, saveBadge);
