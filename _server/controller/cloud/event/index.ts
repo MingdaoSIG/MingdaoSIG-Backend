@@ -1,5 +1,4 @@
 import { Request, RequestHandler, Response } from "express";
-import jwt, { Secret } from "jsonwebtoken";
 import { isValidObjectId } from "mongoose";
 
 import { Sig } from "@type/sig";
@@ -8,6 +7,7 @@ import { HttpStatus } from "@module/HttpStatusCode";
 import MongoDB from "@module/MongoDB";
 import { canManageSig, isAdmin, isSigModerator } from "@module/Permission";
 import { notify } from "@module/Notify";
+import { userIdFromJwt } from "@module/OptionalJwt";
 import { buildCalendar, ICS_CONTENT_TYPE, IcsEvent } from "@module/Ics";
 import {
   EVENT_CAPACITY_MAX,
@@ -67,20 +67,8 @@ type EventFields = {
  * routes use it to add `rsvpedByMe`; an invalid token counts as none.
  */
 function optionalUserId(req: Request): string | null {
-  const header = req.header("authorization");
-  if (!header?.startsWith("Bearer ")) return null;
-  try {
-    const decoded = jwt.verify(
-      header.slice("Bearer ".length),
-      process.env.JWT_SECRET as Secret,
-      { algorithms: ["HS256"] },
-    );
-    if (typeof decoded === "string") return null;
-    const id = decoded.id;
-    return typeof id === "string" && isValidObjectId(id) ? id : null;
-  } catch {
-    return null;
-  }
+  const id = userIdFromJwt(req);
+  return id && isValidObjectId(id) ? id : null;
 }
 
 function text(value: unknown, name: string, max: number, required: boolean) {
