@@ -76,7 +76,11 @@ async function getBranchVersion(branch: "main" | "development") {
 
   const response = await axios.get(API_URL, {
     headers,
-    timeout: REQUEST_TIMEOUT_MS
+    timeout: REQUEST_TIMEOUT_MS,
+    // `timeout` only starts once the request has a socket. Behind an HTTPS
+    // proxy, axios first opens a CONNECT tunnel, and a proxy that never
+    // answers would stall the first /ping forever; the signal bounds it.
+    signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS)
   });
 
   const version = response.data?.version;
