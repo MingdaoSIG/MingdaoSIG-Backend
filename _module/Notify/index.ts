@@ -8,6 +8,8 @@ import mongoose from "mongoose";
  * - `collapseKey`: when the recipient still has an UNREAD notification with
  *   the same key, that one is updated (latest actor, meta.count + 1, moved to
  *   the top) instead of adding another, e.g. "3 people liked your post".
+ *   `meta.count` counts distinct actors (kept in `meta.actors`): the same
+ *   actor again changes nothing and dispatches nothing.
  * - Other delivery channels (web push, …) register with `onNotification`;
  *   they run after the notification is stored and their errors are logged.
  * - Notifications expire after 180 days (TTL index).
@@ -89,15 +91,26 @@ export function onNotification(dispatcher: Dispatcher) {
   dispatchers.push(dispatcher);
 }
 
+// A collapsed notification remembers this many distinct actors, so the same
+// person repeating the action (like, unlike, like again) is counted once.
+const MAX_COLLAPSED_ACTORS = 100;
+
+/**
+ * The stored notification, or null when nothing new happened: the actor is
+ * already counted in the unread collapsed notification (no update, no
+ * dispatch).
+ */
 async function store(input: NotifyInput) {
   const label = (input.target.label ?? "").slice(0, 200);
   if (input.collapseKey) {
+    const unread = {
+      recipient: input.recipient,
+      collapseKey: input.collapseKey,
+      read: false,
+    };
     const updated = await NotificationModel.findOneAndUpdate(
-      {
-        recipient: input.recipient,
-        collapseKey: input.collapseKey,
-        read: false,
-      },
+      // Notifications stored before meta.actors existed match as well.
+      { ...unread, "meta.actors": { $ne: input.actor } },
       {
         $set: {
           actor: input.actor,
@@ -106,10 +119,17 @@ async function store(input: NotifyInput) {
           createdAt: new Date(),
         },
         $inc: { "meta.count": 1 },
+        $push: {
+          "meta.actors": {
+            $each: [input.actor],
+            $slice: -MAX_COLLAPSED_ACTORS,
+          },
+        },
       },
       { returnDocument: "after", lean: true, timestamps: false },
     );
     if (updated) return updated;
+    if (await NotificationModel.exists(unread)) return null;
   }
   const created = await NotificationModel.create({
     recipient: input.recipient,
@@ -117,7 +137,11 @@ async function store(input: NotifyInput) {
     actor: input.actor,
     target: { kind: input.target.kind, id: input.target.id, label },
     link: input.link,
-    meta: { ...(input.meta ?? {}), count: 1 },
+    meta: {
+      ...(input.meta ?? {}),
+      count: 1,
+      ...(input.collapseKey ? { actors: [input.actor] } : {}),
+    },
     collapseKey: input.collapseKey ?? null,
   });
   return created.toObject();
@@ -131,6 +155,7 @@ export async function notify(input: NotifyInput | NotifyInput[]) {
   for (const n of inputs) {
     try {
       const saved = await store(n);
+      if (!saved) continue;
       for (const dispatch of dispatchers) {
         Promise.resolve()
           .then(() => dispatch(saved))
