@@ -1,7 +1,7 @@
 import { RequestHandler, Response } from "express";
 import { QueryFilter, isValidObjectId } from "mongoose";
 
-import { Post } from "@type/post";
+import { Post, PostFilter } from "@type/post";
 import { Sort } from "@type/database";
 import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
@@ -23,6 +23,9 @@ const sortMethods = {
 
 // Page size of GET /post/list when the caller sends no `limit`.
 const DEFAULT_LIST_LIMIT = 50;
+// GET /post/list?days=N keeps the posts of the last N days.
+const MAX_DAYS = 365;
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 // GET /post/list/admin
 const ADMIN_DEFAULT_LIMIT = 50;
@@ -53,9 +56,13 @@ export const listAll: RequestHandler<Record<string, string>> = async (
         sortMethods.mostLikes
       : sortMethods.mostLikes;
 
+    const filter: PostFilter = { pinned: false };
+    const days = recentDays(req.query?.days);
+    if (days) filter.createdAt = { $gte: new Date(Date.now() - days * DAY_MS) };
+
     return await listPostBy(
       res,
-      { pinned: false },
+      filter,
       skip ? Number(skip) : 0,
       limit ? Number(limit) : DEFAULT_LIST_LIMIT,
       sortMethod,
@@ -256,6 +263,30 @@ function adminTitleQuery(value: unknown) {
     );
 
   return q;
+}
+
+/**
+ * Optional `days` of GET /post/list (an integer from 1 to 365): only posts
+ * created within the last N days. The home page's 熱門貼文 sends it with
+ * sort=mostLikes; it filters every sort order the same way.
+ */
+function recentDays(value: unknown) {
+  if (value === undefined) return 0;
+
+  if (typeof value !== "string" || !/^\d+$/.test(value))
+    throw new CustomError(
+      CustomStatus.INVALID_QUERY,
+      new Error("days is not a positive integer"),
+    );
+
+  const days = Number(value);
+  if (days < 1 || days > MAX_DAYS)
+    throw new CustomError(
+      CustomStatus.INVALID_QUERY,
+      new Error(`days should be from 1 to ${MAX_DAYS}`),
+    );
+
+  return days;
 }
 
 async function listPostBy(
