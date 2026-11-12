@@ -16,6 +16,7 @@ import draft from "./draft";
 import report from "./report";
 import notification from "./notification";
 import push from "./push";
+import site from "./site";
 
 const router: Router = Router();
 
@@ -33,6 +34,7 @@ router.use("/draft", draft);
 router.use("/report", report);
 router.use("/notification", notification);
 router.use("/push", push);
+router.use("/site", site);
 
 router.use((_: Request, res: Response) => {
   res.status(HttpStatus.NOT_FOUND).json({ status: CustomStatus.NOT_FOUND });

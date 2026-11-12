@@ -25,6 +25,12 @@ import {
 } from "@controller/cloud/admin/comments";
 import { suspend, unsuspend } from "@controller/cloud/admin/suspension";
 import { listAllLogins, listUserLogins } from "@controller/cloud/admin/logins";
+import {
+  createBanner,
+  editBanner,
+  listBanners,
+  removeBanner,
+} from "@controller/cloud/admin/banners";
 import { listSigs } from "@controller/cloud/admin/sigs";
 import { decide, listJoinRequests } from "@controller/cloud/admin/joinRequests";
 import { listAuditEntries } from "@controller/cloud/admin/audit";
@@ -70,6 +76,11 @@ admin.post("/join-requests/:id/decision", decide);
 
 admin.get("/audit", adminOnly, listAuditEntries);
 admin.get("/logins", adminOnly, listAllLogins);
+
+admin.get("/banners", adminOnly, listBanners);
+admin.post("/banners", adminOnly, createBanner);
+admin.post("/banners/:id", adminOnly, editBanner);
+admin.delete("/banners/:id", adminOnly, removeBanner);
 
 admin.get("/reports", contentModeratorOnly, listReports);
 admin.post("/reports/:id/resolve", contentModeratorOnly, resolveReport);
