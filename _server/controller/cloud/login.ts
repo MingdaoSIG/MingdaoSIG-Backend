@@ -6,6 +6,7 @@ import { CustomStatus } from "@module/CustomStatusCode";
 import signJWT from "@module/SignJWT";
 import getUserData, { getUserDataBySession } from "@module/GetUserData";
 import getGoogleUserData from "@module/GetGoogleUserData";
+import { withNotificationSettings } from "@module/NotificationSettings";
 
 export const login: RequestHandler = async (req, res) => {
   try {
@@ -32,7 +33,7 @@ export const login: RequestHandler = async (req, res) => {
       return res.status(HttpStatus.OK).json({
         status: CustomStatus.OK,
         authorization: `Bearer ${jwt}`,
-        data: userData,
+        data: withNotificationSettings(userData),
       });
     } else if (session) {
       const userData = await getUserDataBySession(session);
@@ -45,7 +46,7 @@ export const login: RequestHandler = async (req, res) => {
       return res.status(HttpStatus.OK).json({
         status: CustomStatus.OK,
         authorization: `Bearer ${jwt}`,
-        data: userData,
+        data: withNotificationSettings(userData),
       });
     }
   } catch (error: any) {

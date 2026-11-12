@@ -7,6 +7,7 @@ import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
 import CheckRequestRequirement from "@module/CheckRequestRequirement";
 import NewJoinRequest from "@module/NewJoinRequest";
+import { notifyJoinRequest } from "@module/NotifyEvents";
 import MongoDB from "@module/MongoDB";
 
 const UserDB = new MongoDB.User();
@@ -90,6 +91,11 @@ export const join: RequestHandler<Record<string, string>> = async (
       await JoinRequestDB.remove(requestData._id).catch(() => null);
       throw error;
     }
+    notifyJoinRequest({
+      actorId: userId,
+      sigId,
+      requestId: String(requestData._id),
+    });
 
     requestData.confirmId = undefined;
     return res.status(HttpStatus.OK).json({

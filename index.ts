@@ -8,8 +8,14 @@ import { prefetchOnlineAppVersion } from "@module/GetOnlineAppVersion";
 import {
   attachServer,
   isShuttingDown,
+  onShutdown,
   shutdown,
 } from "@module/GracefulShutdown";
+import { pushConfig } from "@module/WebPush";
+import {
+  startDigestScheduler,
+  stopDigestScheduler,
+} from "@module/WeeklyDigest";
 
 // Like dotenv: values already set in the environment win over .env, and a
 // missing .env is fine (deployments set the variables directly).
@@ -33,6 +39,8 @@ process.on("SIGTERM", () => shutdown("SIGTERM"));
 process.on("SIGINT", () => shutdown("SIGINT"));
 
 const env = ValidateEnv();
+// Reads the WEB_PUSH_* values now, so invalid ones are reported at startup.
+pushConfig();
 
 async function start() {
   const connected = await ConnectMongoDB(env.MONGO_URI, {
@@ -58,6 +66,8 @@ async function start() {
     console.error("MongoDB : index build stopped:", error);
   });
   prefetchOnlineAppVersion();
+  startDigestScheduler();
+  onShutdown(stopDigestScheduler);
 }
 
 start().catch((error) => {
