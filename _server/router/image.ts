@@ -12,7 +12,7 @@ const image: Router = Router();
 image.use("/:id", rateLimiter(RateLimiterOption._1m_1200req));
 image.get("/:id", read);
 
-image.use("/", rateLimiter(RateLimiterOption._1m_100req));
+image.use("/", rateLimiter(RateLimiterOption.UPLOAD));
 image.use("/", JWTverifier);
 image.use(
   "/",

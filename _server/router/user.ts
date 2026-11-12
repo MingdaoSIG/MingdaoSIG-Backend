@@ -8,11 +8,10 @@ import { write } from "@controller/cloud/user/write";
 
 const user: Router = Router();
 
-user.use("/@:id", rateLimiter(RateLimiterOption._1m_200req));
+user.use(rateLimiter(RateLimiterOption.BY_METHOD));
 user.get("/@:id", readByCustomId);
 user.get("/:id", readById);
 
-user.use("/", rateLimiter(RateLimiterOption._1m_100req));
 user.use(JWTverifier);
 user.post("/", write);
 

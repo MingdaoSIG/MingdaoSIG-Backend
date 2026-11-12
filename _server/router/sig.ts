@@ -16,19 +16,17 @@ import { listMembers } from "@controller/cloud/sig/listMembers";
 
 const sig: Router = Router();
 
+sig.use(rateLimiter(RateLimiterOption.BY_METHOD));
 sig.get("/list", listAll);
 
-sig.use("/@:customId", rateLimiter(RateLimiterOption._1m_200req));
 sig.get("/@:customId", readByCustomId);
 
-sig.use("/:sigId", rateLimiter(RateLimiterOption._1m_200req));
 sig.get("/:sigId", readById);
 
 sig.get("/confirm/:confirmId", confirmJoinRequest);
 
 sig.use(JWTverifier);
 sig.post("/:id", write);
-sig.use("/:sigId/join", rateLimiter(RateLimiterOption._1m_1200req));
 sig.get("/:sigId/join", readJoinRequest);
 sig.post("/:sigId/join", join);
 sig.post("/:sigId/leader", addLeader);
