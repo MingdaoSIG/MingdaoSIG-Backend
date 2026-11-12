@@ -7,6 +7,7 @@ import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
 import MongoDB from "@module/MongoDB";
 import CheckRequestRequirement from "@module/CheckRequestRequirement";
+import { recordAudit } from "@module/Audit";
 
 const SigDB = new MongoDB.Sig();
 const UserDB = new MongoDB.User();
@@ -76,6 +77,13 @@ export const addLeader: RequestHandler<Record<string, string>> = async (
         new Error("Failed to add leader"),
       );
     }
+
+    await recordAudit({
+      actor: String(userData._id),
+      action: "sig.leader.add",
+      target: { kind: "user", id: newLeaderId, label: newLeader.name ?? "" },
+      meta: { sig: sigId },
+    });
 
     return response.status(HttpStatus.OK).json({
       status: CustomStatus.OK,

@@ -18,6 +18,11 @@ const joinRequestSchema = new Schema(
 
 // Lookup of a user's request to a SIG.
 joinRequestSchema.index({ user: 1, sig: 1, removed: 1 });
+// GET /admin/join-requests by state (oldest pending first, otherwise newest
+// first), the pending counts in GET /admin/overview and GET /admin/sigs.
+joinRequestSchema.index({ removed: 1, state: 1, createdAt: 1, _id: 1 });
+// The same, for one SIG or the SIGs a manager manages.
+joinRequestSchema.index({ sig: 1, removed: 1, state: 1, createdAt: 1, _id: 1 });
 
 // ---- Unique indexes --------------------------------------------------------
 // Check production data for duplicates before adding one here. A failed build

@@ -11,6 +11,7 @@ import post from "@DBfunc/post";
 import sig from "@DBfunc/sig";
 import comment from "@DBfunc/comment";
 import joinRequest from "@DBfunc/joinRequest";
+import admin from "@DBfunc/admin";
 
 export class UserDB {
   async read(search: UserSearch) {
@@ -230,6 +231,33 @@ export class JoinRequestDB {
   }
 }
 
+// Admin panel and SIG management queries (see @DBfunc/admin).
+export class AdminDB {
+  overview = admin.overview;
+  listPosts = admin.listPosts;
+  setPostFlag = admin.setPostFlag;
+  userIdsMatching = admin.userIdsMatching;
+  badgeValues = admin.badgeValues;
+  countAdmins = admin.countAdmins;
+  listUsers = admin.listUsers;
+  readFullUser = admin.readFullUser;
+  removeSigMembership = admin.removeSigMembership;
+  setBadges = admin.setBadges;
+  setPermission = admin.setPermission;
+  userActivity = admin.userActivity;
+  listComments = admin.listComments;
+  setCommentRemoved = admin.setCommentRemoved;
+  imageExists = admin.imageExists;
+  listSigs = admin.listSigs;
+  memberCounts = admin.memberCounts;
+  pendingJoinRequestCounts = admin.pendingJoinRequestCounts;
+  sigIds = admin.sigIds;
+  listJoinRequests = admin.listJoinRequests;
+  postsByIds = admin.postsByIds;
+  sigsByIds = admin.sigsByIds;
+  usersByIds = admin.usersByIds;
+}
+
 const MongoDB = {
   User: UserDB,
   Image: ImageDB,
@@ -237,5 +265,6 @@ const MongoDB = {
   Sig: SigDB,
   Comment: CommentDB,
   JoinRequest: JoinRequestDB,
+  Admin: AdminDB,
 };
 export default MongoDB;

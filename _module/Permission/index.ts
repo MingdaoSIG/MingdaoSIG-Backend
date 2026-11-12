@@ -16,6 +16,30 @@ export function isSigModerator(sig: Sig, userId: string) {
   return Boolean(sig.moderator?.includes(userId));
 }
 
+/** A SIG manager is a leader or a moderator (指導老師) of that SIG. */
+export function isSigManager(sig: Sig, userId: string) {
+  return isSigLeader(sig, userId) || isSigModerator(sig, userId);
+}
+
+/**
+ * Whether `user` may manage `sig` (edit it, list or remove its members,
+ * decide its join requests): an admin, or a manager of that SIG. Without a
+ * SIG only an admin may.
+ */
+export function canManageSig(
+  user: User | null | undefined,
+  sig: Sig | null | undefined,
+) {
+  if (isAdmin(user)) return true;
+  if (!user?._id || !sig) return false;
+  return isSigManager(sig, String(user._id));
+}
+
+/** MongoDB filter for the SIGs that `userId` manages. */
+export function managedSigsFilter(userId: string) {
+  return { $or: [{ leader: userId }, { moderator: userId }] };
+}
+
 /**
  * Whether a user may publish a post in `sig` (creating one, or moving an
  * existing post into it).
