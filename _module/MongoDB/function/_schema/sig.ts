@@ -6,6 +6,8 @@ const sigSchema = new Schema({
   name: String,
   description: String,
   avatar: String,
+  // Ids of the users following the SIG (contract v4 §6.1, @module/SigFollow).
+  // Private: public reads return `followerCount` instead.
   follower: [String],
   customId: String,
   moderator: [String],
@@ -18,5 +20,9 @@ const sigSchema = new Schema({
   // asks for "+discordWebhook", so no read returns or logs it.
   discordWebhook: { type: String, select: false },
 });
+
+// GET /user/me `followedSigs` and the followed SIGs of the my-SIG feed
+// (multikey on the follower ids).
+sigSchema.index({ follower: 1 });
 
 export default mongoose.model("sig", sigSchema, "sig");
