@@ -7,9 +7,11 @@ import {
   countAdmins,
   listUsers,
   readFullUser,
+  readUserProfile,
   removeSigMembership,
   setBadges,
   setPermission,
+  updateUserProfile,
   userActivity,
 } from "./users";
 import { listComments, setCommentRemoved } from "./comments";
@@ -36,6 +38,8 @@ export default {
   setBadges,
   setPermission,
   userActivity,
+  readUserProfile,
+  updateUserProfile,
   listComments,
   setCommentRemoved,
   imageExists,

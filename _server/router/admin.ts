@@ -24,6 +24,7 @@ import {
 } from "@controller/cloud/admin/comments";
 import { listSigs } from "@controller/cloud/admin/sigs";
 import { createSig } from "@controller/cloud/admin/sigCreate";
+import { updateUser } from "@controller/cloud/admin/userEdit";
 import {
   applyRolloverHandler,
   batchLeaders,
@@ -54,6 +55,7 @@ admin.post("/posts/:id/restore", adminOnly, restorePost);
 
 admin.get("/users", adminOnly, listUsers);
 admin.get("/users/:id", adminOnly, readUser);
+admin.post("/users/:id", adminOnly, updateUser);
 admin.post("/users/:id/permission", adminOnly, setPermission);
 admin.post("/users/:id/badges", adminOnly, setBadges);
 

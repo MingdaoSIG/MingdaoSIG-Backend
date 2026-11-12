@@ -281,6 +281,8 @@ export class AdminDB {
   setBadges = admin.setBadges;
   setPermission = admin.setPermission;
   userActivity = admin.userActivity;
+  readUserProfile = admin.readUserProfile;
+  updateUserProfile = admin.updateUserProfile;
   listComments = admin.listComments;
   setCommentRemoved = admin.setCommentRemoved;
   imageExists = admin.imageExists;

@@ -30,6 +30,7 @@ export const AUDIT_ACTIONS = [
   "post.move",
   "sig.merge",
   "rollover.apply",
+  "user.update",
 ] as const;
 
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];

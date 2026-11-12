@@ -11,6 +11,7 @@ export type Permission = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 export type User = {
   _id: string; // ID
   customId?: string; // 自定義ID
+  previousCustomIds?: string[]; // 舊的自定義ID（會轉址）
   email: string; // 帳號
   name: string; // 姓名
   code: string; // 學號
