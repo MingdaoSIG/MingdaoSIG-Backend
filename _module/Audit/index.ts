@@ -33,6 +33,7 @@ export const AUDIT_ACTIONS = [
   "user.suspend",
   "user.unsuspend",
   "banner.update",
+  "broadcast.send",
 ] as const;
 
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
@@ -45,7 +46,8 @@ export type AuditTargetKind =
   | "join"
   | "series"
   | "report"
-  | "banner";
+  | "banner"
+  | "broadcast";
 
 export interface AuditEntryInput {
   /** user id of whoever performed the action */

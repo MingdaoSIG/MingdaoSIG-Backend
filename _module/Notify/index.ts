@@ -177,6 +177,43 @@ export async function notify(input: NotifyInput | NotifyInput[]) {
   }
 }
 
+// Documents per insertMany call when storing a broadcast.
+const INSERT_BATCH = 1000;
+
+/**
+ * Stores many notifications at once with insertMany, for broadcasts to
+ * thousands of users: no collapsing and no dispatch (the caller decides
+ * about push). Notifying yourself is skipped. Returns the stored
+ * notifications as plain objects. Unlike notify, this throws on failure.
+ */
+export async function insertNotifications(inputs: NotifyInput[]) {
+  const docs = inputs
+    .filter((n) => n.recipient && n.recipient !== n.actor)
+    .map((n) => ({
+      recipient: n.recipient,
+      type: n.type,
+      actor: n.actor,
+      target: {
+        kind: n.target.kind,
+        id: n.target.id,
+        label: (n.target.label ?? "").slice(0, 200),
+      },
+      link: n.link,
+      meta: { ...(n.meta ?? {}), count: 1 },
+      collapseKey: n.collapseKey ?? null,
+    }));
+
+  const stored: Record<string, any>[] = [];
+  for (let i = 0; i < docs.length; i += INSERT_BATCH) {
+    const inserted = await NotificationModel.insertMany(
+      docs.slice(i, i + INSERT_BATCH),
+      { ordered: false },
+    );
+    for (const doc of inserted) stored.push(doc.toObject());
+  }
+  return stored;
+}
+
 /** Newest first, with the recipient's unread count. */
 export async function listNotifications(
   recipient: string,

@@ -54,6 +54,7 @@ const userSchema = new Schema(
         join_result: Boolean,
         feedback: Boolean,
         event: Boolean,
+        system: Boolean,
       },
       email: {
         comment: Boolean,

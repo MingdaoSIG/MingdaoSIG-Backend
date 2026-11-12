@@ -25,6 +25,7 @@ import {
 } from "@controller/cloud/admin/comments";
 import { suspend, unsuspend } from "@controller/cloud/admin/suspension";
 import { listAllLogins, listUserLogins } from "@controller/cloud/admin/logins";
+import { broadcast } from "@controller/cloud/admin/broadcast";
 import {
   createBanner,
   editBanner,
@@ -71,6 +72,7 @@ admin.post("/comments/:id/restore", contentModeratorOnly, restoreComment);
 
 // Admin, or SIG manager (scoped)
 admin.get("/sigs", listSigs);
+admin.post("/broadcast", broadcast);
 admin.get("/join-requests", listJoinRequests);
 admin.post("/join-requests/:id/decision", decide);
 
