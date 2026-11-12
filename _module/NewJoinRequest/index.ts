@@ -1,8 +1,12 @@
+import { isValidObjectId } from "mongoose";
+
 import { Identity } from "@type/user";
 import { JoinRequest } from "@type/joinRequest";
+import { Sig } from "@type/sig";
 import MongoDB from "@module/MongoDB";
 import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
+import { ADMIN_PERMISSION } from "@module/Permission";
 import { SendPretty, SendText } from "@module/SendMail";
 
 const SigDB = new MongoDB.Sig();
@@ -32,16 +36,10 @@ export default async function NewJoinRequest(
 
     const sigName = sigData.name;
 
-    const targetEmails = Array.from(
-      new Set(
-        await Promise.all(
-          sigData.leader?.map(async (leaderId) => {
-            const leaderData = await UserDB.read({ id: leaderId });
-            return leaderData.email;
-          }) ?? [],
-        ),
-      ),
-    ).filter((item) => item !== undefined);
+    const targetEmails = await reviewerEmails(sigData);
+    if (targetEmails.length === 0) {
+      throw new Error("Nobody can review this join request");
+    }
 
     await SendPretty({
       title: `${sigName} SIG 加入申請`,
@@ -65,11 +63,11 @@ export default async function NewJoinRequest(
       to: targetEmails,
     });
 
-    // The leaders have the request; a failed receipt to the applicant must
+    // The reviewers have the request; a failed receipt to the applicant must
     // not fail (and roll back) the application.
     await SendText(
       "SIG 申請遞交通知",
-      `您的${sigName} SIG 加入申請已經成功遞交至 SIG Leader，請靜候 Leader 審核。`,
+      `您的${sigName} SIG 加入申請已經成功遞交，請靜候審核。`,
       [userData.email],
     ).catch(() => {
       console.warn(
@@ -81,6 +79,44 @@ export default async function NewJoinRequest(
   } catch (error) {
     throw new CustomError(CustomStatus.FAILED_TO_SEND_EMAIL, error);
   }
+}
+
+/**
+ * Who gets the request: the SIG's leaders and moderators (指導老師). A SIG
+ * with neither (or whose accounts are gone) sends it to the platform admins
+ * instead, so a request is never lost.
+ */
+async function reviewerEmails(sigData: Sig) {
+  const reviewerIds = [
+    ...(sigData.leader ?? []),
+    ...(sigData.moderator ?? []),
+  ].filter((id) => isValidObjectId(id));
+
+  const reviewers =
+    reviewerIds.length > 0
+      ? await UserDB.list(
+          { _id: { $in: reviewerIds } },
+          { lean: true, projection: { email: 1 } },
+        )
+      : [];
+  const emails = uniqueEmails(reviewers);
+  if (emails.length > 0) return emails;
+
+  const admins = await UserDB.list(
+    { permission: ADMIN_PERMISSION },
+    { lean: true, projection: { email: 1 } },
+  );
+  return uniqueEmails(admins);
+}
+
+function uniqueEmails(users: { email?: string }[]) {
+  return Array.from(
+    new Set(
+      users
+        .map((user) => user.email?.trim())
+        .filter((email): email is string => Boolean(email)),
+    ),
+  );
 }
 
 function prettierIdentity(identity: string) {

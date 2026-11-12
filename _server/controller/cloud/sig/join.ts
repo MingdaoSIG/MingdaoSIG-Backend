@@ -63,11 +63,10 @@ export const join: RequestHandler<Record<string, string>> = async (
       );
     }
 
-    const oldJoinRequest = await JoinRequestDB.read({
-      user: userId,
-      sig: sigId,
-    }).catch(() => null);
-    if (oldJoinRequest && oldJoinRequest.state === "pending") {
+    // Only the newest request counts: a pending one blocks a duplicate, a
+    // rejected one lets the user apply again.
+    const latestJoinRequest = await JoinRequestDB.readLatest(userId, sigId);
+    if (latestJoinRequest?.state === "pending") {
       throw new CustomError(
         CustomStatus.ALREADY_APPLIED,
         new Error("Already applied"),
@@ -114,24 +113,29 @@ export const readJoinRequest: RequestHandler<Record<string, string>> = async (
     const decodedJwt: any = (req as ExtendedRequest).JWT;
     const userId = decodedJwt.id;
 
-    const oldJoinRequest = await JoinRequestDB.read({
-      user: userId,
-      sig: sigId,
-    });
+    if (!sigId || !isValidObjectId(sigId))
+      throw new CustomError(
+        CustomStatus.INVALID_SIG_ID,
+        new Error("Invalid sig id"),
+      );
 
-    if (!oldJoinRequest) {
+    // The newest request is the user's current state (pending, rejected or
+    // accepted); older ones are history.
+    const latestJoinRequest = await JoinRequestDB.readLatest(userId, sigId);
+
+    if (!latestJoinRequest) {
       throw new CustomError(
         CustomStatus.NOT_FOUND,
         new Error("Request not found"),
       );
     }
 
-    oldJoinRequest.confirmId = undefined;
+    latestJoinRequest.confirmId = undefined;
 
     return res.status(HttpStatus.OK).json({
       status: CustomStatus.OK,
-      state: oldJoinRequest.state,
-      data: oldJoinRequest,
+      state: latestJoinRequest.state,
+      data: latestJoinRequest,
     });
   } catch (error: any) {
     return res

@@ -1,5 +1,10 @@
 import write, { confirmPending, markRemoved } from "./write";
-import { readById, readByUserIdAndSigId, readByConfirmId } from "./read";
+import {
+  readById,
+  readByUserIdAndSigId,
+  readLatestByUserIdAndSigId,
+  readByConfirmId,
+} from "./read";
 
 export default {
   write,
@@ -7,5 +12,6 @@ export default {
   markRemoved,
   readById,
   readByUserIdAndSigId,
+  readLatestByUserIdAndSigId,
   readByConfirmId,
 };
