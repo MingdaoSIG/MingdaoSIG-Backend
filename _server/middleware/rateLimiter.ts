@@ -1,5 +1,5 @@
 import { NextFunction, Request, RequestHandler, Response } from "express";
-import { rateLimit } from "express-rate-limit";
+import { ipKeyGenerator, rateLimit } from "express-rate-limit";
 import jwt, { Secret } from "jsonwebtoken";
 
 import { HttpStatus } from "@module/HttpStatusCode";
@@ -45,13 +45,20 @@ function userIdFromJwt(req: Request): string | null {
   }
 }
 
+// IPv4 addresses are used as they are. IPv6 addresses are grouped by /56
+// (express-rate-limit's default), so a client cannot get a fresh budget by
+// rotating addresses inside its own prefix.
+function clientIp(req: Request) {
+  return ipKeyGenerator(req.ip ?? "");
+}
+
 function keyByUserOrIp(req: Request) {
   const userId = userIdFromJwt(req);
-  return userId ? `user:${userId}` : `ip:${req.ip}`;
+  return userId ? `user:${userId}` : `ip:${clientIp(req)}`;
 }
 
 function keyByIp(req: Request) {
-  return `ip:${req.ip}`;
+  return `ip:${clientIp(req)}`;
 }
 
 function tooManyRequests(_: Request, res: Response) {
@@ -62,12 +69,12 @@ function tooManyRequests(_: Request, res: Response) {
 }
 
 function createLimiter(
-  max: number | (() => number),
+  limit: number | (() => number),
   keyGenerator: (req: Request) => string
 ) {
   return rateLimit({
     windowMs: WINDOW_MS,
-    max,
+    limit,
     standardHeaders: true,
     legacyHeaders: false,
     keyGenerator,
