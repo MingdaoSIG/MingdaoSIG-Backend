@@ -5,7 +5,6 @@ import jwt, { Secret } from "jsonwebtoken";
 import { HttpStatus } from "@module/HttpStatusCode";
 import { CustomCode, CustomStatus } from "@module/CustomStatusCode";
 
-
 const WINDOW_MS = 60 * 1000;
 
 // Requests per minute for each tier. Each tier can be raised or lowered with
@@ -14,7 +13,7 @@ const TIER_LIMITS = {
   read: { max: 300, env: "RATE_LIMIT_READ_PER_MIN" },
   write: { max: 60, env: "RATE_LIMIT_WRITE_PER_MIN" },
   upload: { max: 30, env: "RATE_LIMIT_UPLOAD_PER_MIN" },
-  login: { max: 120, env: "RATE_LIMIT_LOGIN_PER_MIN" }
+  login: { max: 120, env: "RATE_LIMIT_LOGIN_PER_MIN" },
 } as const;
 
 type Tier = keyof typeof TIER_LIMITS;
@@ -33,14 +32,13 @@ function userIdFromJwt(req: Request): string | null {
     const decoded = jwt.verify(
       authHeader.replace("Bearer ", ""),
       process.env.JWT_SECRET as Secret,
-      { algorithms: ["HS256"] }
+      { algorithms: ["HS256"] },
     );
     if (typeof decoded === "string" || typeof decoded.id !== "string") {
       return null;
     }
     return decoded.id;
-  }
-  catch (error) {
+  } catch (error) {
     return null;
   }
 }
@@ -64,13 +62,13 @@ function keyByIp(req: Request) {
 function tooManyRequests(_: Request, res: Response) {
   res.status(HttpStatus.TOO_MANY_REQUESTS).json({
     status: CustomStatus.TOO_MANY_REQUESTS,
-    message: CustomCode[CustomStatus.TOO_MANY_REQUESTS]
+    message: CustomCode[CustomStatus.TOO_MANY_REQUESTS],
   });
 }
 
 function createLimiter(
   limit: number | (() => number),
-  keyGenerator: (req: Request) => string
+  keyGenerator: (req: Request) => string,
 ) {
   return rateLimit({
     windowMs: WINDOW_MS,
@@ -78,7 +76,7 @@ function createLimiter(
     standardHeaders: true,
     legacyHeaders: false,
     keyGenerator,
-    handler: tooManyRequests
+    handler: tooManyRequests,
   });
 }
 
@@ -127,17 +125,17 @@ export function rateLimiter(option: RateLimiterOption): RequestHandler {
 }
 
 export enum RateLimiterOption {
-    // 300 requests per minute per user (or IP when there is no valid JWT)
-    READ = "read",
-    // 60 requests per minute per user (or IP)
-    WRITE = "write",
-    // READ for GET/HEAD, WRITE for every other method
-    BY_METHOD = "byMethod",
-    // 30 image uploads per minute per user (or IP)
-    UPLOAD = "upload",
-    // 120 requests per minute per IP
-    LOGIN = "login",
-    _1m_100req = "1m_100req",
-    _1m_200req = "1m_200req",
-    _1m_1200req = "1m_1200req",
+  // 300 requests per minute per user (or IP when there is no valid JWT)
+  READ = "read",
+  // 60 requests per minute per user (or IP)
+  WRITE = "write",
+  // READ for GET/HEAD, WRITE for every other method
+  BY_METHOD = "byMethod",
+  // 30 image uploads per minute per user (or IP)
+  UPLOAD = "upload",
+  // 120 requests per minute per IP
+  LOGIN = "login",
+  _1m_100req = "1m_100req",
+  _1m_200req = "1m_200req",
+  _1m_1200req = "1m_1200req",
 }

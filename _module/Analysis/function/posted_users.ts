@@ -1,6 +1,5 @@
 import schema from "./schema";
 
-
 export default async function posted_user(from: Date | undefined, to: Date) {
   const TITLE = "Users that have posted";
 
@@ -8,13 +7,13 @@ export default async function posted_user(from: Date | undefined, to: Date) {
     removed: false,
     createdAt: {
       $gte: from ?? 0,
-      $lte: to
-    }
+      $lte: to,
+    },
   });
 
   return {
     func: posted_user.name,
     title: TITLE,
-    content: uniqueUsers.length
+    content: uniqueUsers.length,
   };
 }

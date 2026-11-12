@@ -5,10 +5,9 @@ import comment from "@schema/comment";
 import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 
-
 export default async function write(
   id: string | ObjectId | null,
-  dataToSave: CommentWrite
+  dataToSave: CommentWrite,
 ) {
   try {
     const data = await comment.findOne({ _id: id });
@@ -16,14 +15,12 @@ export default async function write(
 
     if (code) {
       return (await comment.findOneAndUpdate({ _id: id }, dataToSave, {
-        returnDocument: "after"
+        returnDocument: "after",
       })) as unknown as Comment;
-    }
-    else {
+    } else {
       return (await comment.create(dataToSave)) as unknown as Comment;
     }
-  }
-  catch (error: any) {
+  } catch (error: any) {
     throw new CustomError(CustomStatus.ERROR_WRITING_COMMENT_TO_DB, error);
   }
 }

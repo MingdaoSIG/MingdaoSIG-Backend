@@ -1,10 +1,9 @@
 import schema from "./schema";
 
-
 export default async function top_posted_users(
   from: Date | undefined,
   to: Date,
-  limit: number
+  limit: number,
 ) {
   const TITLE = `Top ${limit} post users`;
 
@@ -16,14 +15,14 @@ export default async function top_posted_users(
         {
           createdAt: from
             ? {
-              $gte: from,
-              $lte: to
-            }
+                $gte: from,
+                $lte: to,
+              }
             : {
-              $lte: to
-            }
-        }
-      ]
+                $lte: to,
+              },
+        },
+      ],
     })
     .group({ _id: "$user", count: { $sum: 1 } })
     .sort({ count: -1 })
@@ -40,6 +39,6 @@ export default async function top_posted_users(
   return {
     func: top_posted_users.name,
     title: TITLE,
-    content: usersArray
+    content: usersArray,
   };
 }

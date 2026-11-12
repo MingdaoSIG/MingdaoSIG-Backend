@@ -1,46 +1,46 @@
 {
-    "name": "MingdaoSIG",
-    "version": "2.9.1",
-    "description": "",
-    "main": "index.ts",
-    "scripts": {
-        "build": "tsc && tsc-alias",
-        "build:watch": "tsc && (concurrently \"tsc -w\" \"tsc-alias -w\")",
-        "start": "node dist/index.js",
-        "start:dev": "nodemon --delay 1 dist/index.js",
-        "dev": "concurrently \"npm run build:watch\" \"npm run start:dev\"",
-        "check": "biome check",
-        "check:fix": "biome check --fix"
-    },
-    "keywords": [],
-    "author": "",
-    "license": "ISC",
-    "engines": {
-        "node": "24"
-    },
-    "packageManager": "pnpm@10.34.9",
-    "dependencies": {
-        "axios": "^1.21.1",
-        "compression": "^1.8.2",
-        "cors": "^2.8.6",
-        "express": "^5.3.0",
-        "express-rate-limit": "^8.7.4",
-        "jsonwebtoken": "^9.0.3",
-        "mongoose": "^9.12.1",
-        "morgan": "^1.12.1",
-        "sharp": "^0.35.5"
-    },
-    "devDependencies": {
-        "@biomejs/biome": "2.6.7",
-        "@types/compression": "^1.8.1",
-        "@types/cors": "^2.8.19",
-        "@types/express": "^5.0.6",
-        "@types/jsonwebtoken": "^9.0.10",
-        "@types/morgan": "^1.9.10",
-        "@types/node": "^24.19.2",
-        "concurrently": "^10.0.7",
-        "nodemon": "^3.1.14",
-        "tsc-alias": "^1.9.10",
-        "typescript": "^6.0.3"
-    }
+  "name": "MingdaoSIG",
+  "version": "2.9.1",
+  "description": "",
+  "main": "index.ts",
+  "scripts": {
+    "build": "tsc && tsc-alias",
+    "build:watch": "tsc && (concurrently \"tsc -w\" \"tsc-alias -w\")",
+    "start": "node dist/index.js",
+    "start:dev": "nodemon --delay 1 dist/index.js",
+    "dev": "concurrently \"npm run build:watch\" \"npm run start:dev\"",
+    "check": "biome check",
+    "check:fix": "biome check --fix"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "engines": {
+    "node": "24"
+  },
+  "packageManager": "pnpm@10.34.9",
+  "dependencies": {
+    "axios": "^1.21.1",
+    "compression": "^1.8.2",
+    "cors": "^2.8.6",
+    "express": "^5.3.0",
+    "express-rate-limit": "^8.7.4",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.12.1",
+    "morgan": "^1.12.1",
+    "sharp": "^0.35.5"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.6.7",
+    "@types/compression": "^1.8.1",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/morgan": "^1.9.10",
+    "@types/node": "^24.19.2",
+    "concurrently": "^10.0.7",
+    "nodemon": "^3.1.14",
+    "tsc-alias": "^1.9.10",
+    "typescript": "^6.0.3"
+  }
 }

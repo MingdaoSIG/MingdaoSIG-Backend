@@ -1,6 +1,5 @@
 import schema from "./schema";
 
-
 type Position = number | { position: number; index: number };
 
 /**
@@ -29,7 +28,7 @@ export async function readSigNames() {
  */
 export function countByNameInFirstSeenOrder(
   groups: { _id: unknown; count: number; first: Position }[],
-  sigNames: Map<string, string>
+  sigNames: Map<string, string>,
 ): Array<{ name: string; count: number }> {
   const rows = new Map<string, { count: number; first: [number, number] }>();
 
@@ -53,7 +52,7 @@ export function countByNameInFirstSeenOrder(
 
   return Array.from(rows.entries())
     .sort(
-      ([, a], [, b]) => b.count - a.count || comparePosition(a.first, b.first)
+      ([, a], [, b]) => b.count - a.count || comparePosition(a.first, b.first),
     )
     .map(([name, { count }]) => ({ name, count }));
 }

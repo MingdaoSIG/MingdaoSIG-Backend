@@ -9,7 +9,6 @@ import top_liked_post from "./function/top_liked_posts";
 import sig_users from "./function/users_of_each_sigs";
 import TTLCache from "@module/TTLCache";
 
-
 const CACHE_TTL_MS = 5 * 60 * 1000;
 
 // Shared by every Analysis instance. Results are cached for 5 minutes per
@@ -21,7 +20,7 @@ function cached<T>(
   from: Date,
   to: Date,
   load: () => Promise<T>,
-  extra = ""
+  extra = "",
 ): Promise<T> {
   // An invalid date used to fail in the Mongoose cast; keep failing (and
   // never cache) instead of sending NaN to MongoDB.
@@ -37,11 +36,8 @@ export class Analysis {
     const fromDate = new Date(from ?? 0) ?? 0;
     const toDate = new Date(to) ?? 0;
 
-    return await cached(
-      "posts_of_each_sigs",
-      fromDate,
-      toDate,
-      () => posts_of_each_sigs(fromDate, toDate)
+    return await cached("posts_of_each_sigs", fromDate, toDate, () =>
+      posts_of_each_sigs(fromDate, toDate),
     );
   }
 
@@ -49,11 +45,8 @@ export class Analysis {
     const fromDate = new Date(from ?? 0) ?? 0;
     const toDate = new Date(to) ?? 0;
 
-    return await cached(
-      "posts",
-      fromDate,
-      toDate,
-      () => posts(fromDate, toDate)
+    return await cached("posts", fromDate, toDate, () =>
+      posts(fromDate, toDate),
     );
   }
 
@@ -61,11 +54,8 @@ export class Analysis {
     const fromDate = new Date(from ?? 0) ?? 0;
     const toDate = new Date(to) ?? 0;
 
-    return await cached(
-      "users",
-      fromDate,
-      toDate,
-      () => users(fromDate, toDate)
+    return await cached("users", fromDate, toDate, () =>
+      users(fromDate, toDate),
     );
   }
 
@@ -73,11 +63,8 @@ export class Analysis {
     const fromDate = new Date(from ?? 0) ?? 0;
     const toDate = new Date(to) ?? 0;
 
-    return await cached(
-      "posted_users",
-      fromDate,
-      toDate,
-      () => posted_users(fromDate, toDate)
+    return await cached("posted_users", fromDate, toDate, () =>
+      posted_users(fromDate, toDate),
     );
   }
 
@@ -85,18 +72,15 @@ export class Analysis {
     const fromDate = new Date(from ?? 0) ?? 0;
     const toDate = new Date(to) ?? 0;
 
-    return await cached(
-      "likes",
-      fromDate,
-      toDate,
-      () => likes(fromDate, toDate)
+    return await cached("likes", fromDate, toDate, () =>
+      likes(fromDate, toDate),
     );
   }
 
   async top_posted_users(
     from: Date | undefined,
     to: Date,
-    options?: { limit: number | undefined }
+    options?: { limit: number | undefined },
   ) {
     const fromDate = new Date(from ?? 0) ?? 0;
     const toDate = new Date(to) ?? 0;
@@ -107,14 +91,14 @@ export class Analysis {
       fromDate,
       toDate,
       () => top_posted_users(fromDate, toDate, limit),
-      String(limit)
+      String(limit),
     );
   }
 
   async top_posted_sigs(
     from: Date | undefined,
     to: Date,
-    options?: { limit: number | undefined }
+    options?: { limit: number | undefined },
   ) {
     const fromDate = new Date(from ?? 0) ?? 0;
     const toDate = new Date(to) ?? 0;
@@ -125,14 +109,14 @@ export class Analysis {
       fromDate,
       toDate,
       () => top_posted_sigs(fromDate, toDate, limit),
-      String(limit)
+      String(limit),
     );
   }
 
   async top_liked_post(
     from: Date | undefined,
     to: Date,
-    options?: { limit: number | undefined }
+    options?: { limit: number | undefined },
   ) {
     const fromDate = new Date(from ?? 0) ?? 0;
     const toDate = new Date(to) ?? 0;
@@ -143,7 +127,7 @@ export class Analysis {
       fromDate,
       toDate,
       () => top_liked_post(fromDate, toDate, limit),
-      String(limit)
+      String(limit),
     );
   }
 
@@ -151,11 +135,8 @@ export class Analysis {
     const fromDate = new Date(from ?? 0) ?? 0;
     const toDate = new Date(to) ?? 0;
 
-    return await cached(
-      "sig_users",
-      fromDate,
-      toDate,
-      () => sig_users(fromDate, toDate)
+    return await cached("sig_users", fromDate, toDate, () =>
+      sig_users(fromDate, toDate),
     );
   }
 }

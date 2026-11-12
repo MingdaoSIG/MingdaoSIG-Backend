@@ -2,7 +2,6 @@ import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 import MongoDB from "@module/MongoDB";
 
-
 const UserDB = new MongoDB.User();
 const SigDB = new MongoDB.Sig();
 
@@ -16,7 +15,7 @@ function CheckPattern(customId: string) {
   if (customId && !regex.test(customId))
     throw new CustomError(
       CustomStatus.INVALID_BODY,
-      new Error("Invalid custom id")
+      new Error("Invalid custom id"),
     );
 }
 
@@ -29,6 +28,6 @@ async function CheckExists(customId: string) {
   if (alreadyExists)
     throw new CustomError(
       CustomStatus.CUSTOM_ID_ALREADY_EXISTS,
-      new Error("Custom id already exists")
+      new Error("Custom id already exists"),
     );
 }

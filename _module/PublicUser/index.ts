@@ -1,6 +1,5 @@
 import { User } from "@type/user";
 
-
 // What other people may see about a user: what the frontend renders on
 // profiles, post bylines and comments. Email, student number (code), class,
 // identity, SIG memberships, followers and permission stay private; the user
@@ -11,10 +10,10 @@ export const PUBLIC_USER_FIELDS = [
   "name",
   "avatar",
   "description",
-  "badge"
+  "badge",
 ] as const;
 
-export type PublicUser = Pick<User, typeof PUBLIC_USER_FIELDS[number]>;
+export type PublicUser = Pick<User, (typeof PUBLIC_USER_FIELDS)[number]>;
 
 export default function toPublicUser(user: User): PublicUser {
   const publicUser: Partial<PublicUser> = {};

@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 
-
 const Schema = mongoose.Schema;
 
 const userSchema = new Schema(
@@ -19,15 +18,15 @@ const userSchema = new Schema(
       type: [
         {
           type: String,
-          enum: ["developer", "10.21_user"]
-        }
+          enum: ["developer", "10.21_user"],
+        },
       ],
-      default: []
+      default: [],
     },
     follower: [String],
-    permission: Number
+    permission: Number,
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // Lookups by email (login), customId (profile pages, custom id checks), code

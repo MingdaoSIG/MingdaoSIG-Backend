@@ -7,7 +7,6 @@ import { CustomCode, CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
 import MongoDB from "@module/MongoDB";
 
-
 const ImageDB = new MongoDB.Image();
 
 export const MAX_UPLOAD_BYTES = 5 * 1024 * 1024; // 5 MB
@@ -15,7 +14,7 @@ export const ALLOWED_IMAGE_TYPES = [
   "image/jpeg",
   "image/png",
   "image/webp",
-  "image/tiff"
+  "image/tiff",
 ];
 const MAX_INPUT_PIXELS = 40 * 1000 * 1000; // 40 MP
 const MAX_EDGE = 2048;
@@ -26,10 +25,10 @@ const OUTPUT_FORMAT = {
   jpeg: "webp",
   png: "webp",
   webp: "webp",
-  tiff: "webp"
+  tiff: "webp",
 } as const;
 const OUTPUT_MIME_TYPE = {
-  webp: "image/webp"
+  webp: "image/webp",
 } as const;
 
 type InputFormat = keyof typeof OUTPUT_FORMAT;
@@ -44,7 +43,7 @@ export const checkUploadHeaders: RequestHandler = (req, res, next) => {
   if (!ALLOWED_IMAGE_TYPES.includes(contentType)) {
     return res.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).json({
       status: CustomStatus.INVALID_BODY,
-      message: "Unsupported image type"
+      message: "Unsupported image type",
     });
   }
 
@@ -53,7 +52,7 @@ export const checkUploadHeaders: RequestHandler = (req, res, next) => {
     res.set("Connection", "close");
     return res.status(HttpStatus.PAYLOAD_TOO_LARGE).json({
       status: CustomStatus.CONTENT_SIZE_EXCEEDED,
-      message: CustomCode[CustomStatus.CONTENT_SIZE_EXCEEDED]
+      message: CustomCode[CustomStatus.CONTENT_SIZE_EXCEEDED],
     });
   }
 
@@ -67,12 +66,12 @@ export const upload: RequestHandler = async (req, res) => {
     if (!Buffer.isBuffer(rawImage) || rawImage.byteLength === 0)
       throw new CustomError(
         CustomStatus.EMPTY_CONTENT,
-        new Error("Content is empty")
+        new Error("Content is empty"),
       );
     if (rawImage.byteLength > MAX_UPLOAD_BYTES)
       throw new CustomError(
         CustomStatus.CONTENT_SIZE_EXCEEDED,
-        new Error("Content size exceeded")
+        new Error("Content size exceeded"),
       );
 
     const { data, mimeType } = await processImage(rawImage);
@@ -82,15 +81,14 @@ export const upload: RequestHandler = async (req, res) => {
 
     return res.status(HttpStatus.OK).json({
       status: CustomStatus.OK,
-      id: savedData._id!
+      id: savedData._id!,
     });
-  }
-  catch (error: any) {
+  } catch (error: any) {
     return res
       .status(
         error.statusCode === CustomStatus.CONTENT_SIZE_EXCEEDED
           ? HttpStatus.PAYLOAD_TOO_LARGE
-          : HttpStatus.BAD_REQUEST
+          : HttpStatus.BAD_REQUEST,
       )
       .json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });
   }
@@ -102,8 +100,7 @@ async function processImage(input: Buffer) {
     // metadata() only reads the header, so the pixel limit is checked below
     // to answer with 4026 instead of a generic decode error.
     metadata = await sharp(input, { limitInputPixels: false }).metadata();
-  }
-  catch (error) {
+  } catch (error) {
     throw new CustomError(CustomStatus.INVALID_BODY, error);
   }
 
@@ -111,7 +108,7 @@ async function processImage(input: Buffer) {
   if (!format || !(format in OUTPUT_FORMAT)) {
     throw new CustomError(
       CustomStatus.INVALID_BODY,
-      new Error("Unsupported image format")
+      new Error("Unsupported image format"),
     );
   }
 
@@ -119,7 +116,7 @@ async function processImage(input: Buffer) {
   if (!width || !height || width * height > MAX_INPUT_PIXELS) {
     throw new CustomError(
       CustomStatus.CONTENT_SIZE_EXCEEDED,
-      new Error("Image has too many pixels")
+      new Error("Image has too many pixels"),
     );
   }
 
@@ -133,14 +130,13 @@ async function processImage(input: Buffer) {
         width: MAX_EDGE,
         height: MAX_EDGE,
         fit: "inside",
-        withoutEnlargement: true
+        withoutEnlargement: true,
       })
       .toFormat(outputFormat)
       .toBuffer();
 
     return { data, mimeType: OUTPUT_MIME_TYPE[outputFormat] };
-  }
-  catch (error) {
+  } catch (error) {
     throw new CustomError(CustomStatus.INVALID_BODY, error);
   }
 }

@@ -6,10 +6,9 @@ import {
   ALLOWED_IMAGE_TYPES,
   MAX_UPLOAD_BYTES,
   checkUploadHeaders,
-  upload
+  upload,
 } from "@controller/cloud/image/upload";
 import { read } from "@controller/cloud/image/read";
-
 
 const image: Router = Router();
 
@@ -23,9 +22,9 @@ image.post(
   checkUploadHeaders,
   express.raw({
     type: ALLOWED_IMAGE_TYPES,
-    limit: MAX_UPLOAD_BYTES
+    limit: MAX_UPLOAD_BYTES,
   }),
-  upload
+  upload,
 );
 
 export default image;

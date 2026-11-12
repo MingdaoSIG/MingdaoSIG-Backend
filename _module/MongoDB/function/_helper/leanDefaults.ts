@@ -1,6 +1,5 @@
 import { Model } from "mongoose";
 
-
 /**
  * Fills in schema defaults that a .lean() result lacks, so a lean read returns
  * the same JSON as a hydrated Mongoose document: when a stored document misses
@@ -9,7 +8,7 @@ import { Model } from "mongoose";
  */
 export default function leanDefaults<T extends object>(
   model: Model<any>,
-  doc: T
+  doc: T,
 ): T {
   if (!doc) return doc;
 

@@ -3,7 +3,6 @@ import profile from "@schema/user";
 import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 
-
 export async function readByEmail(email: string) {
   return await readData("email", email);
 }
@@ -32,12 +31,10 @@ export async function readOldestByEmail(email: string) {
       .sort({ _id: 1 });
 
     return data as unknown as User | null;
-  }
-  catch (error: any) {
+  } catch (error: any) {
     throw new CustomError(CustomStatus.ERROR_READING_USER_FROM_DB, error);
   }
 }
-
 
 async function readData(key: string, value: any) {
   try {
@@ -49,8 +46,7 @@ async function readData(key: string, value: any) {
     }
 
     return data as unknown as User;
-  }
-  catch (error: any) {
+  } catch (error: any) {
     throw new CustomError(CustomStatus.ERROR_READING_USER_FROM_DB, error);
   }
 }

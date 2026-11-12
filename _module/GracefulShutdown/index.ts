@@ -1,7 +1,6 @@
 import { Server, ServerResponse } from "http";
 import mongoose from "mongoose";
 
-
 // Docker Swarm sends SIGKILL 10 s after SIGTERM by default, so drain in less.
 const DEFAULT_TIMEOUT_MS = 8000;
 
@@ -40,7 +39,7 @@ export function attachServer(server: Server) {
 export function shutdown(
   reason: string,
   exitCode = 0,
-  timeoutMs = Number(process.env.SHUTDOWN_TIMEOUT_MS) || DEFAULT_TIMEOUT_MS
+  timeoutMs = Number(process.env.SHUTDOWN_TIMEOUT_MS) || DEFAULT_TIMEOUT_MS,
 ) {
   if (shutdownPromise) return shutdownPromise;
   shuttingDown = true;
@@ -52,10 +51,9 @@ export function shutdown(
     try {
       await mongoose.disconnect();
       console.warn("Server : MongoDB connection closed");
-    }
-    catch (error: any) {
+    } catch (error: any) {
       console.error(
-        `Server : failed to close MongoDB connection: ${error?.message}`
+        `Server : failed to close MongoDB connection: ${error?.message}`,
       );
     }
 
@@ -72,29 +70,25 @@ async function drain(server: Server, timeoutMs: number) {
     if (!res.headersSent) res.setHeader("Connection", "close");
   }
 
-  const closed = new Promise<void>(resolve => {
+  const closed = new Promise<void>((resolve) => {
     server.close(() => resolve());
   });
   server.closeIdleConnections();
 
   let timer: NodeJS.Timeout | undefined;
-  const timedOut = new Promise<boolean>(resolve => {
+  const timedOut = new Promise<boolean>((resolve) => {
     timer = setTimeout(() => resolve(true), timeoutMs);
   });
 
-  const didTimeOut = await Promise.race([
-    closed.then(() => false),
-    timedOut
-  ]);
+  const didTimeOut = await Promise.race([closed.then(() => false), timedOut]);
   clearTimeout(timer);
 
   if (didTimeOut) {
     console.warn(
-      `Server : ${activeResponses.size} request(s) still running after ${timeoutMs} ms, closing their connections`
+      `Server : ${activeResponses.size} request(s) still running after ${timeoutMs} ms, closing their connections`,
     );
     server.closeAllConnections();
-  }
-  else {
+  } else {
     console.warn("Server : all connections drained");
   }
 }

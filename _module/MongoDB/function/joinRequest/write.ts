@@ -6,10 +6,9 @@ import joinRequest from "@schema/joinRequest";
 import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 
-
 export default async function write(
   id: string | ObjectId | null,
-  dataToSave: JoinRequestWrite
+  dataToSave: JoinRequestWrite,
 ) {
   try {
     const data = await joinRequest.findOne({ _id: id });
@@ -17,21 +16,16 @@ export default async function write(
 
     if (code) {
       return joinRequest.findOneAndUpdate({ _id: id }, dataToSave, {
-        returnDocument: "after"
+        returnDocument: "after",
       }) as unknown as JoinRequest;
-    }
-    else {
+    } else {
       return (await joinRequest.create({
         ...dataToSave,
-        confirmId: randomUUID()
+        confirmId: randomUUID(),
       })) as unknown as JoinRequest;
     }
-  }
-  catch (error: any) {
-    throw new CustomError(
-      CustomStatus.ERROR_WRITING_JOIN_REQUEST_TO_DB,
-      error
-    );
+  } catch (error: any) {
+    throw new CustomError(CustomStatus.ERROR_WRITING_JOIN_REQUEST_TO_DB, error);
   }
 }
 
@@ -39,20 +33,16 @@ export default async function write(
 // is no longer pending, so two confirmations cannot both win.
 export async function confirmPending(
   id: string | ObjectId,
-  state: "accepted" | "rejected"
+  state: "accepted" | "rejected",
 ) {
   try {
     return (await joinRequest.findOneAndUpdate(
       { _id: id, state: "pending", removed: false },
       { state },
-      { returnDocument: "after" }
+      { returnDocument: "after" },
     )) as unknown as JoinRequest | null;
-  }
-  catch (error: any) {
-    throw new CustomError(
-      CustomStatus.ERROR_WRITING_JOIN_REQUEST_TO_DB,
-      error
-    );
+  } catch (error: any) {
+    throw new CustomError(CustomStatus.ERROR_WRITING_JOIN_REQUEST_TO_DB, error);
   }
 }
 
@@ -61,13 +51,9 @@ export async function markRemoved(id: string | ObjectId) {
     return (await joinRequest.findOneAndUpdate(
       { _id: id },
       { removed: true },
-      { returnDocument: "after" }
+      { returnDocument: "after" },
     )) as unknown as JoinRequest | null;
-  }
-  catch (error: any) {
-    throw new CustomError(
-      CustomStatus.ERROR_WRITING_JOIN_REQUEST_TO_DB,
-      error
-    );
+  } catch (error: any) {
+    throw new CustomError(CustomStatus.ERROR_WRITING_JOIN_REQUEST_TO_DB, error);
   }
 }

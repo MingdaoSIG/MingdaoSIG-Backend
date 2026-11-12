@@ -14,12 +14,12 @@ const SigDB = new MongoDB.Sig();
 
 export const write: RequestHandler<Record<string, string>> = async (
   req: Request<Record<string, string>> | ExtendedRequest,
-  res
+  res,
 ) => {
   try {
     const {
       // customId,
-      description
+      description,
     } = req.body ?? {};
     const sigId = req.params.id;
     const decodedJwt: any = (req as ExtendedRequest).JWT;
@@ -29,19 +29,19 @@ export const write: RequestHandler<Record<string, string>> = async (
     if (!sigId || !isValidObjectId(sigId))
       throw new CustomError(
         CustomStatus.INVALID_SIG_ID,
-        new Error("Invalid sig id")
+        new Error("Invalid sig id"),
       );
 
     new CheckRequestRequirement(req as Request).onlyIncludesBody(
       // ["customId", "description"],
-      ["description"]
+      ["description"],
     );
 
     const sigData = await SigDB.read({ id: sigId }).catch(() => null);
     if (!sigData) {
       throw new CustomError(
         CustomStatus.INVALID_SIG_ID,
-        new Error("Sig not found")
+        new Error("Sig not found"),
       );
     }
 
@@ -52,15 +52,12 @@ export const write: RequestHandler<Record<string, string>> = async (
     if (!isModerator && !isLeader && !isAdminUser) {
       throw new CustomError(
         CustomStatus.FORBIDDEN,
-        new Error("Not leader or moderator of this sig")
+        new Error("Not leader or moderator of this sig"),
       );
     }
 
     if (sigData.removed && !isModerator && !isAdminUser) {
-      throw new CustomError(
-        CustomStatus.FORBIDDEN,
-        new Error("Sig removed")
-      );
+      throw new CustomError(CustomStatus.FORBIDDEN, new Error("Sig removed"));
     }
 
     // if (sigData.customId !== customId) {
@@ -70,22 +67,21 @@ export const write: RequestHandler<Record<string, string>> = async (
     if (description && description?.length > 250)
       throw new CustomError(
         CustomStatus.INVALID_CONTENT_LENGTH,
-        new Error("Invalid description")
+        new Error("Invalid description"),
       );
 
     const dataToSave = {
       // customId: String(customId ?? sigData.customId),
-      description: String(description ?? sigData.description)
+      description: String(description ?? sigData.description),
     };
     const savedData = await SigDB.write(dataToSave, { id: sigId });
 
     return res.status(HttpStatus.OK).json({
       status: CustomStatus.OK,
       id: savedData._id,
-      data: savedData
+      data: savedData,
     });
-  }
-  catch (error: any) {
+  } catch (error: any) {
     return res
       .status(HttpStatus.BAD_REQUEST)
       .json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });

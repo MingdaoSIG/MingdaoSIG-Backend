@@ -9,14 +9,13 @@ import CheckRequestRequirement from "@module/CheckRequestRequirement";
 import NewJoinRequest from "@module/NewJoinRequest";
 import MongoDB from "@module/MongoDB";
 
-
 const UserDB = new MongoDB.User();
 const SigDB = new MongoDB.Sig();
 const JoinRequestDB = new MongoDB.JoinRequest();
 
 export const join: RequestHandler<Record<string, string>> = async (
   req: Request<Record<string, string>> | ExtendedRequest,
-  res
+  res,
 ) => {
   try {
     const { body } = req;
@@ -27,28 +26,24 @@ export const join: RequestHandler<Record<string, string>> = async (
     if (!sigId || !isValidObjectId(sigId))
       throw new CustomError(
         CustomStatus.INVALID_SIG_ID,
-        new Error("Invalid sig id")
+        new Error("Invalid sig id"),
       );
 
-    new CheckRequestRequirement(req as Request).matchBody([
-      "q1",
-      "q2",
-      "q3"
-    ]);
+    new CheckRequestRequirement(req as Request).matchBody(["q1", "q2", "q3"]);
 
     const { q1, q2, q3 } = body;
 
     if (q1.length > 250 || q2.length > 250 || q3.length > 250) {
       throw new CustomError(
         CustomStatus.INVALID_CONTENT_LENGTH,
-        new Error("Invalid content length")
+        new Error("Invalid content length"),
       );
     }
 
     if (q1.trim() === "" || q2.trim() === "" || q3.trim() === "") {
       throw new CustomError(
         CustomStatus.INVALID_BODY,
-        new Error("q1, q2 or q3 is empty")
+        new Error("q1, q2 or q3 is empty"),
       );
     }
 
@@ -56,7 +51,7 @@ export const join: RequestHandler<Record<string, string>> = async (
     if (!sigData || sigData.removed) {
       throw new CustomError(
         CustomStatus.INVALID_SIG_ID,
-        new Error("Sig not found")
+        new Error("Sig not found"),
       );
     }
 
@@ -64,18 +59,18 @@ export const join: RequestHandler<Record<string, string>> = async (
     if (userData.sig?.includes(sigId)) {
       throw new CustomError(
         CustomStatus.ALREADY_JOINED,
-        new Error("Already joined")
+        new Error("Already joined"),
       );
     }
 
     const oldJoinRequest = await JoinRequestDB.read({
       user: userId,
-      sig: sigId
+      sig: sigId,
     }).catch(() => null);
     if (oldJoinRequest && oldJoinRequest.state === "pending") {
       throw new CustomError(
         CustomStatus.ALREADY_APPLIED,
-        new Error("Already applied")
+        new Error("Already applied"),
       );
     }
 
@@ -85,13 +80,12 @@ export const join: RequestHandler<Record<string, string>> = async (
       q1,
       q2,
       q3,
-      state: "pending"
+      state: "pending",
     });
 
     try {
       await NewJoinRequest(sigId, userId, requestData);
-    }
-    catch (error) {
+    } catch (error) {
       // Leaders were not notified: drop the request so the user can retry
       // instead of being stuck with "already applied".
       await JoinRequestDB.remove(requestData._id).catch(() => null);
@@ -102,10 +96,9 @@ export const join: RequestHandler<Record<string, string>> = async (
     return res.status(HttpStatus.OK).json({
       status: CustomStatus.OK,
       id: requestData._id,
-      data: requestData
+      data: requestData,
     });
-  }
-  catch (error: any) {
+  } catch (error: any) {
     return res
       .status(HttpStatus.BAD_REQUEST)
       .json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });
@@ -114,7 +107,7 @@ export const join: RequestHandler<Record<string, string>> = async (
 
 export const readJoinRequest: RequestHandler<Record<string, string>> = async (
   req: Request<Record<string, string>> | ExtendedRequest,
-  res
+  res,
 ) => {
   try {
     const sigId = req.params.sigId;
@@ -123,13 +116,13 @@ export const readJoinRequest: RequestHandler<Record<string, string>> = async (
 
     const oldJoinRequest = await JoinRequestDB.read({
       user: userId,
-      sig: sigId
+      sig: sigId,
     });
 
     if (!oldJoinRequest) {
       throw new CustomError(
         CustomStatus.NOT_FOUND,
-        new Error("Request not found")
+        new Error("Request not found"),
       );
     }
 
@@ -138,10 +131,9 @@ export const readJoinRequest: RequestHandler<Record<string, string>> = async (
     return res.status(HttpStatus.OK).json({
       status: CustomStatus.OK,
       state: oldJoinRequest.state,
-      data: oldJoinRequest
+      data: oldJoinRequest,
     });
-  }
-  catch (error: any) {
+  } catch (error: any) {
     return res
       .status(HttpStatus.BAD_REQUEST)
       .json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });

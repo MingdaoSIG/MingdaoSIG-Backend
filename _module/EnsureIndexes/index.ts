@@ -2,7 +2,6 @@ import mongoose, { mongo } from "mongoose";
 
 import { isShuttingDown } from "@module/GracefulShutdown";
 
-
 let running = false;
 let finished = false;
 let resumeRegistered = false;
@@ -36,17 +35,16 @@ export default async function EnsureIndexes(): Promise<void> {
           await dropIfUniquenessChanged(model.collection, fields, indexOptions);
           const name = await model.collection.createIndex(
             fields as Record<string, 1 | -1>,
-            indexOptions
+            indexOptions,
           );
           console.log(`MongoDB : index ready ${collectionName}.${name}`);
-        }
-        catch (error: any) {
+        } catch (error: any) {
           console.error(
             `MongoDB : failed to build index ${JSON.stringify(
-              fields
+              fields,
             )} ${JSON.stringify(options)} on "${collectionName}": ${
               error?.message
-            }`
+            }`,
           );
           // A build cut off by a dropped connection runs again on reconnect.
           if (connectionLost()) return;
@@ -54,8 +52,7 @@ export default async function EnsureIndexes(): Promise<void> {
       }
     }
     finished = true;
-  }
-  finally {
+  } finally {
     running = false;
   }
 }
@@ -69,18 +66,18 @@ export default async function EnsureIndexes(): Promise<void> {
 async function dropIfUniquenessChanged(
   collection: mongoose.mongo.Collection,
   fields: object,
-  options: { unique?: boolean } | undefined
+  options: { unique?: boolean } | undefined,
 ) {
   const existing = await collection.indexes().catch(() => []);
   const key = JSON.stringify(fields);
   const match = existing.find(
-    index => index.name !== "_id_" && JSON.stringify(index.key) === key
+    (index) => index.name !== "_id_" && JSON.stringify(index.key) === key,
   );
   if (!match || Boolean(match.unique) === Boolean(options?.unique)) return;
 
   await collection.dropIndex(String(match.name));
   console.log(
-    `MongoDB : dropped index ${collection.collectionName}.${match.name} to rebuild it with unique: ${Boolean(options?.unique)}`
+    `MongoDB : dropped index ${collection.collectionName}.${match.name} to rebuild it with unique: ${Boolean(options?.unique)}`,
   );
 }
 
@@ -88,7 +85,7 @@ function connectionLost() {
   if (mongoose.connection.readyState === 1) return false;
   if (!isShuttingDown()) {
     console.warn(
-      "MongoDB : connection lost, index build continues after reconnecting"
+      "MongoDB : connection lost, index build continues after reconnecting",
     );
   }
   return true;
@@ -100,7 +97,7 @@ function registerResume() {
 
   mongoose.connection.on("reconnected", () => {
     if (finished || isShuttingDown()) return;
-    EnsureIndexes().catch(error => {
+    EnsureIndexes().catch((error) => {
       console.error("MongoDB : index build stopped:", error);
     });
   });

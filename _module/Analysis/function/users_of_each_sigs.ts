@@ -1,7 +1,6 @@
 import schema from "./schema";
 import { countByNameInFirstSeenOrder, readSigNames } from "./sig_counts";
 
-
 export default async function sig_users(from: Date | undefined, to: Date) {
   const TITLE = "Users of each sigs";
 
@@ -19,9 +18,9 @@ export default async function sig_users(from: Date | undefined, to: Date) {
         $match: {
           createdAt: {
             $gte: from ?? new Date(0),
-            $lte: to
-          }
-        }
+            $lte: to,
+          },
+        },
       },
       {
         $group: {
@@ -31,30 +30,30 @@ export default async function sig_users(from: Date | undefined, to: Date) {
               customId: "$customId",
               // Keeps a missing customId apart from a null one.
               type: { $type: "$customId" },
-              sig: "$sig"
-            }
-          }
-        }
+              sig: "$sig",
+            },
+          },
+        },
       },
       { $unwind: { path: "$users", includeArrayIndex: "position" } },
       {
         $group: {
           _id: { customId: "$users.customId", type: "$users.type" },
           position: { $min: "$position" },
-          sig: { $top: { sortBy: { position: 1 }, output: "$users.sig" } }
-        }
+          sig: { $top: { sortBy: { position: 1 }, output: "$users.sig" } },
+        },
       },
       { $unwind: { path: "$sig", includeArrayIndex: "index" } },
       {
         $group: {
           _id: "$sig",
           count: { $sum: 1 },
-          first: { $min: { position: "$position", index: "$index" } }
-        }
-      }
+          first: { $min: { position: "$position", index: "$index" } },
+        },
+      },
     ],
     // A natural-order scan keeps $push in insertion order.
-    { hint: { $natural: 1 } }
+    { hint: { $natural: 1 } },
   );
 
   // Removed sigs are left out of the chart
@@ -63,6 +62,6 @@ export default async function sig_users(from: Date | undefined, to: Date) {
   return {
     func: sig_users.name,
     title: TITLE,
-    content: countByNameInFirstSeenOrder(groups, sigNames)
+    content: countByNameInFirstSeenOrder(groups, sigNames),
   };
 }

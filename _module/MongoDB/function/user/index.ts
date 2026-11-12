@@ -3,11 +3,10 @@ import {
   readByEmail,
   readById,
   readByCode,
-  readOldestByEmail
+  readOldestByEmail,
 } from "./read";
 import { writeByEmail, writeById, upsertByEmail } from "./write";
 import list from "./list";
-
 
 export default {
   readByEmail,
@@ -18,5 +17,5 @@ export default {
   writeById,
   writeByEmail,
   upsertByEmail,
-  list
+  list,
 };

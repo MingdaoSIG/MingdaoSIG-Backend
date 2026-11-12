@@ -6,13 +6,11 @@ import { RequestHandler } from "express";
 import { HttpStatus } from "@module/HttpStatusCode";
 import { CustomStatus } from "@module/CustomStatusCode";
 
-
 let currentVersion: string | undefined;
 function getCurrentVersion() {
   if (!currentVersion) {
-    currentVersion = JSON.parse(
-      readFileSync("./package.json").toString()
-    ).version as string;
+    currentVersion = JSON.parse(readFileSync("./package.json").toString())
+      .version as string;
   }
   return currentVersion;
 }
@@ -30,16 +28,15 @@ export const ping: RequestHandler = async (req, res) => {
         current,
         latest: {
           main: mainVersion,
-          development: developmentVersion
+          development: developmentVersion,
         },
         upToDate: {
           main: mainVersion === current,
-          development: developmentVersion === current
-        }
-      }
+          development: developmentVersion === current,
+        },
+      },
     });
-  }
-  catch (error: any) {
+  } catch (error: any) {
     return res
       .status(HttpStatus.BAD_REQUEST)
       .json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });

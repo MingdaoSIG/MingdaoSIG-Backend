@@ -7,13 +7,12 @@ import type { ExtendedRequest } from "@type/request";
 import type { Request, RequestHandler } from "express";
 import { isValidObjectId } from "mongoose";
 
-
 const SigDB = new MongoDB.Sig();
 const UserDB = new MongoDB.User();
 
 export const deleteLeader: RequestHandler<Record<string, string>> = async (
   request: Request<Record<string, string>> | ExtendedRequest,
-  response
+  response,
 ) => {
   try {
     const extendedRequest = request as ExtendedRequest;
@@ -23,17 +22,15 @@ export const deleteLeader: RequestHandler<Record<string, string>> = async (
     if (!sigId || !isValidObjectId(sigId))
       throw new CustomError(
         CustomStatus.INVALID_SIG_ID,
-        new Error("Invalid sig id")
+        new Error("Invalid sig id"),
       );
 
-    new CheckRequestRequirement(extendedRequest).onlyIncludesBody([
-      "leaderId"
-    ]);
+    new CheckRequestRequirement(extendedRequest).onlyIncludesBody(["leaderId"]);
 
     if (!leaderId || !isValidObjectId(leaderId)) {
       throw new CustomError(
         CustomStatus.INVALID_USER_ID,
-        new Error("Invalid leader id")
+        new Error("Invalid leader id"),
       );
     }
 
@@ -41,53 +38,46 @@ export const deleteLeader: RequestHandler<Record<string, string>> = async (
     if (!sigData) {
       throw new CustomError(
         CustomStatus.INVALID_SIG_ID,
-        new Error("Sig not found")
+        new Error("Sig not found"),
       );
     }
 
     if (sigData.removed) {
-      throw new CustomError(
-        CustomStatus.FORBIDDEN,
-        new Error("Sig removed")
-      );
+      throw new CustomError(CustomStatus.FORBIDDEN, new Error("Sig removed"));
     }
 
     const userData = extendedRequest.userData;
     const isPermissionTwo = userData?.permission === 2;
     if (!isPermissionTwo) {
-      throw new CustomError(
-        CustomStatus.FORBIDDEN,
-        new Error("Not admin")
-      );
+      throw new CustomError(CustomStatus.FORBIDDEN, new Error("Not admin"));
     }
 
     if (!sigData.leader || !sigData.leader?.includes(leaderId)) {
       throw new CustomError(
         CustomStatus.NOT_LEADER,
-        new Error("User is not a leader of this SIG")
+        new Error("User is not a leader of this SIG"),
       );
     }
 
-    const updatedLeaders = sigData.leader.filter(id => id !== leaderId);
+    const updatedLeaders = sigData.leader.filter((id) => id !== leaderId);
     const dataToSave = {
-      leader: updatedLeaders
+      leader: updatedLeaders,
     };
 
     const savedData = await SigDB.write(dataToSave, { id: sigId });
     if (!savedData) {
       throw new CustomError(
         CustomStatus.UNKNOWN_ERROR,
-        new Error("Failed to delete leader")
+        new Error("Failed to delete leader"),
       );
     }
 
     return response.status(HttpStatus.OK).json({
       status: CustomStatus.OK,
       id: savedData._id,
-      data: savedData
+      data: savedData,
     });
-  }
-  catch (error: any) {
+  } catch (error: any) {
     return response
       .status(HttpStatus.BAD_REQUEST)
       .json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });

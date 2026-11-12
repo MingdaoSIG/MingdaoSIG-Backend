@@ -7,7 +7,6 @@ import configuredCors from "@middleware/cors";
 import errorHandler from "@middleware/errorHandler";
 import requestLogger from "@middleware/requestLogger";
 
-
 const cloud: Express = express();
 cloud.disable("x-powered-by");
 // Express 5 defaults to the "simple" query parser. Keep "extended" (qs), the

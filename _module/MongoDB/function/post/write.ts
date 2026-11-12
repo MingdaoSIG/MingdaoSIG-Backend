@@ -5,10 +5,9 @@ import post from "@schema/post";
 import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 
-
 export default async function write(
   id: string | ObjectId | null,
-  dataToSave: PostWrite
+  dataToSave: PostWrite,
 ) {
   try {
     const data = await post.findOne({ _id: id });
@@ -16,14 +15,12 @@ export default async function write(
 
     if (code) {
       return (await post.findOneAndUpdate({ _id: id }, dataToSave, {
-        returnDocument: "after"
+        returnDocument: "after",
       })) as unknown as Post;
-    }
-    else {
+    } else {
       return (await post.create(dataToSave)) as unknown as Post;
     }
-  }
-  catch (error: any) {
+  } catch (error: any) {
     throw new CustomError(CustomStatus.ERROR_WRITING_POST_TO_DB, error);
   }
 }

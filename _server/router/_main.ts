@@ -12,7 +12,6 @@ import comment from "./comment";
 import ping from "./ping";
 import information from "./information";
 
-
 const router: Router = Router();
 
 router.use("/login", login);

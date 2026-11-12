@@ -61,7 +61,7 @@ export const HttpCode = {
   508: "Loop Detected",
   509: "Bandwidth Limit Exceeded",
   510: "Not Extended",
-  511: "Network Authentication Required"
+  511: "Network Authentication Required",
 } as const;
 
 export const HttpStatus = {
@@ -127,5 +127,5 @@ export const HttpStatus = {
   LOOP_DETECTED: 508,
   BANDWIDTH_LIMIT_EXCEEDED: 509,
   NOT_EXTENDED: 510,
-  NETWORK_AUTHENTICATION_REQUIRED: 511
+  NETWORK_AUTHENTICATION_REQUIRED: 511,
 } as const;

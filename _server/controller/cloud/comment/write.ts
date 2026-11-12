@@ -8,13 +8,12 @@ import { HttpStatus } from "@module/HttpStatusCode";
 import MongoDB from "@module/MongoDB";
 import CheckRequestRequirement from "@module/CheckRequestRequirement";
 
-
 const PostDB = new MongoDB.Post();
 const CommentDB = new MongoDB.Comment();
 
 export const write: RequestHandler<Record<string, string>> = async (
   req: Request<Record<string, string>> | ExtendedRequest,
-  res
+  res,
 ) => {
   try {
     const { body } = req;
@@ -25,66 +24,65 @@ export const write: RequestHandler<Record<string, string>> = async (
     new CheckRequestRequirement(req as Request).matchBody([
       "post",
       "reply",
-      "content"
+      "content",
     ]);
 
     const {
       post: postId,
       reply: replyId,
-      content
+      content,
     }: {
-            post: string;
-            reply: string | "";
-            content: string;
-        } = body;
+      post: string;
+      reply: string | "";
+      content: string;
+    } = body;
 
     if (content.length > 250)
       throw new CustomError(
         CustomStatus.INVALID_CONTENT_LENGTH,
-        new Error("Invalid content length")
+        new Error("Invalid content length"),
       );
     if (content.trim() === "")
       throw new CustomError(
         CustomStatus.EMPTY_CONTENT,
-        new Error("Content is empty")
+        new Error("Content is empty"),
       );
 
     if (
       !isValidObjectId(postId) ||
-            !(await PostDB.read({ id: postId }).catch(() => null))
+      !(await PostDB.read({ id: postId }).catch(() => null))
     )
       throw new CustomError(
         CustomStatus.INVALID_POST_ID,
-        new Error("Post not found")
+        new Error("Post not found"),
       );
 
     const validReplyTarget =
-            replyId === ""
-              ? true
-              : await CommentDB.read({ id: replyId }).catch(() => null);
+      replyId === ""
+        ? true
+        : await CommentDB.read({ id: replyId }).catch(() => null);
     if (!validReplyTarget)
       throw new CustomError(
         CustomStatus.INVALID_REPLY_ID,
-        new Error("Reply not found")
+        new Error("Reply not found"),
       );
 
     const dataToSave = {
       user: userId,
       post: postId,
       content: content,
-      reply: replyId
+      reply: replyId,
     };
 
     const savedComment = await CommentDB.write(dataToSave, {
-      id: commentId
+      id: commentId,
     });
     return res.status(HttpStatus.OK).json({
       status: CustomStatus.OK,
       id: savedComment._id,
-      data: savedComment
+      data: savedComment,
     });
-  }
-  catch (error: any) {
+  } catch (error: any) {
     return res
       .status(HttpStatus.BAD_REQUEST)
       .json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });

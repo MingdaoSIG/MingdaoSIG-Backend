@@ -1,10 +1,9 @@
 import schema from "./schema";
 import { countByNameInFirstSeenOrder, readSigNames } from "./sig_counts";
 
-
 export default async function posts_of_each_sigs(
   from: Date | undefined,
-  to: Date
+  to: Date,
 ) {
   const TITLE = "Posts of each sigs";
 
@@ -23,9 +22,9 @@ export default async function posts_of_each_sigs(
           removed: false,
           createdAt: {
             $gte: from ?? new Date(0),
-            $lte: to
-          }
-        }
+            $lte: to,
+          },
+        },
       },
       { $group: { _id: null, sigs: { $push: "$sig" } } },
       { $unwind: { path: "$sigs", includeArrayIndex: "position" } },
@@ -33,12 +32,12 @@ export default async function posts_of_each_sigs(
         $group: {
           _id: "$sigs",
           count: { $sum: 1 },
-          first: { $min: "$position" }
-        }
-      }
+          first: { $min: "$position" },
+        },
+      },
     ],
     // A natural-order scan keeps $push in insertion order.
-    { hint: { $natural: 1 } }
+    { hint: { $natural: 1 } },
   );
 
   // Removed sigs are left out of the chart
@@ -47,6 +46,6 @@ export default async function posts_of_each_sigs(
   return {
     func: posts_of_each_sigs.name,
     title: TITLE,
-    content: countByNameInFirstSeenOrder(groups, sigNames)
+    content: countByNameInFirstSeenOrder(groups, sigNames),
   };
 }

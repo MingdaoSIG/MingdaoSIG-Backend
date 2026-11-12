@@ -5,7 +5,6 @@ import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 import leanDefaults from "@DBfunc/_helper/leanDefaults";
 
-
 export default async function list(search: SigFilter, option?: ReadOption) {
   try {
     const { lean, projection } = option || {};
@@ -13,10 +12,10 @@ export default async function list(search: SigFilter, option?: ReadOption) {
 
     const data = lean
       ? await query
-        .lean()
-        .then(docs =>
-          projection ? docs : docs.map(doc => leanDefaults(sig, doc))
-        )
+          .lean()
+          .then((docs) =>
+            projection ? docs : docs.map((doc) => leanDefaults(sig, doc)),
+          )
       : await query;
 
     if (!data) {
@@ -24,8 +23,7 @@ export default async function list(search: SigFilter, option?: ReadOption) {
     }
 
     return data as unknown as Sig[];
-  }
-  catch (error: any) {
+  } catch (error: any) {
     throw new CustomError(CustomStatus.ERROR_READING_SIG_FROM_DB, error);
   }
 }

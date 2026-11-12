@@ -8,9 +8,8 @@ import { prefetchOnlineAppVersion } from "@module/GetOnlineAppVersion";
 import {
   attachServer,
   isShuttingDown,
-  shutdown
+  shutdown,
 } from "@module/GracefulShutdown";
-
 
 // Like dotenv: values already set in the environment win over .env, and a
 // missing .env is fine (deployments set the variables directly).
@@ -21,10 +20,10 @@ if (existsSync(".env")) process.loadEnvFile(".env");
 process.stdout.on("error", () => undefined);
 process.stderr.on("error", () => undefined);
 
-process.on("unhandledRejection", reason => {
+process.on("unhandledRejection", (reason) => {
   console.error("Process : unhandled promise rejection:", reason);
 });
-process.on("uncaughtException", error => {
+process.on("uncaughtException", (error) => {
   // The process state is unknown after this, so drain and exit; the
   // orchestrator restarts the container and startup no longer crash-loops.
   console.error("Process : uncaught exception:", error);
@@ -37,31 +36,31 @@ const env = ValidateEnv();
 
 async function start() {
   const connected = await ConnectMongoDB(env.MONGO_URI, {
-    shouldStop: isShuttingDown
+    shouldStop: isShuttingDown,
   });
   if (!connected || isShuttingDown()) return;
 
   server.set("host", env.HOST);
   server.set("port", env.PORT);
-  const httpServer = server.listen(env.PORT, env.HOST, error => {
+  const httpServer = server.listen(env.PORT, env.HOST, (error) => {
     // Express 5 also calls this on a listen error (EADDRINUSE ...), which the
     // "error" handler below reports.
     if (error) return;
     console.log(`Server : listening on http://${env.HOST}:${env.PORT}`);
   });
-  httpServer.on("error", error => {
+  httpServer.on("error", (error) => {
     console.error("Server : HTTP server error:", error);
     shutdown("HTTP server error", 1);
   });
   attachServer(httpServer);
 
-  EnsureIndexes().catch(error => {
+  EnsureIndexes().catch((error) => {
     console.error("MongoDB : index build stopped:", error);
   });
   prefetchOnlineAppVersion();
 }
 
-start().catch(error => {
+start().catch((error) => {
   console.error("Server : failed to start:", error);
   process.exit(1);
 });

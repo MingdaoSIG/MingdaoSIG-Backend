@@ -4,11 +4,10 @@ import { ExtendedRequest } from "@type/request";
 import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 
-
 const MAX_LIMIT = 50;
 
 export default function CheckValidPaginationOption(
-  req: Request | ExtendedRequest
+  req: Request | ExtendedRequest,
 ) {
   const skip = req.query?.skip;
   const limit = req.query?.limit;
@@ -26,7 +25,7 @@ export default function CheckValidPaginationOption(
     if (value <= 0 || value > MAX_LIMIT)
       throw new CustomError(
         CustomStatus.INVALID_QUERY,
-        new Error("Limit should be above 0 and less than 50")
+        new Error("Limit should be above 0 and less than 50"),
       );
   }
 
@@ -37,13 +36,13 @@ function toNonNegativeInteger(value: unknown, name: string) {
   if (typeof value !== "string")
     throw new CustomError(
       CustomStatus.INVALID_QUERY,
-      new Error(`${name} is not a string`)
+      new Error(`${name} is not a string`),
     );
 
   if (!/^\d+$/.test(value))
     throw new CustomError(
       CustomStatus.INVALID_QUERY,
-      new Error(`${name} is not a non-negative integer`)
+      new Error(`${name} is not a non-negative integer`),
     );
 
   return Number(value);
