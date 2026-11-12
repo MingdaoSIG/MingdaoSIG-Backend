@@ -5,6 +5,7 @@ import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
 import { SendText } from "@module/SendMail";
+import { JoinRequest } from "@type/joinRequest";
 
 const UserDB = new MongoDB.User();
 const SigDB = new MongoDB.Sig();
@@ -50,59 +51,9 @@ async function confirm(res: Response, confirmId: string, accept: boolean) {
         CustomStatus.NOT_FOUND,
         new Error("Request not found"),
       );
-    } else if (oldJoinRequest.state !== "pending") {
-      throw new CustomError(
-        CustomStatus.ALREADY_CONFIRMED,
-        new Error("Request already confirmed"),
-      );
     }
 
-    if (accept) {
-      const sigData = await SigDB.read({ id: oldJoinRequest.sig }).catch(
-        () => null,
-      );
-      if (!sigData || sigData.removed) {
-        throw new CustomError(
-          CustomStatus.INVALID_SIG_ID,
-          new Error("Sig removed"),
-        );
-      }
-    }
-
-    const savedData = await JoinRequestDB.confirmPending(
-      oldJoinRequest._id,
-      accept ? "accepted" : "rejected",
-    );
-    if (!savedData) {
-      // Another confirmation won the race
-      throw new CustomError(
-        CustomStatus.ALREADY_CONFIRMED,
-        new Error("Request already confirmed"),
-      );
-    }
-
-    if (savedData.state === "accepted") {
-      await UserDB.write(
-        {
-          // @ts-expect-error
-          $addToSet: {
-            sig: oldJoinRequest.sig,
-          },
-        },
-        {
-          id: oldJoinRequest.user,
-        },
-      );
-    }
-
-    // The decision is saved; a failed notification must not report failure.
-    await sendNotification(
-      oldJoinRequest.user,
-      oldJoinRequest.sig,
-      savedData.state,
-    ).catch(() => {
-      console.warn("Join request confirmed, but the notification email failed");
-    });
+    const savedData = await decideJoinRequest(oldJoinRequest, accept);
 
     return res.status(HttpStatus.OK).json({
       status: CustomStatus.OK,
@@ -114,6 +65,78 @@ async function confirm(res: Response, confirmId: string, accept: boolean) {
       .status(HttpStatus.BAD_REQUEST)
       .json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });
   }
+}
+
+/**
+ * Accepts or rejects a join request: the email link (by confirmId) and the
+ * admin panel (POST /admin/join-requests/:id/decision) both go through here.
+ *
+ * - A request that is no longer pending throws ALREADY_CONFIRMED (4031).
+ * - Accepting needs the SIG to exist and not be removed (INVALID_SIG_ID).
+ * - Accepting adds the SIG to the applicant's `sig` list.
+ * - The applicant gets the result email; a failed email is logged only.
+ *
+ * Returns the updated request.
+ */
+export async function decideJoinRequest(
+  oldJoinRequest: JoinRequest,
+  accept: boolean,
+) {
+  if (oldJoinRequest.state !== "pending") {
+    throw new CustomError(
+      CustomStatus.ALREADY_CONFIRMED,
+      new Error("Request already confirmed"),
+    );
+  }
+
+  if (accept) {
+    const sigData = await SigDB.read({ id: oldJoinRequest.sig }).catch(
+      () => null,
+    );
+    if (!sigData || sigData.removed) {
+      throw new CustomError(
+        CustomStatus.INVALID_SIG_ID,
+        new Error("Sig removed"),
+      );
+    }
+  }
+
+  const savedData = await JoinRequestDB.confirmPending(
+    oldJoinRequest._id,
+    accept ? "accepted" : "rejected",
+  );
+  if (!savedData) {
+    // Another confirmation won the race
+    throw new CustomError(
+      CustomStatus.ALREADY_CONFIRMED,
+      new Error("Request already confirmed"),
+    );
+  }
+
+  if (savedData.state === "accepted") {
+    await UserDB.write(
+      {
+        // @ts-expect-error
+        $addToSet: {
+          sig: oldJoinRequest.sig,
+        },
+      },
+      {
+        id: oldJoinRequest.user,
+      },
+    );
+  }
+
+  // The decision is saved; a failed notification must not report failure.
+  await sendNotification(
+    oldJoinRequest.user,
+    oldJoinRequest.sig,
+    savedData.state,
+  ).catch(() => {
+    console.warn("Join request confirmed, but the notification email failed");
+  });
+
+  return savedData;
 }
 
 async function sendNotification(userId: string, sigId: string, state: string) {
