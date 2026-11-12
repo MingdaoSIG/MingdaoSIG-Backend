@@ -23,6 +23,7 @@ import {
   removeComment,
   restoreComment,
 } from "@controller/cloud/admin/comments";
+import { suspend, unsuspend } from "@controller/cloud/admin/suspension";
 import { listSigs } from "@controller/cloud/admin/sigs";
 import { decide, listJoinRequests } from "@controller/cloud/admin/joinRequests";
 import { listAuditEntries } from "@controller/cloud/admin/audit";
@@ -50,6 +51,9 @@ admin.post("/posts/:id/restore", contentModeratorOnly, restorePost);
 
 admin.get("/users", contentModeratorOnly, listUsers);
 admin.get("/users/:id", contentModeratorOnly, readUser);
+// Content moderators may mute (and lift mutes), never ban (v4 §5.1).
+admin.post("/users/:id/suspend", contentModeratorOnly, suspend);
+admin.post("/users/:id/unsuspend", contentModeratorOnly, unsuspend);
 admin.post("/users/:id/permission", adminOnly, setPermission);
 admin.post("/users/:id/badges", adminOnly, setBadges);
 

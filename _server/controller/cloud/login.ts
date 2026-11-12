@@ -1,4 +1,4 @@
-import { RequestHandler } from "express";
+import { RequestHandler, Response } from "express";
 
 // import CheckRequestRequirement from "@module/CheckRequestRequirement";
 import { HttpStatus } from "@module/HttpStatusCode";
@@ -7,6 +7,32 @@ import signJWT from "@module/SignJWT";
 import getUserData, { getUserDataBySession } from "@module/GetUserData";
 import getGoogleUserData from "@module/GetGoogleUserData";
 import { withNotificationSettings } from "@module/NotificationSettings";
+import {
+  activeSuspension,
+  clearExpiredSuspension,
+  isExpiredSuspension,
+  sendSuspended,
+  withActiveSuspension,
+} from "@module/Suspension";
+import { User } from "@type/user";
+
+/**
+ * The login response, or 403/4041 for a user with a ban in force (contract
+ * v4 §5.1). An expired suspension is cleared.
+ */
+function loggedIn(res: Response, userData: User) {
+  const suspension = activeSuspension(userData.suspension);
+  if (suspension?.type === "ban") return sendSuspended(res, suspension);
+  if (isExpiredSuspension(userData.suspension))
+    clearExpiredSuspension(String(userData._id));
+
+  const jwt = signJWT({ id: userData._id });
+  return res.status(HttpStatus.OK).json({
+    status: CustomStatus.OK,
+    authorization: `Bearer ${jwt}`,
+    data: withActiveSuspension(withNotificationSettings(userData)),
+  });
+}
 
 export const login: RequestHandler = async (req, res) => {
   try {
@@ -29,12 +55,7 @@ export const login: RequestHandler = async (req, res) => {
         googleUserData.picture,
       );
 
-      const jwt = signJWT({ id: userData._id });
-      return res.status(HttpStatus.OK).json({
-        status: CustomStatus.OK,
-        authorization: `Bearer ${jwt}`,
-        data: withNotificationSettings(userData),
-      });
+      return loggedIn(res, userData);
     } else if (session) {
       const userData = await getUserDataBySession(session);
       if (!userData) {
@@ -42,12 +63,7 @@ export const login: RequestHandler = async (req, res) => {
           .status(HttpStatus.UNAUTHORIZED)
           .json({ status: CustomStatus.INVALID_SESSION });
       }
-      const jwt = signJWT({ id: userData._id });
-      return res.status(HttpStatus.OK).json({
-        status: CustomStatus.OK,
-        authorization: `Bearer ${jwt}`,
-        data: withNotificationSettings(userData),
-      });
+      return loggedIn(res, userData);
     }
   } catch (error: any) {
     return res

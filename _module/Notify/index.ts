@@ -38,7 +38,9 @@ export type NotificationTargetKind =
   | "sig"
   | "event"
   | "join"
-  | "report";
+  | "report"
+  | "user" // system: your account (suspensions)
+  | "broadcast"; // system: an admin or SIG broadcast
 
 export interface NotifyInput {
   recipient: string;

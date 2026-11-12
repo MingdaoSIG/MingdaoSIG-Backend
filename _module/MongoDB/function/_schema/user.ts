@@ -2,6 +2,19 @@ import mongoose from "mongoose";
 
 const Schema = mongoose.Schema;
 
+// 停權 / 禁言 (@module/Suspension). `until` null means indefinite.
+const suspensionSchema = new Schema(
+  {
+    type: { type: String, enum: ["mute", "ban"], required: true },
+    until: { type: Date, default: null },
+    reason: String,
+    // user id of the admin or content moderator who set it
+    by: String,
+    createdAt: Date,
+  },
+  { _id: false },
+);
+
 const userSchema = new Schema(
   {
     customId: String,
@@ -49,6 +62,10 @@ const userSchema = new Schema(
     },
     // ISO week ("2026-W46", Asia/Taipei) of the last weekly digest email.
     digestLastSentWeek: String,
+    // Absent unless suspended. Private: the user sees it (while it is in
+    // force) on /login and /user/me; admins and content moderators in
+    // /admin/users.
+    suspension: { type: suspensionSchema, default: undefined },
   },
   { timestamps: true },
 );
@@ -67,6 +84,12 @@ userSchema.index({ createdAt: -1, _id: -1 });
 userSchema.index(
   { "notificationSettings.email.digest": 1, digestLastSentWeek: 1 },
   { partialFilterExpression: { "notificationSettings.email.digest": true } },
+);
+
+// GET /admin/users?suspended=1 (sparse: very few users are suspended).
+userSchema.index(
+  { "suspension.until": 1 },
+  { partialFilterExpression: { "suspension.type": { $exists: true } } },
 );
 
 export default mongoose.model("user", userSchema, "user");

@@ -13,6 +13,7 @@ import {
   roleOf,
 } from "@module/Permission";
 import { recordAudit } from "@module/Audit";
+import { activeSuspension, suspensionView } from "@module/Suspension";
 import { objectBody } from "../_body";
 import {
   callerId,
@@ -30,17 +31,43 @@ import {
 const AdminDB = new MongoDB.Admin();
 
 const ROLE_FILTERS = ["all", "admin", "moderator"] as const;
+const FLAGS = ["0", "1"] as const;
+
+/** `suspension` as the admin pages get it: while it is in force, else null. */
+function currentSuspension(stored: unknown) {
+  const active = activeSuspension(stored);
+  return active
+    ? {
+        ...suspensionView(active),
+        by: active.by ?? "",
+        createdAt: active.createdAt ?? null,
+      }
+    : null;
+}
 
 // GET /admin/users (admin, content moderator): the list includes email and
-// code. `role=moderator` lists the content moderators (permission 3).
+// code. `role=moderator` lists the content moderators (permission 3);
+// `suspended=1` only users with a suspension in force (停權中).
 export const listUsers: RequestHandler = async (req, res) => {
   try {
     const { skip, limit } = pagination(req);
     const q = queryText(req);
     const role = queryEnum(req, "role", ROLE_FILTERS, "all");
     const sig = queryId(req, "sig");
+    const suspended = queryEnum(req, "suspended", FLAGS, "0") === "1";
 
     const filter: Filter = {};
+    if (suspended) {
+      Object.assign(filter, { "suspension.type": { $exists: true } });
+      filter.$and = [
+        {
+          $or: [
+            { "suspension.until": null },
+            { "suspension.until": { $gt: new Date() } },
+          ],
+        },
+      ];
+    }
     if (role === "admin") filter.permission = ADMIN_PERMISSION;
     if (role === "moderator") filter.permission = CONTENT_MODERATOR_PERMISSION;
     if (sig) filter.sig = sig;
@@ -71,6 +98,7 @@ export const listUsers: RequestHandler = async (req, res) => {
         role: roleOf(user),
         badge: user.badge ?? [],
         sig: user.sig ?? [],
+        suspension: currentSuspension(user.suspension),
         createdAt: user.createdAt ?? null,
       })),
       total,
@@ -113,6 +141,7 @@ export const readUser: RequestHandler = async (req, res) => {
       data: {
         ...user,
         role: roleOf(user),
+        suspension: currentSuspension(user.suspension),
         postCount: activity.postCount,
         commentCount: activity.commentCount,
         managedSigs,

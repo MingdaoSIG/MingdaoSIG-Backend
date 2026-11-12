@@ -9,6 +9,7 @@ import MongoDB from "@module/MongoDB";
 import { isAdmin } from "@module/Permission";
 import toPublicUser from "@module/PublicUser";
 import { withNotificationSettings } from "@module/NotificationSettings";
+import { withActiveSuspension } from "@module/Suspension";
 
 const ProfileDB = new MongoDB.User();
 
@@ -74,14 +75,17 @@ export const readByCustomId: RequestHandler<Record<string, string>> = async (
 };
 
 // GET /user/me: the caller's own full document (JWT required), with
-// `notificationSettings` merged with the defaults.
+// `notificationSettings` merged with the defaults and `suspension` while it
+// is in force (a banned caller gets 403/4041 from JWTverifier instead).
 export const readMe: RequestHandler<Record<string, string>> = async (
   req,
   res,
 ) => {
   return res.status(HttpStatus.OK).json({
     status: CustomStatus.OK,
-    data: withNotificationSettings((req as ExtendedRequest).userData),
+    data: withActiveSuspension(
+      withNotificationSettings((req as ExtendedRequest).userData),
+    ),
   });
 };
 

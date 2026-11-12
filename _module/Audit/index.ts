@@ -30,6 +30,8 @@ export const AUDIT_ACTIONS = [
   "series.remove",
   "report.resolve",
   "report.dismiss",
+  "user.suspend",
+  "user.unsuspend",
 ] as const;
 
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];

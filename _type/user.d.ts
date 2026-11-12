@@ -4,6 +4,14 @@ type StoredNotificationSettings = {
   email?: Record<string, boolean | undefined>;
 };
 
+type StoredSuspension = {
+  type: "mute" | "ban";
+  until: Date | null;
+  reason: string;
+  by: string;
+  createdAt: Date;
+};
+
 export type Identity = "teacher" | "student" | "alumni";
 
 export type Permission = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
@@ -26,6 +34,7 @@ export type User = {
   notifyComments?: boolean; // 有人留言時寄信通知（未設定視為 true）
   notificationSettings?: StoredNotificationSettings; // 通知設定（未設定的項目用預設值）
   digestLastSentWeek?: string; // 上次寄出每週摘要的 ISO 週，例如 2026-W46
+  suspension?: StoredSuspension; // 停權／禁言（未設定表示沒有）
   createAt?: string; // 建立時間
   updateAt?: string; // 更新時間
   __v?: number; // 版本

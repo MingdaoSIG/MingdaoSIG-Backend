@@ -183,9 +183,14 @@ export async function pushPayload(notification: Record<string, any>) {
     typeof notification.meta?.excerpt === "string"
       ? notification.meta.excerpt
       : "";
+  // `system` notifications carry their own text (contract v4 §5.5).
+  const message =
+    typeof notification.meta?.message === "string"
+      ? notification.meta.message
+      : "";
   return {
     title: pushTitle(notification, actorName),
-    body: cut(excerpt || label, BODY_LENGTH),
+    body: cut(excerpt || message || label, BODY_LENGTH),
     url: String(notification.link ?? "/"),
     tag: String(notification.collapseKey || notification._id),
   };
@@ -226,6 +231,10 @@ export function pushTitle(
     }
     case "report_result":
       return "你的檢舉已處理";
+    case "system": {
+      const title = notification.meta?.title;
+      return typeof title === "string" && title ? title : "MDSIG 通知";
+    }
     default:
       return "MDSIG 通知";
   }

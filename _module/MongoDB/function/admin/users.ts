@@ -21,6 +21,7 @@ const LIST_FIELDS = {
   permission: 1,
   badge: 1,
   sig: 1,
+  suspension: 1,
   createdAt: 1,
 } as const;
 
