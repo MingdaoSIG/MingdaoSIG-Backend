@@ -27,6 +27,8 @@ const SEND_TIMEOUT_MS = 10_000;
 // A push the device cannot take within a day is dropped by the push service.
 const PUSH_TTL_SECONDS = 24 * 60 * 60;
 const BODY_LENGTH = 100;
+// Parallel deliveries when pushing a broadcast.
+const BATCH_CONCURRENCY = 10;
 
 const subscriptionSchema = new mongoose.Schema(
   {
@@ -152,6 +154,74 @@ export async function dispatchPush(notification: Record<string, any>) {
   );
 }
 
+/**
+ * Sends many stored notifications (a broadcast) with a few queries in
+ * total: recipients whose `notificationSettings.push[type]` is false are
+ * skipped, then every device of the others gets its notification, at most
+ * BATCH_CONCURRENCY at a time. Never throws for a single delivery.
+ */
+export async function dispatchPushMany(notifications: Record<string, any>[]) {
+  if (!pushConfig().enabled || notifications.length === 0) return;
+
+  const byRecipient = new Map<string, Record<string, any>>();
+  for (const notification of notifications) {
+    const recipient = String(notification.recipient ?? "");
+    if (isValidObjectId(recipient)) byRecipient.set(recipient, notification);
+  }
+
+  const optedOut = new Set<string>();
+  const types = new Set(
+    Array.from(byRecipient.values(), (notification) =>
+      String(notification.type),
+    ),
+  );
+  for (const type of types) {
+    const ids = Array.from(byRecipient)
+      .filter(([, notification]) => notification.type === type)
+      .map(([recipient]) => recipient);
+    const users = await UserDB.list(
+      { _id: { $in: ids }, [`notificationSettings.push.${type}`]: false },
+      { lean: true, projection: { _id: 1 } },
+    );
+    for (const user of users) optedOut.add(String(user._id));
+  }
+
+  const allowed = Array.from(byRecipient.keys()).filter(
+    (recipient) => !optedOut.has(recipient),
+  );
+  if (allowed.length === 0) return;
+  const subscriptions = await PushSubscriptionModel.find({
+    user: { $in: allowed },
+  }).lean();
+
+  const names = new Map<string, Promise<string>>();
+  const actorName = (actor: unknown) => {
+    const key = String(actor ?? "");
+    if (!names.has(key)) names.set(key, nameOf(actor));
+    return names.get(key) as Promise<string>;
+  };
+
+  let next = 0;
+  const worker = async () => {
+    while (next < subscriptions.length) {
+      const subscription = subscriptions[next++];
+      const notification = byRecipient.get(String(subscription.user));
+      if (!notification) continue;
+      const payload = payloadFor(
+        notification,
+        await actorName(notification.actor),
+      );
+      await send(subscription, JSON.stringify(payload));
+    }
+  };
+  await Promise.all(
+    Array.from(
+      { length: Math.min(BATCH_CONCURRENCY, subscriptions.length) },
+      worker,
+    ),
+  );
+}
+
 async function send(subscription: Record<string, any>, payload: string) {
   try {
     await webpush.sendNotification(
@@ -177,15 +247,23 @@ async function send(subscription: Record<string, any>, payload: string) {
 
 /** `{ title, body, url, tag }` for the service worker. */
 export async function pushPayload(notification: Record<string, any>) {
-  const actorName = await nameOf(notification.actor);
+  return payloadFor(notification, await nameOf(notification.actor));
+}
+
+function payloadFor(notification: Record<string, any>, actorName: string) {
   const label = String(notification.target?.label ?? "");
   const excerpt =
     typeof notification.meta?.excerpt === "string"
       ? notification.meta.excerpt
       : "";
+  // `system` notifications carry their own text (contract v4 §5.5).
+  const message =
+    typeof notification.meta?.message === "string"
+      ? notification.meta.message
+      : "";
   return {
     title: pushTitle(notification, actorName),
-    body: cut(excerpt || label, BODY_LENGTH),
+    body: cut(excerpt || message || label, BODY_LENGTH),
     url: String(notification.link ?? "/"),
     tag: String(notification.collapseKey || notification._id),
   };
@@ -226,6 +304,10 @@ export function pushTitle(
     }
     case "report_result":
       return "你的檢舉已處理";
+    case "system": {
+      const title = notification.meta?.title;
+      return typeof title === "string" && title ? title : "MDSIG 通知";
+    }
     default:
       return "MDSIG 通知";
   }

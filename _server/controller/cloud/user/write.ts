@@ -11,6 +11,7 @@ import {
   notificationSettingsUpdate,
   withNotificationSettings,
 } from "@module/NotificationSettings";
+import { withActiveSuspension } from "@module/Suspension";
 // import CheckValidCustomId from "@module/CheckValidCustomId";
 
 const UserDB = new MongoDB.User();
@@ -92,7 +93,7 @@ export const write: RequestHandler = async (
     return res.status(HttpStatus.OK).json({
       status: CustomStatus.OK,
       id: savedData._id,
-      data: withNotificationSettings(savedData),
+      data: withActiveSuspension(withNotificationSettings(savedData)),
     });
   } catch (error: any) {
     return res

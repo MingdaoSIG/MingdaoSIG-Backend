@@ -79,3 +79,43 @@ export function idList(value: unknown, name: string) {
     fail(CustomStatus.INVALID_BODY, `${name} must not repeat an id`);
   return ids;
 }
+
+export const LINK_MAX = 500;
+
+/**
+ * An optional link: "" (none, also for null or a missing value), a site
+ * path ("/post/…", not "//host") or an https URL; at most 500 characters.
+ */
+export function linkValue(value: unknown, name = "link") {
+  if (value === undefined || value === null || value === "") return "";
+  if (typeof value !== "string")
+    fail(CustomStatus.INVALID_BODY, `${name} must be a string`);
+  const link = value.trim();
+  const invalid = () =>
+    fail(
+      CustomStatus.INVALID_BODY,
+      `${name} must be a path starting with / or an https URL`,
+    );
+  if (link.length > LINK_MAX || /[\s\\]/.test(link)) invalid();
+  if (link.startsWith("/")) {
+    if (link.startsWith("//")) invalid();
+    return link;
+  }
+  try {
+    const url = new URL(link);
+    if (url.protocol !== "https:" || !url.hostname || url.username) invalid();
+  } catch {
+    invalid();
+  }
+  return link;
+}
+
+/** An ISO date string as a Date; 400/4011 otherwise. */
+export function dateValue(value: unknown, name: string) {
+  if (typeof value !== "string")
+    fail(CustomStatus.INVALID_BODY, `${name} must be an ISO date`);
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime()))
+    fail(CustomStatus.INVALID_BODY, `${name} must be an ISO date`);
+  return date;
+}

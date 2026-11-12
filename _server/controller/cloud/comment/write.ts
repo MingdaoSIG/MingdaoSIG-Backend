@@ -10,6 +10,7 @@ import MongoDB from "@module/MongoDB";
 import CheckRequestRequirement from "@module/CheckRequestRequirement";
 import notifyNewComment from "@module/CommentNotification";
 import { notifyComment } from "@module/NotifyEvents";
+import { scanForKeywords } from "@module/KeywordFilter";
 import { checkContent } from "./_shared";
 
 const PostDB = new MongoDB.Post();
@@ -61,6 +62,11 @@ export const write: RequestHandler<Record<string, string>> = async (
       reply: parent ? String(parent._id) : "",
     });
 
+    scanForKeywords({
+      kind: "comment",
+      id: String(savedComment._id),
+      texts: [content],
+    });
     notifyNewComment({
       actorId: userId,
       actorName: userData?.name,

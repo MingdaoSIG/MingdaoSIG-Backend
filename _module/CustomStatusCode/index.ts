@@ -32,6 +32,7 @@ export const CustomCode = {
   4036: "Invalid session",
   4037: "Invalid time range",
   4040: "Not recruiting",
+  4041: "Account suspended",
 
   4100: "Error reading user from db",
   4101: "Error writing user to db",
@@ -85,6 +86,8 @@ export const CustomStatus = {
   INVALID_SESSION: 4036,
   INVALID_TIME_RANGE: 4037,
   NOT_RECRUITING: 4040,
+  // Contract v4 §5.1
+  ACCOUNT_SUSPENDED: 4041,
 
   ERROR_READING_USER_FROM_DB: 4100,
   ERROR_WRITING_USER_TO_DB: 4101,

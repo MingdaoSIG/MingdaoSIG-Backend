@@ -20,6 +20,7 @@ export const PUSH_SETTING_TYPES = [
   "join_result",
   "feedback",
   "event",
+  "system", // announcements and broadcasts (contract v4 §5.5)
 ] as const satisfies readonly NotificationType[];
 
 export const EMAIL_SETTING_TYPES = ["comment", "digest"] as const;
