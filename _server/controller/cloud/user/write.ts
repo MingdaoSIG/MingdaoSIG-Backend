@@ -7,10 +7,8 @@ import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
 import MongoDB from "@module/MongoDB";
 import CheckRequestRequirement from "@module/CheckRequestRequirement";
-import {
-  notificationSettingsUpdate,
-  withNotificationSettings,
-} from "@module/NotificationSettings";
+import { notificationSettingsUpdate } from "@module/NotificationSettings";
+import { withOwnUserFields } from "@module/Onboarding";
 import { withActiveSuspension } from "@module/Suspension";
 // import CheckValidCustomId from "@module/CheckValidCustomId";
 
@@ -18,9 +16,12 @@ const UserDB = new MongoDB.User();
 
 // POST /user: the caller updates their own `description`, `notifyComments`
 // (comment notification emails) and/or `notificationSettings` (a partial
-// deep merge). Fields left out keep their value. `notifyComments` and
+// deep merge), or sends `onboarded: true` once the first-login onboarding is
+// done or skipped (sets `onboardedAt`; a date already stored is kept).
+// Fields left out keep their value. `notifyComments` and
 // `notificationSettings.email.comment` are the same setting: writing either
-// one updates both, and sending both with different values is 4011.
+// one updates both, and sending both with different values is 4011. Returns
+// the same document as GET /user/me.
 export const write: RequestHandler = async (
   req: Request | ExtendedRequest,
   res,
@@ -31,13 +32,14 @@ export const write: RequestHandler = async (
       description,
       notifyComments,
       notificationSettings,
+      onboarded,
     } = req.body ?? {};
     const decodedJwt: any = (req as ExtendedRequest).JWT;
     const userId = decodedJwt.id;
 
     new CheckRequestRequirement(req as Request).onlyIncludesBody(
       // ["customId", "description"],
-      ["description", "notifyComments", "notificationSettings"],
+      ["description", "notifyComments", "notificationSettings", "onboarded"],
     );
 
     // if (userData.customId !== customId) {
@@ -48,6 +50,13 @@ export const write: RequestHandler = async (
       throw new CustomError(
         CustomStatus.INVALID_BODY,
         new Error("Invalid description"),
+      );
+    }
+
+    if (onboarded !== undefined && onboarded !== true) {
+      throw new CustomError(
+        CustomStatus.INVALID_BODY,
+        new Error("onboarded can only be true"),
       );
     }
 
@@ -87,13 +96,15 @@ export const write: RequestHandler = async (
       dataToSave.notifyComments = commentEmails;
       dataToSave["notificationSettings.email.comment"] = commentEmails;
     }
+    if (onboarded === true && !(req as ExtendedRequest).userData?.onboardedAt)
+      dataToSave.onboardedAt = new Date();
 
     const savedData = await UserDB.write(dataToSave, { id: userId });
 
     return res.status(HttpStatus.OK).json({
       status: CustomStatus.OK,
       id: savedData._id,
-      data: withActiveSuspension(withNotificationSettings(savedData)),
+      data: withActiveSuspension(await withOwnUserFields(savedData)),
     });
   } catch (error: any) {
     return res

@@ -36,6 +36,8 @@ const eventSchema = new mongoose.Schema(
 
 // GET /sig/:sigId/events (by startAt), the calendar feed and the analytics.
 eventSchema.index({ sig: 1, removed: 1, startAt: 1 });
+// GET /event/list?scope=all|rsvped (every SIG, by startAt).
+eventSchema.index({ removed: 1, startAt: 1 });
 
 const eventRsvpSchema = new mongoose.Schema(
   {
@@ -47,6 +49,8 @@ const eventRsvpSchema = new mongoose.Schema(
 
 // One RSVP per user and event; also serves the counts and the RSVP list.
 eventRsvpSchema.index({ event: 1, user: 1 }, { unique: true });
+// GET /event/list?scope=rsvped (the events a user signed up for).
+eventRsvpSchema.index({ user: 1, event: 1 });
 
 export const EventModel =
   (mongoose.models.event as mongoose.Model<any>) ??

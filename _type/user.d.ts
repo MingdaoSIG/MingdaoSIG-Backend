@@ -35,6 +35,7 @@ export type User = {
   notifyComments?: boolean; // 有人留言時寄信通知（未設定視為 true）
   notificationSettings?: StoredNotificationSettings; // 通知設定（未設定的項目用預設值）
   digestLastSentWeek?: string; // 上次寄出每週摘要的 ISO 週，例如 2026-W46
+  onboardedAt?: Date | string | null; // 完成（或略過）新手導覽的時間
   suspension?: StoredSuspension; // 停權／禁言（未設定表示沒有）
   createAt?: string; // 建立時間
   updateAt?: string; // 更新時間

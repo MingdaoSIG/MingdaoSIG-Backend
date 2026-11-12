@@ -59,6 +59,10 @@ const userSchema = new Schema(
     },
     // ISO week ("2026-W46", Asia/Taipei) of the last weekly digest email.
     digestLastSentWeek: String,
+    // When the user finished or skipped the first-login onboarding (POST
+    // /user `{ onboarded: true }`). GET /user/me also counts users who
+    // already took part as onboarded (@module/Onboarding).
+    onboardedAt: Date,
     // Absent unless suspended. Private: the user sees it (while it is in
     // force) on /login and /user/me; admins and content moderators in
     // /admin/users.

@@ -1,14 +1,22 @@
-import { Request, RequestHandler, Response } from "express";
+import { NextFunction, Request, RequestHandler, Response } from "express";
 import { isValidObjectId } from "mongoose";
 
 import { Sig } from "@type/sig";
 import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
 import MongoDB from "@module/MongoDB";
-import { canManageSig, isAdmin, isSigModerator } from "@module/Permission";
+import {
+  ANNOUNCEMENT_SIG_ID,
+  canManageSig,
+  isAdmin,
+  isSigModerator,
+} from "@module/Permission";
 import { notify } from "@module/Notify";
 import { userIdFromJwt } from "@module/OptionalJwt";
 import { buildCalendar, ICS_CONTENT_TYPE, IcsEvent } from "@module/Ics";
+import { sigColorOf } from "@module/SigView";
+import { userSigIds } from "@module/UserSigs";
+import JWTverifier from "@middleware/JWTverifier";
 import {
   EVENT_CAPACITY_MAX,
   EVENT_DESCRIPTION_MAX_LENGTH,
@@ -48,6 +56,11 @@ const EVENT_FIELDS = [
 ] as const;
 const REQUIRED_ON_CREATE = ["title", "startAt", "endAt"] as const;
 const WHEN = ["upcoming", "past", "all"] as const;
+const SCOPES = ["all", "mine", "rsvped"] as const;
+const SIGNED_IN_SCOPES: readonly unknown[] = ["mine", "rsvped"];
+const DAY_MS = 24 * 60 * 60 * 1000;
+const LIST_DEFAULT_DAYS = 60;
+const LIST_MAX_DAYS = 120;
 const CALENDAR_PAST_DAYS = 30;
 const CALENDAR_MAX_EVENTS = 500;
 const UID_DOMAIN = "sig.mingdao.edu.tw";
@@ -240,6 +253,142 @@ export const listSigEvents: RequestHandler<Record<string, string>> = async (
       EventModel.countDocuments(filter),
     ]);
     const data = await toEventItems(docs as EventDoc[], optionalUserId(req));
+    return res
+      .status(HttpStatus.OK)
+      .json({ status: CustomStatus.OK, data, total });
+  } catch (error) {
+    return sendError(res, error);
+  }
+};
+
+/** An optional ISO date query value; anything unparsable is 404/4012. */
+function queryDate(req: Request, name: string) {
+  const value = req.query[name];
+  if (value === undefined || value === "") return undefined;
+  if (typeof value !== "string")
+    fail(CustomStatus.INVALID_QUERY, `${name} is not a single string`);
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime()))
+    fail(CustomStatus.INVALID_QUERY, `${name} is not an ISO date`);
+  return parsed;
+}
+
+/**
+ * The `from`/`to` window of GET /event/list: from defaults to now, to to
+ * from + 60 days; at most 120 days, and to may not be before from.
+ */
+function listWindow(req: Request) {
+  const from = queryDate(req, "from") ?? new Date();
+  const to =
+    queryDate(req, "to") ??
+    new Date(from.getTime() + LIST_DEFAULT_DAYS * DAY_MS);
+  if (to.getTime() < from.getTime())
+    fail(CustomStatus.INVALID_QUERY, "to is before from");
+  if (to.getTime() - from.getTime() > LIST_MAX_DAYS * DAY_MS)
+    fail(
+      CustomStatus.INVALID_QUERY,
+      `from and to may be at most ${LIST_MAX_DAYS} days apart`,
+    );
+  return { from, to };
+}
+
+/**
+ * For GET /event/list: `scope=mine` and `scope=rsvped` need a valid JWT
+ * (401/4013 otherwise); `all` (the default) is public.
+ */
+export function eventListAuth(req: Request, res: Response, next: NextFunction) {
+  if (SIGNED_IN_SCOPES.includes(req.query.scope)) {
+    return JWTverifier(req, res, next);
+  }
+  return next();
+}
+
+type ListSig = {
+  _id: unknown;
+  name?: string;
+  customId?: string;
+  color?: string;
+  removed?: boolean;
+};
+
+// GET /event/list?scope=all|mine|rsvped&from&to&skip&limit (API contract v4
+// §6.4): events of every SIG (all, public), of the caller's member, managed
+// and followed SIGs (mine) or that the caller signed up for (rsvped), that
+// overlap the window (end at or after from, start before to), by startAt.
+// Events of archived SIGs (except the announcement SIG) are left out of all
+// and mine. Items are the §3.3 items with `sig: { _id, name, customId,
+// color }`.
+export const listEvents: RequestHandler<Record<string, string>> = async (
+  req,
+  res,
+) => {
+  try {
+    const scope = queryEnum(req, "scope", SCOPES, "all");
+    const { from, to } = listWindow(req);
+    const { skip, limit } = pagination(req);
+    const viewerId = scope === "all" ? optionalUserId(req) : callerId(req);
+
+    const sigs = (await SigDB.list(
+      {},
+      {
+        lean: true,
+        projection: { name: 1, customId: 1, color: 1, removed: 1 },
+      },
+    )) as unknown as ListSig[];
+    const sigById = new Map(sigs.map((item) => [String(item._id), item]));
+    const archived = sigs
+      .filter(
+        (item) => item.removed && String(item._id) !== ANNOUNCEMENT_SIG_ID,
+      )
+      .map((item) => String(item._id));
+
+    const filter: Record<string, unknown> = {
+      removed: false,
+      startAt: { $lt: to },
+      endAt: { $gte: from },
+    };
+    if (scope === "all") {
+      filter.sig = { $nin: archived };
+    } else if (scope === "mine") {
+      const user = caller(req);
+      const mine = await userSigIds(String(user._id), user.sig ?? [], {
+        followed: true,
+      });
+      filter.sig = { $in: mine.filter((id) => !archived.includes(id)) };
+    } else {
+      const rsvps = await EventRsvpModel.find(
+        { user: viewerId },
+        { event: 1 },
+      ).lean();
+      filter._id = {
+        $in: rsvps
+          .map((item: any) => String(item.event))
+          .filter((id) => isValidObjectId(id)),
+      };
+    }
+
+    const [docs, total] = await Promise.all([
+      EventModel.find(filter)
+        .sort({ startAt: 1, _id: 1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      EventModel.countDocuments(filter),
+    ]);
+    const items = await toEventItems(docs as EventDoc[], viewerId);
+    const data = items.map((item) => {
+      const sigData = sigById.get(item.sig);
+      return {
+        ...item,
+        sig: {
+          _id: item.sig,
+          name: sigData?.name ?? "",
+          customId: sigData?.customId ?? "",
+          color: sigColorOf(sigData),
+        },
+      };
+    });
+
     return res
       .status(HttpStatus.OK)
       .json({ status: CustomStatus.OK, data, total });

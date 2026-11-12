@@ -6,18 +6,21 @@ import {
   cancelRsvp,
   editEvent,
   eventCalendar,
+  eventListAuth,
+  listEvents,
   listRsvps,
   readEventById,
   removeEvent,
   rsvp,
 } from "@controller/cloud/event";
 
-// SIG events (API contract v4 §3.3). The SIG-scoped routes (list, create,
-// calendar feed) are in the sig router.
+// SIG events (API contract v4 §3.3) and the cross-SIG list (§6.4). The
+// SIG-scoped routes (list, create, calendar feed) are in the sig router.
 const event: Router = Router();
 
 event.use(rateLimiter(RateLimiterOption.BY_METHOD));
-// Before "/:id", which would take "<id>.ics" as the id.
+// Before "/:id", which would take "list" or "<id>.ics" as the id.
+event.get("/list", eventListAuth, listEvents);
 event.get("/:id.ics", eventCalendar);
 event.get("/:id", readEventById);
 

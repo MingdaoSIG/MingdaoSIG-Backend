@@ -23,6 +23,7 @@ import {
 } from "@controller/cloud/event";
 import { analytics } from "@controller/cloud/sig/analytics";
 import { testDiscordWebhook } from "@controller/cloud/sig/discord";
+import { follow, unfollow } from "@controller/cloud/sig/follow";
 
 const sig: Router = Router();
 
@@ -51,5 +52,7 @@ sig.delete("/:sigId/members/:userId", removeMember);
 sig.post("/:sigId/events", createSigEvent);
 sig.get("/:id/analytics", analytics);
 sig.post("/:id/discord/test", testDiscordWebhook);
+sig.post("/:id/follow", follow);
+sig.delete("/:id/follow", unfollow);
 
 export default sig;

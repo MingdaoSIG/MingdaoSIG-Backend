@@ -11,15 +11,18 @@ import { toPostListItems } from "./_listItems";
 const PostDB = new MongoDB.Post();
 
 /**
- * GET /post/list/mysig?skip&limit (JWT, contract v4 §2.5): non-removed posts
- * of the caller's SIGs (see userSigIds), newest first, with `total`. Same
- * items as GET /post/list. No SIG means an empty list.
+ * GET /post/list/mysig?skip&limit (JWT, contract v4 §2.5, §6.1): non-removed
+ * posts of the SIGs the caller is a member of, manages or follows (see
+ * userSigIds), newest first, with `total`. Same items as GET /post/list. No
+ * SIG means an empty list.
  */
 export const listMySig: RequestHandler = async (req, res) => {
   try {
     const { skip, limit } = pagination(req);
     const user = (req as unknown as ExtendedRequest).userData;
-    const sigIds = await userSigIds(String(user._id), user.sig ?? []);
+    const sigIds = await userSigIds(String(user._id), user.sig ?? [], {
+      followed: true,
+    });
     if (sigIds.length === 0) {
       return res
         .status(HttpStatus.OK)
