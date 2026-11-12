@@ -40,6 +40,7 @@ export const AUDIT_ACTIONS = [
   "banner.update",
   "broadcast.send",
   "keyword.update",
+  "issue.update",
 ] as const;
 
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
@@ -57,7 +58,8 @@ export type AuditTargetKind =
   | "badge"
   | "banner"
   | "broadcast"
-  | "setting";
+  | "setting"
+  | "issue";
 
 export interface AuditEntryInput {
   /** user id of whoever performed the action */
