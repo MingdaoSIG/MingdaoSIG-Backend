@@ -26,6 +26,7 @@ import {
 import { suspend, unsuspend } from "@controller/cloud/admin/suspension";
 import { listAllLogins, listUserLogins } from "@controller/cloud/admin/logins";
 import { broadcast } from "@controller/cloud/admin/broadcast";
+import { traffic } from "@controller/cloud/admin/traffic";
 import {
   createBanner,
   editBanner,
@@ -50,6 +51,7 @@ admin.use(JWTverifier);
 
 // Content moderators get the posts, comments and open-report numbers only.
 admin.get("/overview", contentModeratorOnly, overview);
+admin.get("/traffic", adminOnly, traffic);
 
 admin.get("/posts", contentModeratorOnly, listPosts);
 admin.post("/posts/batch", contentModeratorOnly, batchPosts);

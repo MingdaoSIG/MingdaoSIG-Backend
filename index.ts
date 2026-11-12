@@ -12,6 +12,7 @@ import {
   shutdown,
 } from "@module/GracefulShutdown";
 import { pushConfig } from "@module/WebPush";
+import { closeUmami, umamiConfig } from "@module/UmamiTraffic";
 import {
   startDigestScheduler,
   stopDigestScheduler,
@@ -39,8 +40,10 @@ process.on("SIGTERM", () => shutdown("SIGTERM"));
 process.on("SIGINT", () => shutdown("SIGINT"));
 
 const env = ValidateEnv();
-// Reads the WEB_PUSH_* values now, so invalid ones are reported at startup.
+// Reads the WEB_PUSH_* and UMAMI_* values now, so invalid ones are reported
+// at startup.
 pushConfig();
+umamiConfig();
 
 async function start() {
   const connected = await ConnectMongoDB(env.MONGO_URI, {
@@ -68,6 +71,7 @@ async function start() {
   prefetchOnlineAppVersion();
   startDigestScheduler();
   onShutdown(stopDigestScheduler);
+  onShutdown(closeUmami);
 }
 
 start().catch((error) => {
