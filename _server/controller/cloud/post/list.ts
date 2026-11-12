@@ -10,6 +10,7 @@ import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
 import MongoDB from "@module/MongoDB";
 import CheckValidPaginationOption from "@module/CheckValidPaginationOption";
+import { CachedPlainTextExcerpt } from "@module/PlainTextExcerpt";
 
 
 const PostDB = new MongoDB.Post();
@@ -233,7 +234,14 @@ async function listPostBy(
         _id: sigsDataMap[post.sig]?._id,
         name: sigsDataMap[post.sig]?.name
       },
-      comments: commentNumberMap[postId] ?? 0
+      comments: commentNumberMap[postId] ?? 0,
+      // Plain text preview, so list views do not need the full content.
+      excerpt: CachedPlainTextExcerpt(
+        `${postId}:${new Date(post.updatedAt ?? 0).getTime()}:${
+          post.content?.length ?? 0
+        }`,
+        post.content
+      )
     };
   });
 
