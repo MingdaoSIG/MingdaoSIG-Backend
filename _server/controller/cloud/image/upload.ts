@@ -20,17 +20,15 @@ export const ALLOWED_IMAGE_TYPES = [
 const MAX_INPUT_PIXELS = 40 * 1000 * 1000; // 40 MP
 const MAX_EDGE = 2048;
 
-// Output keeps the input format, except TIFF, which most browsers cannot
-// display, so it is stored as WebP like every upload was before.
+// Every upload is stored as WebP, as it always was: GET /image/:id serves
+// every stored image as image/webp, and existing images are all WebP.
 const OUTPUT_FORMAT = {
-  jpeg: "jpeg",
-  png: "png",
+  jpeg: "webp",
+  png: "webp",
   webp: "webp",
   tiff: "webp"
 } as const;
 const OUTPUT_MIME_TYPE = {
-  jpeg: "image/jpeg",
-  png: "image/png",
   webp: "image/webp"
 } as const;
 
