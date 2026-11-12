@@ -1,4 +1,5 @@
 import CheckRequestRequirement from "@module/CheckRequestRequirement";
+import { recordAudit } from "@module/Audit";
 import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
@@ -8,6 +9,7 @@ import type { Request, RequestHandler } from "express";
 import { isValidObjectId } from "mongoose";
 
 const SigDB = new MongoDB.Sig();
+const AdminDB = new MongoDB.Admin();
 
 export const deleteLeader: RequestHandler<Record<string, string>> = async (
   request: Request<Record<string, string>> | ExtendedRequest,
@@ -70,6 +72,20 @@ export const deleteLeader: RequestHandler<Record<string, string>> = async (
         new Error("Failed to delete leader"),
       );
     }
+
+    const removed = await AdminDB.usersByIds([leaderId], { name: 1 }).catch(
+      () => new Map(),
+    );
+    await recordAudit({
+      actor: String(userData._id),
+      action: "sig.leader.remove",
+      target: {
+        kind: "user",
+        id: leaderId,
+        label: removed.get(leaderId)?.name ?? "",
+      },
+      meta: { sig: sigId },
+    });
 
     return response.status(HttpStatus.OK).json({
       status: CustomStatus.OK,
