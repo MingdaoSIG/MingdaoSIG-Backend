@@ -16,7 +16,7 @@ export default async function write(
 
     if (code) {
       return (await post.findOneAndUpdate({ _id: id }, dataToSave, {
-        new: true
+        returnDocument: "after"
       })) as unknown as Post;
     }
     else {

@@ -27,7 +27,7 @@ export async function upsertByEmail(
     return (await profile.findOneAndUpdate(
       { email },
       { $set: dataToSet, $setOnInsert: dataToInsert },
-      { upsert: true, new: true, sort: { _id: 1 } }
+      { upsert: true, returnDocument: "after", sort: { _id: 1 } }
     )) as unknown as User;
   }
   catch (error: any) {
@@ -45,7 +45,7 @@ async function _writeData(key: string, value: any, dataToSave: UserWrite) {
         { [key]: value },
         dataToSave,
         {
-          new: true
+          returnDocument: "after"
         }
       )) as unknown as User;
     }

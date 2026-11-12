@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import mongoose from "mongoose";
+import mongoose, { mongo } from "mongoose";
 
 import { isShuttingDown } from "@module/GracefulShutdown";
 
@@ -30,11 +30,14 @@ export default async function EnsureIndexes(): Promise<void> {
       for (const [fields, options] of model.schema.indexes()) {
         if (isShuttingDown() || connectionLost()) return;
 
+        // The schemas only declare driver index options (no custom unique
+        // error messages), so this cast is safe.
+        const indexOptions = options as mongo.CreateIndexesOptions;
         try {
-          await dropIfUniquenessChanged(model.collection, fields, options);
+          await dropIfUniquenessChanged(model.collection, fields, indexOptions);
           const name = await model.collection.createIndex(
             fields as Record<string, 1 | -1>,
-            options
+            indexOptions
           );
           console.log(`MongoDB : index ready ${collectionName}.${name}`);
         }

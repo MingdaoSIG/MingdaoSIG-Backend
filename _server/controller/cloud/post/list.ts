@@ -1,5 +1,5 @@
 import { RequestHandler, Response } from "express";
-import { FilterQuery, isValidObjectId } from "mongoose";
+import { QueryFilter, isValidObjectId } from "mongoose";
 
 import { Post } from "@type/post";
 import { User } from "@type/user";
@@ -170,7 +170,7 @@ export const listAllByPinned: RequestHandler<Record<string, string>> = async (_,
 
 async function listPostBy(
   res: Response,
-  search: FilterQuery<Post>,
+  search: QueryFilter<Post>,
   skip?: number,
   limit?: number,
   sort?: Sort

@@ -1,5 +1,5 @@
 import { RequestHandler, Response } from "express";
-import { FilterQuery, isValidObjectId } from "mongoose";
+import { QueryFilter, isValidObjectId } from "mongoose";
 
 import { Comment } from "@type/comment";
 import { User } from "@type/user";
@@ -56,7 +56,7 @@ export const listAllByPost: RequestHandler<Record<string, string>> = async (req,
 
 async function listByPost(
   res: Response,
-  search: FilterQuery<Comment>,
+  search: QueryFilter<Comment>,
   skip?: number,
   limit?: number,
   sort?: Sort

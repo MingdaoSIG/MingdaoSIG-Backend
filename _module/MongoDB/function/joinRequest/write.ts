@@ -17,7 +17,7 @@ export default async function write(
 
     if (code) {
       return joinRequest.findOneAndUpdate({ _id: id }, dataToSave, {
-        new: true
+        returnDocument: "after"
       }) as unknown as JoinRequest;
     }
     else {
@@ -45,7 +45,7 @@ export async function confirmPending(
     return (await joinRequest.findOneAndUpdate(
       { _id: id, state: "pending", removed: false },
       { state },
-      { new: true }
+      { returnDocument: "after" }
     )) as unknown as JoinRequest | null;
   }
   catch (error: any) {
@@ -61,7 +61,7 @@ export async function markRemoved(id: string | ObjectId) {
     return (await joinRequest.findOneAndUpdate(
       { _id: id },
       { removed: true },
-      { new: true }
+      { returnDocument: "after" }
     )) as unknown as JoinRequest | null;
   }
   catch (error: any) {
