@@ -7,6 +7,7 @@ import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
 import MongoDB from "@module/MongoDB";
 import { isAdmin } from "@module/Permission";
+import toPublicUser from "@module/PublicUser";
 
 
 const ProfileDB = new MongoDB.User();
@@ -33,7 +34,7 @@ export const readById: RequestHandler = async (req, res) => {
     return res.status(HttpStatus.OK).json({
       status: CustomStatus.OK,
       id: userData._id,
-      data: userData
+      data: toPublicUser(userData)
     });
   }
   catch (error: any) {
@@ -58,7 +59,7 @@ export const readByCustomId: RequestHandler = async (req, res) => {
     return res.status(HttpStatus.OK).json({
       status: CustomStatus.OK,
       id: userData._id,
-      data: userData
+      data: toPublicUser(userData)
     });
   }
   catch (error: any) {
