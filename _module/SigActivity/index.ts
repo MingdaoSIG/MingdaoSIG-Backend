@@ -37,15 +37,10 @@ export function activityOf(
   return activity.get(String(sigId)) ?? EMPTY;
 }
 
-/** Drops the cached numbers, so the next read recomputes them. */
-export function clearSigActivity() {
-  cache.clear();
-}
-
 async function loadActivity() {
   try {
-    // Newest post per SIG (the { sig, removed, createdAt } index), then the
-    // members per SIG from the user collection in the same round trip.
+    // The newest non-removed post per SIG, then the members per SIG from
+    // the user collection, merged in the same round trip.
     const rows: {
       _id: string;
       memberCount: number;
