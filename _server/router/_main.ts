@@ -11,6 +11,8 @@ import comment from "./comment";
 import ping from "./ping";
 import information from "./information";
 import admin from "./admin";
+import notification from "./notification";
+import push from "./push";
 
 const router: Router = Router();
 
@@ -23,6 +25,8 @@ router.use("/image", image);
 router.use("/ping", ping);
 router.use("/information", information);
 router.use("/admin", admin);
+router.use("/notification", notification);
+router.use("/push", push);
 
 router.use((_: Request, res: Response) => {
   res.status(HttpStatus.NOT_FOUND).json({ status: CustomStatus.NOT_FOUND });

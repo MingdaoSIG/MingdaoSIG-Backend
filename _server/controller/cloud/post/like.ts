@@ -6,6 +6,7 @@ import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
 import MongoDB from "@module/MongoDB";
+import { notifyLike } from "@module/NotifyEvents";
 
 const PostDB = new MongoDB.Post();
 
@@ -41,6 +42,14 @@ export const like: RequestHandler<Record<string, string>> = async (
         },
         { id },
       );
+      notifyLike({
+        actorId: decodedJwt.id,
+        post: {
+          _id: id,
+          title: oldData.title,
+          user: oldData.user,
+        },
+      });
     }
 
     return res.status(HttpStatus.OK).json({

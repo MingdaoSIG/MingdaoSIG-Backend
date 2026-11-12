@@ -8,6 +8,7 @@ import { HttpStatus } from "@module/HttpStatusCode";
 import MongoDB from "@module/MongoDB";
 import { isAdmin } from "@module/Permission";
 import toPublicUser from "@module/PublicUser";
+import { withNotificationSettings } from "@module/NotificationSettings";
 
 const ProfileDB = new MongoDB.User();
 
@@ -72,14 +73,15 @@ export const readByCustomId: RequestHandler<Record<string, string>> = async (
   }
 };
 
-// GET /user/me: the caller's own full document (JWT required)
+// GET /user/me: the caller's own full document (JWT required), with
+// `notificationSettings` merged with the defaults.
 export const readMe: RequestHandler<Record<string, string>> = async (
   req,
   res,
 ) => {
   return res.status(HttpStatus.OK).json({
     status: CustomStatus.OK,
-    data: (req as ExtendedRequest).userData,
+    data: withNotificationSettings((req as ExtendedRequest).userData),
   });
 };
 

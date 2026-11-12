@@ -9,6 +9,7 @@ import { HttpStatus } from "@module/HttpStatusCode";
 import MongoDB from "@module/MongoDB";
 import CheckRequestRequirement from "@module/CheckRequestRequirement";
 import notifyNewComment from "@module/CommentNotification";
+import { notifyComment } from "@module/NotifyEvents";
 import { checkContent } from "./_shared";
 
 const PostDB = new MongoDB.Post();
@@ -64,6 +65,13 @@ export const write: RequestHandler<Record<string, string>> = async (
       actorId: userId,
       actorName: userData?.name,
       post: { _id: postId, title: postData.title, user: postData.user },
+      content,
+      parentAuthorId: parent?.user,
+    });
+    notifyComment({
+      actorId: userId,
+      post: { _id: postId, title: postData.title, user: postData.user },
+      commentId: String(savedComment._id),
       content,
       parentAuthorId: parent?.user,
     });
