@@ -5,9 +5,25 @@ import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
 import MongoDB from "@module/MongoDB";
+import { userIdFromJwt } from "@module/OptionalJwt";
+import { sigActivity } from "@module/SigActivity";
+import { toPublicSig } from "@module/SigView";
 import { withShowcase } from "./showcase";
 
 const SigDB = new MongoDB.Sig();
+
+/**
+ * The SIG as GET /sig/:id and /sig/@:customId return it: the showcase
+ * resolved, plus the public counts and settings of @module/SigView, and
+ * `followedByMe` when the request carries a valid JWT (contract v4 §6.1).
+ */
+async function toSigRead(sigData: unknown, viewerId: string | null) {
+  const [data, activity] = await Promise.all([
+    withShowcase(sigData),
+    sigActivity(),
+  ]);
+  return toPublicSig(data, activity, viewerId);
+}
 
 export const readById: RequestHandler<Record<string, string>> = async (
   req,
@@ -31,7 +47,7 @@ export const readById: RequestHandler<Record<string, string>> = async (
     return res.status(HttpStatus.OK).json({
       status: CustomStatus.OK,
       id: sigData._id,
-      data: await withShowcase(sigData),
+      data: await toSigRead(sigData, userIdFromJwt(req)),
     });
   } catch (error: any) {
     return res
@@ -55,7 +71,7 @@ export const readByCustomId: RequestHandler<Record<string, string>> = async (
     return res.status(HttpStatus.OK).json({
       status: CustomStatus.OK,
       id: sigData._id,
-      data: await withShowcase(sigData),
+      data: await toSigRead(sigData, userIdFromJwt(req)),
     });
   } catch (error: any) {
     return res
