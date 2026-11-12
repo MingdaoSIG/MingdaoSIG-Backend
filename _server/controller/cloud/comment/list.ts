@@ -1,19 +1,27 @@
-import { RequestHandler, Response } from "express";
-import { QueryFilter, isValidObjectId } from "mongoose";
+import { RequestHandler } from "express";
+import { isValidObjectId } from "mongoose";
 
-import { Comment } from "@type/comment";
-import { User } from "@type/user";
-import { Sort } from "@type/database";
 import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
 import MongoDB from "@module/MongoDB";
 import CheckValidPaginationOption from "@module/CheckValidPaginationOption";
+import { formatComment, readAuthors } from "./_shared";
 
 const CommentDB = new MongoDB.Comment();
 const PostDB = new MongoDB.Post();
-const UserDB = new MongoDB.User();
 
+const MAX_LIMIT = 100;
+
+/**
+ * GET /comment/list/post/:postId
+ *
+ * The post's top-level comments that are not removed, newest first (`skip`
+ * and `limit` page through them; without `limit` every one is returned).
+ * Each one carries its non-removed `replies`, oldest first, and
+ * `replyCount`. Replies under a removed comment are not shown, and
+ * CommentDB.countByPost does not count them either.
+ */
 export const listAllByPost: RequestHandler<Record<string, string>> = async (
   req,
   res,
@@ -23,7 +31,7 @@ export const listAllByPost: RequestHandler<Record<string, string>> = async (
     const skip = req.query?.skip;
     const limit = req.query?.limit;
 
-    CheckValidPaginationOption(req);
+    CheckValidPaginationOption(req, MAX_LIMIT);
 
     if (
       !isValidObjectId(postId) ||
@@ -37,13 +45,41 @@ export const listAllByPost: RequestHandler<Record<string, string>> = async (
         new Error("Invalid post id"),
       );
 
-    return await listByPost(
-      res,
-      { post: postId, reply: "" },
-      skip ? Number(skip) : 0,
-      limit ? Number(limit) : 0,
-      { createdAt: -1 },
+    const comments = await CommentDB.listTopLevel(postId, {
+      skip: skip ? Number(skip) : 0,
+      limit: limit ? Number(limit) : 0,
+    });
+    const replies = await CommentDB.listReplies(
+      postId,
+      comments.map((comment) => String(comment._id)),
     );
+
+    const authors = await readAuthors(
+      [...comments, ...replies].map((comment) => comment.user),
+    );
+
+    const repliesByParent = new Map<
+      string,
+      ReturnType<typeof formatComment>[]
+    >();
+    for (const reply of replies) {
+      const parentId = String(reply.reply);
+      const list = repliesByParent.get(parentId) ?? [];
+      list.push(formatComment(reply, authors));
+      repliesByParent.set(parentId, list);
+    }
+
+    return res.status(HttpStatus.OK).json({
+      status: CustomStatus.OK,
+      data: comments.map((comment) => {
+        const commentReplies = repliesByParent.get(String(comment._id)) ?? [];
+        return {
+          ...formatComment(comment, authors),
+          replies: commentReplies,
+          replyCount: commentReplies.length,
+        };
+      }),
+    });
   } catch (error: any) {
     return res
       .status(
@@ -54,55 +90,3 @@ export const listAllByPost: RequestHandler<Record<string, string>> = async (
       .json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });
   }
 };
-
-async function listByPost(
-  res: Response,
-  search: QueryFilter<Comment>,
-  skip?: number,
-  limit?: number,
-  sort?: Sort,
-) {
-  const commentData = await CommentDB.list(
-    {
-      ...search,
-      removed: false,
-    },
-    {
-      skip: skip || 0,
-      limit: limit || 0,
-      sort: sort || { createdAt: -1 },
-    },
-  );
-
-  const userIds = new Set<string>();
-  commentData?.forEach((comment) => {
-    userIds.add(comment.user);
-  });
-
-  const usersDataMap: Record<string, User> = {};
-  const usersData = await UserDB.list(
-    { _id: { $in: Array.from(userIds) } },
-    { lean: true, projection: { customId: 1, name: 1, avatar: 1 } },
-  );
-  usersData.forEach((user) => {
-    if (user._id) {
-      usersDataMap[String(user._id)] = user;
-    }
-  });
-
-  const commentDataWithUser = commentData.map((comment) => {
-    return {
-      ...comment,
-      user: {
-        customId: usersDataMap[comment.user]?.customId,
-        name: usersDataMap[comment.user]?.name,
-        avatar: usersDataMap[comment.user]?.avatar,
-      },
-    };
-  });
-
-  return res.status(HttpStatus.OK).json({
-    status: CustomStatus.OK,
-    data: commentDataWithUser,
-  });
-}

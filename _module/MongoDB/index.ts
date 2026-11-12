@@ -188,6 +188,22 @@ export class CommentDB {
   async countByPost(postIds: string[]) {
     return await comment.countByPost(postIds);
   }
+
+  async listTopLevel(postId: string, option?: Pick<Option, "skip" | "limit">) {
+    return await comment.listTopLevel(postId, option);
+  }
+
+  async listReplies(postId: string, parentIds: string[]) {
+    return await comment.listReplies(postId, parentIds);
+  }
+
+  async editContent(id: string, content: string) {
+    return await comment.editContent(id, content);
+  }
+
+  async remove(id: string) {
+    return await comment.markRemoved(id);
+  }
 }
 
 export class JoinRequestDB {
