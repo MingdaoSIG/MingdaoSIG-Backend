@@ -4,25 +4,28 @@ import schema from "./schema";
 export default async function users(from: Date | undefined, to: Date) {
   const TITLE = "Users that have sign up";
 
-  const _users = await schema.user.find({
-    createdAt: {
-      $gte: from ?? 0,
-      $lte: to
-    }
-  });
-
-  const usersArray: Array<string> = [];
-  for (const user of _users) {
-    const id = user.customId;
-
-    if (!usersArray.includes(id!)) {
-      usersArray.push(id!);
-    }
-  }
+  // Number of distinct customIds (a missing customId and a null one count as
+  // two values, as before), counted in MongoDB.
+  const [result] = await schema.user.aggregate<{ count: number }>([
+    {
+      $match: {
+        createdAt: {
+          $gte: from ?? new Date(0),
+          $lte: to
+        }
+      }
+    },
+    {
+      $group: {
+        _id: { customId: "$customId", type: { $type: "$customId" } }
+      }
+    },
+    { $count: "count" }
+  ]);
 
   return {
     func: users.name,
     title: TITLE,
-    content: usersArray.length
+    content: result?.count ?? 0
   };
 }

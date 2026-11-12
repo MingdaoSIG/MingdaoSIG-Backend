@@ -11,6 +11,7 @@ import MongoDB from "@module/MongoDB";
 
 
 const UserDB = new MongoDB.User();
+const SigDB = new MongoDB.Sig();
 const JoinRequestDB = new MongoDB.JoinRequest();
 
 export const join: RequestHandler = async (
@@ -51,6 +52,14 @@ export const join: RequestHandler = async (
       );
     }
 
+    const sigData = await SigDB.read({ id: sigId }).catch(() => null);
+    if (!sigData || sigData.removed) {
+      throw new CustomError(
+        CustomStatus.INVALID_SIG_ID,
+        new Error("Sig not found")
+      );
+    }
+
     const userData = await UserDB.read({ id: userId });
     if (userData.sig?.includes(sigId)) {
       throw new CustomError(
@@ -79,7 +88,15 @@ export const join: RequestHandler = async (
       state: "pending"
     });
 
-    await NewJoinRequest(sigId, userId, requestData);
+    try {
+      await NewJoinRequest(sigId, userId, requestData);
+    }
+    catch (error) {
+      // Leaders were not notified: drop the request so the user can retry
+      // instead of being stuck with "already applied".
+      await JoinRequestDB.remove(requestData._id).catch(() => null);
+      throw error;
+    }
 
     requestData.confirmId = undefined;
     return res.status(HttpStatus.OK).json({

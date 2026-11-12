@@ -19,7 +19,9 @@ export const read: RequestHandler = async (req, res) => {
         new Error("Invalid post id")
       );
 
-    const postData = await PostDB.read({ id }).catch(() => null);
+    const postData = await PostDB.read({ id }, { lean: true }).catch(
+      () => null
+    );
     if (!postData)
       throw new CustomError(
         CustomStatus.NOT_FOUND,

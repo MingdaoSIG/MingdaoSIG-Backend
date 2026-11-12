@@ -10,6 +10,7 @@ import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
 import MongoDB from "@module/MongoDB";
 import CheckValidPaginationOption from "@module/CheckValidPaginationOption";
+import { CachedPlainTextExcerpt } from "@module/PlainTextExcerpt";
 
 
 const PostDB = new MongoDB.Post();
@@ -187,51 +188,42 @@ async function listPostBy(
   );
 
   const userIds = new Set<string>();
-  postData?.forEach(post => {
+  const sigIds = new Set<string>();
+  const postIds = new Set<string>();
+  postData.forEach(post => {
     userIds.add(post.user);
+    sigIds.add(post.sig);
+    postIds.add(String(post._id));
   });
+
+  const [usersData, sigsData, commentNumberMap] = await Promise.all([
+    UserDB.list(
+      { _id: { $in: Array.from(userIds) } },
+      { lean: true, projection: { name: 1 } }
+    ),
+    SigDB.list(
+      { _id: { $in: Array.from(sigIds) } },
+      { lean: true, projection: { name: 1 } }
+    ),
+    CommentDB.countByPost(Array.from(postIds))
+  ]);
+
   const usersDataMap: Record<string, User> = {};
-  const usersData = await UserDB.list({ _id: { $in: Array.from(userIds) } });
   usersData.forEach(user => {
     if (user._id) {
-      usersDataMap[user._id] = user;
+      usersDataMap[String(user._id)] = user;
     }
   });
 
-  const sigIds = new Set<string>();
-  postData?.forEach(post => {
-    sigIds.add(post.sig);
-  });
   const sigsDataMap: Record<string, Sig> = {};
-  const sigsData = await SigDB.list({
-    _id: { $in: Array.from(sigIds) }
-  });
   sigsData.forEach(sig => {
     if (sig._id) {
-      sigsDataMap[sig._id] = sig;
+      sigsDataMap[String(sig._id)] = sig;
     }
   });
 
-  const postIds = new Set<string>();
-  postData?.forEach(post => {
-    postIds.add(post._id!);
-  });
-  const commentNumberMap: Record<string, number> = {};
-  const commentData = await CommentDB.list({
-    post: { $in: Array.from(postIds) },
-    removed: false
-  });
-  commentData.forEach(comment => {
-    if (commentNumberMap[comment.post]) {
-      commentNumberMap[comment.post]++;
-    }
-    else {
-      commentNumberMap[comment.post] = 1;
-    }
-  });
-
-  const fullPostData = postData?.map(post => {
-    post = JSON.parse(JSON.stringify(post));
+  const fullPostData = postData.map(post => {
+    const postId = String(post._id);
     return {
       ...post,
       user: {
@@ -242,7 +234,14 @@ async function listPostBy(
         _id: sigsDataMap[post.sig]?._id,
         name: sigsDataMap[post.sig]?.name
       },
-      comments: commentNumberMap[post._id!] ?? 0
+      comments: commentNumberMap[postId] ?? 0,
+      // Plain text preview, so list views do not need the full content.
+      excerpt: CachedPlainTextExcerpt(
+        `${postId}:${new Date(post.updatedAt ?? 0).getTime()}:${
+          post.content?.length ?? 0
+        }`,
+        post.content
+      )
     };
   });
 

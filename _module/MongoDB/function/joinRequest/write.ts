@@ -34,3 +34,40 @@ export default async function write(
     );
   }
 }
+
+// Moves a pending request to accepted/rejected. Returns null when the request
+// is no longer pending, so two confirmations cannot both win.
+export async function confirmPending(
+  id: string | ObjectId,
+  state: "accepted" | "rejected"
+) {
+  try {
+    return (await joinRequest.findOneAndUpdate(
+      { _id: id, state: "pending", removed: false },
+      { state },
+      { new: true }
+    )) as unknown as JoinRequest | null;
+  }
+  catch (error: any) {
+    throw new CustomError(
+      CustomStatus.ERROR_WRITING_JOIN_REQUEST_TO_DB,
+      error
+    );
+  }
+}
+
+export async function markRemoved(id: string | ObjectId) {
+  try {
+    return (await joinRequest.findOneAndUpdate(
+      { _id: id },
+      { removed: true },
+      { new: true }
+    )) as unknown as JoinRequest | null;
+  }
+  catch (error: any) {
+    throw new CustomError(
+      CustomStatus.ERROR_WRITING_JOIN_REQUEST_TO_DB,
+      error
+    );
+  }
+}

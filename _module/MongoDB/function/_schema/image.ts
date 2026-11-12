@@ -5,7 +5,9 @@ const Schema = mongoose.Schema;
 
 const imageSchema = new Schema(
   {
-    image: Buffer
+    image: Buffer,
+    sha256: { type: String, index: true },
+    mimeType: String
   },
   { timestamps: true }
 );
