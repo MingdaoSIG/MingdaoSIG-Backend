@@ -22,6 +22,7 @@ import {
   listTopHashtags,
 } from "@controller/cloud/post/hashtag";
 import { sitemap } from "@controller/cloud/post/sitemap";
+import { listMySig } from "@controller/cloud/post/mysig";
 
 const post: Router = Router();
 
@@ -29,6 +30,7 @@ const post: Router = Router();
 post.use(rateLimiter(RateLimiterOption.BY_METHOD));
 post.get("/list", listAll);
 
+post.get("/list/mysig", JWTverifier, listMySig);
 post.get("/list/user/:id", listAllByUser);
 post.get("/list/user/:id/like", listAllByUserLike);
 post.get("/list/sig/:id", listAllBySig);
