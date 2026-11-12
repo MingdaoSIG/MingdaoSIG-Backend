@@ -28,6 +28,10 @@ import { listAllLogins, listUserLogins } from "@controller/cloud/admin/logins";
 import { broadcast } from "@controller/cloud/admin/broadcast";
 import { traffic } from "@controller/cloud/admin/traffic";
 import {
+  readKeywordFilter,
+  writeKeywordFilter,
+} from "@controller/cloud/admin/keywordFilter";
+import {
   createBanner,
   editBanner,
   listBanners,
@@ -85,6 +89,9 @@ admin.get("/banners", adminOnly, listBanners);
 admin.post("/banners", adminOnly, createBanner);
 admin.post("/banners/:id", adminOnly, editBanner);
 admin.delete("/banners/:id", adminOnly, removeBanner);
+
+admin.get("/keyword-filter", adminOnly, readKeywordFilter);
+admin.post("/keyword-filter", adminOnly, writeKeywordFilter);
 
 admin.get("/reports", contentModeratorOnly, listReports);
 admin.post("/reports/:id/resolve", contentModeratorOnly, resolveReport);

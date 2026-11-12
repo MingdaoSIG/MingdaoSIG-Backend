@@ -21,6 +21,14 @@ export const REPORT_REASONS = [
 ] as const;
 export const REPORT_STATUSES = ["open", "resolved", "dismissed"] as const;
 
+/**
+ * Reports filed by the site itself (the keyword filter, contract v4 §5.11):
+ * `reporter` is this string instead of a user id, and the reason is one
+ * users cannot pick.
+ */
+export const SYSTEM_REPORTER = "system";
+export const SYSTEM_REPORT_REASONS = ["keyword"] as const;
+
 export type ReportTargetKind = (typeof REPORT_TARGET_KINDS)[number];
 export type ReportReason = (typeof REPORT_REASONS)[number];
 export type ReportStatus = (typeof REPORT_STATUSES)[number];
@@ -35,7 +43,11 @@ const reportSchema = new mongoose.Schema(
       kind: { type: String, required: true, enum: REPORT_TARGET_KINDS },
       id: { type: String, required: true },
     },
-    reason: { type: String, required: true, enum: REPORT_REASONS },
+    reason: {
+      type: String,
+      required: true,
+      enum: [...REPORT_REASONS, ...SYSTEM_REPORT_REASONS],
+    },
     note: { type: String, default: "" },
     status: {
       type: String,

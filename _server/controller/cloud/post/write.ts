@@ -9,6 +9,7 @@ import { HttpStatus } from "@module/HttpStatusCode";
 import MongoDB from "@module/MongoDB";
 import CheckRequestRequirement from "@module/CheckRequestRequirement";
 import { canPostToSig, isAdmin, isSigModerator } from "@module/Permission";
+import { scanForKeywords } from "@module/KeywordFilter";
 
 const PostDB = new MongoDB.Post();
 const SigDB = new MongoDB.Sig();
@@ -147,6 +148,12 @@ export const write: RequestHandler<Record<string, string>> = async (
     };
     const writeOptions = postId ? { id: postId } : undefined;
     const savedData = await PostDB.write(dataToSave, writeOptions);
+    // Files a keyword report on a match; never blocks the post (v4 §5.11).
+    scanForKeywords({
+      kind: "post",
+      id: String(savedData._id),
+      texts: [savedData.title, savedData.content, ...(savedData.hashtag ?? [])],
+    });
     return res.status(HttpStatus.OK).json({
       status: CustomStatus.OK,
       id: savedData._id,
