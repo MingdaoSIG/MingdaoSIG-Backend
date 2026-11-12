@@ -9,7 +9,7 @@ import MongoDB from "@module/MongoDB";
 
 const PostDB = new MongoDB.Post();
 
-export const read: RequestHandler = async (req, res) => {
+export const read: RequestHandler<Record<string, string>> = async (req, res) => {
   try {
     const id: string = req.params.id!;
 

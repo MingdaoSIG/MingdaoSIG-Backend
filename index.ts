@@ -42,7 +42,10 @@ async function start() {
 
   server.set("host", env.HOST);
   server.set("port", env.PORT);
-  const httpServer = server.listen(env.PORT, env.HOST, () => {
+  const httpServer = server.listen(env.PORT, env.HOST, error => {
+    // Express 5 also calls this on a listen error (EADDRINUSE ...), which the
+    // "error" handler below reports.
+    if (error) return;
     console.log(`Server : listening on http://${env.HOST}:${env.PORT}`);
   });
   httpServer.on("error", error => {

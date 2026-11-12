@@ -12,7 +12,7 @@ const SigDB = new MongoDB.Sig();
 const JoinRequestDB = new MongoDB.JoinRequest();
 
 // GET /sig/confirm/:confirmId?accept=true|false (links in sent emails)
-export const confirmJoinRequest: RequestHandler = async (req, res) => {
+export const confirmJoinRequest: RequestHandler<Record<string, string>> = async (req, res) => {
   const accept = req.query.accept;
 
   if (accept !== "true" && accept !== "false") {
@@ -25,7 +25,7 @@ export const confirmJoinRequest: RequestHandler = async (req, res) => {
 };
 
 // POST /sig/confirm/:confirmId with {"accept": true|false}
-export const confirmJoinRequestByBody: RequestHandler = async (req, res) => {
+export const confirmJoinRequestByBody: RequestHandler<Record<string, string>> = async (req, res) => {
   const accept = req.body?.accept;
 
   if (typeof accept !== "boolean") {

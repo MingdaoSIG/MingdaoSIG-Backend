@@ -14,13 +14,13 @@ const UserDB = new MongoDB.User();
 const SigDB = new MongoDB.Sig();
 const JoinRequestDB = new MongoDB.JoinRequest();
 
-export const join: RequestHandler = async (
-  req: Request | ExtendedRequest,
+export const join: RequestHandler<Record<string, string>> = async (
+  req: Request<Record<string, string>> | ExtendedRequest,
   res
 ) => {
   try {
     const { body } = req;
-    const sigId = (req as Request).params.sigId;
+    const sigId = req.params.sigId;
     const decodedJwt: any = (req as ExtendedRequest).JWT;
     const userId = decodedJwt.id;
 
@@ -112,12 +112,12 @@ export const join: RequestHandler = async (
   }
 };
 
-export const readJoinRequest: RequestHandler = async (
-  req: Request | ExtendedRequest,
+export const readJoinRequest: RequestHandler<Record<string, string>> = async (
+  req: Request<Record<string, string>> | ExtendedRequest,
   res
 ) => {
   try {
-    const sigId = (req as Request).params.sigId;
+    const sigId = req.params.sigId;
     const decodedJwt: any = (req as ExtendedRequest).JWT;
     const userId = decodedJwt.id;
 

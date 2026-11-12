@@ -11,8 +11,8 @@ import MongoDB from "@module/MongoDB";
 const SigDB = new MongoDB.Sig();
 const UserDB = new MongoDB.User();
 
-export const listMembers: RequestHandler = async (
-  request: Request | ExtendedRequest,
+export const listMembers: RequestHandler<Record<string, string>> = async (
+  request: Request<Record<string, string>> | ExtendedRequest,
   response
 ) => {
   try {

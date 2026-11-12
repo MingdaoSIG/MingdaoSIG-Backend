@@ -10,12 +10,12 @@ import MongoDB from "@module/MongoDB";
 
 const PostDB = new MongoDB.Post();
 
-export const like: RequestHandler = async (
-  req: Request | ExtendedRequest,
+export const like: RequestHandler<Record<string, string>> = async (
+  req: Request<Record<string, string>> | ExtendedRequest,
   res
 ) => {
   try {
-    const id = (req as Request).params.id;
+    const id = req.params.id;
     const decodedJwt: any = (req as ExtendedRequest).JWT;
 
     if (!isValidObjectId(id))
@@ -55,12 +55,12 @@ export const like: RequestHandler = async (
   }
 };
 
-export const dislike: RequestHandler = async (
-  req: Request | ExtendedRequest,
+export const dislike: RequestHandler<Record<string, string>> = async (
+  req: Request<Record<string, string>> | ExtendedRequest,
   res
 ) => {
   try {
-    const id = (req as Request).params.id;
+    const id = req.params.id;
     const decodedJwt: any = (req as ExtendedRequest).JWT;
 
     if (!isValidObjectId(id))

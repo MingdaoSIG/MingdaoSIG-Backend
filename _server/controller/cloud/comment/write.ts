@@ -12,13 +12,13 @@ import CheckRequestRequirement from "@module/CheckRequestRequirement";
 const PostDB = new MongoDB.Post();
 const CommentDB = new MongoDB.Comment();
 
-export const write: RequestHandler = async (
-  req: Request | ExtendedRequest,
+export const write: RequestHandler<Record<string, string>> = async (
+  req: Request<Record<string, string>> | ExtendedRequest,
   res
 ) => {
   try {
     const { body } = req;
-    const commentId = (req as Request).params.commentId;
+    const commentId = req.params.commentId;
     const decodedJwt: any = (req as ExtendedRequest).JWT;
     const userId = decodedJwt.id;
 

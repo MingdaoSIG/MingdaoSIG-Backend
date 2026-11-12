@@ -15,7 +15,7 @@ const CommentDB = new MongoDB.Comment();
 const PostDB = new MongoDB.Post();
 const UserDB = new MongoDB.User();
 
-export const listAllByPost: RequestHandler = async (req, res) => {
+export const listAllByPost: RequestHandler<Record<string, string>> = async (req, res) => {
   try {
     const postId: string = req.params.postId!;
     const skip = req.query?.skip;

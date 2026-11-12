@@ -9,7 +9,7 @@ import MongoDB from "@module/MongoDB";
 
 const SigDB = new MongoDB.Sig();
 
-export const readById: RequestHandler = async (req, res) => {
+export const readById: RequestHandler<Record<string, string>> = async (req, res) => {
   try {
     const sigId = req.params.sigId;
 
@@ -41,7 +41,7 @@ export const readById: RequestHandler = async (req, res) => {
   }
 };
 
-export const readByCustomId: RequestHandler = async (req, res) => {
+export const readByCustomId: RequestHandler<Record<string, string>> = async (req, res) => {
   try {
     const customId: string = req.params.customId;
 

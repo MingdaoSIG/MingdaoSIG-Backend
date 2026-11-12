@@ -12,7 +12,7 @@ import toPublicUser from "@module/PublicUser";
 
 const ProfileDB = new MongoDB.User();
 
-export const readById: RequestHandler = async (req, res) => {
+export const readById: RequestHandler<Record<string, string>> = async (req, res) => {
   try {
     const id: string = req.params.id!;
 
@@ -44,7 +44,7 @@ export const readById: RequestHandler = async (req, res) => {
   }
 };
 
-export const readByCustomId: RequestHandler = async (req, res) => {
+export const readByCustomId: RequestHandler<Record<string, string>> = async (req, res) => {
   try {
     const customId: string = req.params.id!;
 
@@ -70,7 +70,7 @@ export const readByCustomId: RequestHandler = async (req, res) => {
 };
 
 // GET /user/me: the caller's own full document (JWT required)
-export const readMe: RequestHandler = async (req, res) => {
+export const readMe: RequestHandler<Record<string, string>> = async (req, res) => {
   return res.status(HttpStatus.OK).json({
     status: CustomStatus.OK,
     data: (req as ExtendedRequest).userData
@@ -78,7 +78,7 @@ export const readMe: RequestHandler = async (req, res) => {
 };
 
 // GET /user/:id/full: full document for that user themself or an admin
-export const readFullById: RequestHandler = async (req, res) => {
+export const readFullById: RequestHandler<Record<string, string>> = async (req, res) => {
   try {
     const id: string = req.params.id!;
     const caller = (req as ExtendedRequest).userData;

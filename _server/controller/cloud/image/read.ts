@@ -12,7 +12,7 @@ const ImageDB = new MongoDB.Image();
 // Images are never changed after upload, so the id identifies the bytes.
 const IMMUTABLE_CACHE_CONTROL = "public, max-age=31536000, immutable";
 
-export const read: RequestHandler = async (req, res) => {
+export const read: RequestHandler<Record<string, string>> = async (req, res) => {
   try {
     const id: string = req.params.id!;
 

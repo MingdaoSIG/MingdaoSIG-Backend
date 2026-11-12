@@ -13,8 +13,8 @@ export const login: RequestHandler = async (req, res) => {
     // const checker = new CheckRequestRequirement(req);
     // checker.matchBody(["googleToken", "session"]);
 
-    const googleToken: string = req.body.googleToken;
-    const session: string = req.body.session;
+    const googleToken: string = req.body?.googleToken;
+    const session: string = req.body?.session;
 
     if (!googleToken && !session) {
       return res

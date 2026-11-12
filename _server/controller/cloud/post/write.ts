@@ -62,13 +62,13 @@ const sigDefaultCover: { [key: string]: string } = {
         "https://sig-api.lazco.dev/image/6ad18a858a01ead1f9d558aa" // 數學
 };
 
-export const write: RequestHandler = async (
-  req: Request | ExtendedRequest,
+export const write: RequestHandler<Record<string, string>> = async (
+  req: Request<Record<string, string>> | ExtendedRequest,
   res
 ) => {
   try {
     const { body } = req;
-    const postId = (req as Request).params.id;
+    const postId = req.params.id;
     const decodedJwt: any = (req as ExtendedRequest).JWT;
     const userId = decodedJwt.id;
     const userData = (req as ExtendedRequest).userData;

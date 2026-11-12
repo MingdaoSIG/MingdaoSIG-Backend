@@ -11,12 +11,12 @@ import MongoDB from "@module/MongoDB";
 const PostDB = new MongoDB.Post();
 const SigDB = new MongoDB.Sig();
 
-export const remove: RequestHandler = async (
-  req: Request | ExtendedRequest,
+export const remove: RequestHandler<Record<string, string>> = async (
+  req: Request<Record<string, string>> | ExtendedRequest,
   res
 ) => {
   try {
-    const postId = (req as Request).params.id;
+    const postId = req.params.id;
     const decodedJwt: any = (req as ExtendedRequest).JWT;
     const userId = decodedJwt.id;
 

@@ -12,16 +12,16 @@ import { isAdmin, isSigLeader, isSigModerator } from "@module/Permission";
 
 const SigDB = new MongoDB.Sig();
 
-export const write: RequestHandler = async (
-  req: Request | ExtendedRequest,
+export const write: RequestHandler<Record<string, string>> = async (
+  req: Request<Record<string, string>> | ExtendedRequest,
   res
 ) => {
   try {
     const {
       // customId,
       description
-    } = req.body;
-    const sigId = (req as Request).params.id;
+    } = req.body ?? {};
+    const sigId = req.params.id;
     const decodedJwt: any = (req as ExtendedRequest).JWT;
     const userId: string = decodedJwt.id;
     const userData = (req as ExtendedRequest).userData;

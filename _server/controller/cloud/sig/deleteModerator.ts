@@ -11,13 +11,13 @@ import { isValidObjectId } from "mongoose";
 const SigDB = new MongoDB.Sig();
 const UserDB = new MongoDB.User();
 
-export const deleteModerator: RequestHandler = async (
-  request: Request | ExtendedRequest,
+export const deleteModerator: RequestHandler<Record<string, string>> = async (
+  request: Request<Record<string, string>> | ExtendedRequest,
   response
 ) => {
   try {
     const extendedRequest = request as ExtendedRequest;
-    const { moderatorId } = extendedRequest.body;
+    const { moderatorId } = extendedRequest.body ?? {};
     const sigId = extendedRequest.params.sigId;
 
     if (!sigId || !isValidObjectId(sigId))

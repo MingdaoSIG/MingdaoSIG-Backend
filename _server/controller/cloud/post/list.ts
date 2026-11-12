@@ -24,7 +24,7 @@ const sortMethods = {
   oldest: { createdAt: 1 }
 };
 
-export const listAll: RequestHandler = async (req, res) => {
+export const listAll: RequestHandler<Record<string, string>> = async (req, res) => {
   try {
     const skip = req.query?.skip;
     const limit = req.query?.limit;
@@ -52,7 +52,7 @@ export const listAll: RequestHandler = async (req, res) => {
   }
 };
 
-export const listAllBySig: RequestHandler = async (req, res) => {
+export const listAllBySig: RequestHandler<Record<string, string>> = async (req, res) => {
   try {
     const sigId: string = req.params.id!;
     const skip = req.query?.skip;
@@ -87,7 +87,7 @@ export const listAllBySig: RequestHandler = async (req, res) => {
   }
 };
 
-export const listAllByUser: RequestHandler = async (req, res) => {
+export const listAllByUser: RequestHandler<Record<string, string>> = async (req, res) => {
   try {
     const userId: string = req.params.id!;
     const skip = req.query?.skip;
@@ -122,7 +122,7 @@ export const listAllByUser: RequestHandler = async (req, res) => {
   }
 };
 
-export const listAllByUserLike: RequestHandler = async (req, res) => {
+export const listAllByUserLike: RequestHandler<Record<string, string>> = async (req, res) => {
   try {
     const userId: string = req.params.id!;
     const skip = req.query?.skip;
@@ -157,7 +157,7 @@ export const listAllByUserLike: RequestHandler = async (req, res) => {
   }
 };
 
-export const listAllByPinned: RequestHandler = async (_, res) => {
+export const listAllByPinned: RequestHandler<Record<string, string>> = async (_, res) => {
   try {
     return await listPostBy(res, { pinned: true });
   }
@@ -271,7 +271,7 @@ async function listAllByCreateTimeRange(
   }
 }
 
-export const listAllByTimeRange: RequestHandler = async (req, res) => {
+export const listAllByTimeRange: RequestHandler<Record<string, string>> = async (req, res) => {
   try {
     const { start, end } = req.query;
 

@@ -18,7 +18,7 @@ export const write: RequestHandler = async (
     const {
       // customId,
       description
-    } = req.body;
+    } = req.body ?? {};
     const decodedJwt: any = (req as ExtendedRequest).JWT;
     const userId = decodedJwt.id;
     const userData = (req as ExtendedRequest).userData;
