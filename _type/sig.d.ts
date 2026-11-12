@@ -1,3 +1,14 @@
+export type JoinQuestion = {
+  label: string; // 題目 (1–60)
+  required: boolean; // 必填
+};
+
+export type Recruiting = {
+  open?: boolean; // 招生中（未設定視為 true）
+  message?: string; // 招生說明 (≤200)
+  until?: Date | string | null; // 截止時間（null 為不限）
+};
+
 export type Sig = {
   _id: string; // ID
   name: string; // sig 名稱
@@ -11,6 +22,8 @@ export type Sig = {
   defaultCover?: string; // 預設封面（圖片 id）
   color?: string; // 主題色 #rrggbb
   previousCustomIds?: string[]; // 舊的自定義ID（會轉址）
+  joinQuestions?: JoinQuestion[]; // 入社申請題目（未設定用預設三題）
+  recruiting?: Recruiting; // 招生設定
 };
 
 export type SigWrite = {

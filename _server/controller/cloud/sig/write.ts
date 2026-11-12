@@ -18,6 +18,8 @@ import { assertCustomIdAvailable } from "@module/CheckValidCustomId";
 import {
   parseBoolean,
   parseImageId,
+  parseJoinQuestions,
+  parseRecruiting,
   parseSigColor,
   parseSigDescription,
   parseSigName,
@@ -27,7 +29,7 @@ import {
 const SigDB = new MongoDB.Sig();
 
 // Fields the SIG's managers (leaders, moderators) and admins may set.
-const MANAGER_FIELDS = ["description", "avatar"];
+const MANAGER_FIELDS = ["description", "avatar", "joinQuestions", "recruiting"];
 // Fields only an admin may set (API contract v4 §3.7).
 const ADMIN_FIELDS = ["name", "customId", "color", "defaultCover", "removed"];
 
@@ -96,6 +98,21 @@ export const write: RequestHandler<Record<string, string>> = async (
     if (body.avatar !== undefined)
       dataToSave.avatar = await parseImageId(body.avatar, "avatar");
 
+    // Join questions and recruiting (contract v4 §5.6); null questions go
+    // back to the three global ones.
+    const unset: string[] = [];
+    if (body.joinQuestions !== undefined) {
+      const questions = parseJoinQuestions(body.joinQuestions);
+      if (questions) dataToSave.joinQuestions = questions;
+      else unset.push("joinQuestions");
+    }
+
+    if (body.recruiting !== undefined)
+      dataToSave.recruiting = parseRecruiting(
+        body.recruiting,
+        sigData.recruiting,
+      );
+
     // ---- Admin only (contract v4 §3.7) ----
     if (body.name !== undefined) dataToSave.name = parseSigName(body.name);
 
@@ -143,12 +160,15 @@ export const write: RequestHandler<Record<string, string>> = async (
       guard = { customId: sigData.customId ?? null };
     }
 
-    const fields = Object.keys(dataToSave).filter(
-      (field) => field !== "previousCustomIds",
-    );
+    const fields = [
+      ...Object.keys(dataToSave).filter(
+        (field) => field !== "previousCustomIds",
+      ),
+      ...unset,
+    ];
     const savedData =
       fields.length > 0
-        ? await SigDB.update(sigId, dataToSave, guard)
+        ? await SigDB.update(sigId, dataToSave, guard, unset)
         : sigData;
     if (!savedData) {
       throw new CustomError(

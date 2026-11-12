@@ -26,21 +26,25 @@ export default async function write(
 }
 
 /**
- * Sets `dataToSet` on the SIG matching `guard` too (for example its current
- * customId, so two renames at once cannot both apply). Returns the updated
- * SIG, or null when nothing matched.
+ * Sets `dataToSet` (and removes `fieldsToUnset`) on the SIG when it matches
+ * `guard` too (for example its current customId, so two renames at once
+ * cannot both apply). Returns the updated SIG, or null when nothing matched.
  */
 export async function update(
   id: string | ObjectId,
   dataToSet: Record<string, unknown>,
   guard: Record<string, unknown> = {},
+  fieldsToUnset: string[] = [],
 ) {
   try {
-    return (await sig.findOneAndUpdate(
-      { ...guard, _id: id },
-      { $set: dataToSet },
-      { returnDocument: "after" },
-    )) as unknown as Sig | null;
+    const change: Record<string, unknown> = { $set: dataToSet };
+    if (fieldsToUnset.length > 0)
+      change.$unset = Object.fromEntries(
+        fieldsToUnset.map((field) => [field, 1]),
+      );
+    return (await sig.findOneAndUpdate({ ...guard, _id: id }, change, {
+      returnDocument: "after",
+    })) as unknown as Sig | null;
   } catch (error: any) {
     throw new CustomError(CustomStatus.ERROR_WRITING_SIG_TO_DB, error);
   }

@@ -19,6 +19,25 @@ const sigSchema = new Schema({
   // Earlier customIds, kept when an admin changes it or merges this SIG's
   // source into it: GET /sig/@<old id> answers with `redirectTo`.
   previousCustomIds: [String],
+  // ---- Recruiting (API contract v4 §5.6) ------------------------------------
+  // Missing: the three global questions apply (@module/SigSettings).
+  joinQuestions: {
+    type: [
+      new Schema(
+        { label: { type: String }, required: { type: Boolean } },
+        { _id: false, id: false },
+      ),
+    ],
+    default: undefined,
+  },
+  // Missing: open, no message, no end date.
+  recruiting: {
+    type: new Schema(
+      { open: Boolean, message: String, until: Date },
+      { _id: false, id: false },
+    ),
+    default: undefined,
+  },
 });
 
 // GET /sig/@:customId by an old customId.

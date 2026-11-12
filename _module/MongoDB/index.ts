@@ -159,13 +159,15 @@ export class SigDB {
     }
   }
 
-  // $set on one SIG, only when it also matches `guard` (null otherwise).
+  // $set (and $unset) on one SIG, only when it also matches `guard` (null
+  // otherwise).
   async update(
     id: string,
     dataToSet: Record<string, unknown>,
     guard?: Record<string, unknown>,
+    fieldsToUnset?: string[],
   ) {
-    return await sig.update(id, dataToSet, guard);
+    return await sig.update(id, dataToSet, guard, fieldsToUnset);
   }
 
   async create(dataToSave: SigWrite) {

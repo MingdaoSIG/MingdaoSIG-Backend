@@ -5,15 +5,23 @@ import { ExtendedRequest } from "@type/request";
 import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
-import CheckRequestRequirement from "@module/CheckRequestRequirement";
 import NewJoinRequest from "@module/NewJoinRequest";
 import { notifyJoinRequest } from "@module/NotifyEvents";
 import MongoDB from "@module/MongoDB";
+import {
+  isRecruiting,
+  parseJoinAnswers,
+  resolveJoinQuestions,
+} from "@module/SigSettings";
 
 const UserDB = new MongoDB.User();
 const SigDB = new MongoDB.Sig();
 const JoinRequestDB = new MongoDB.JoinRequest();
 
+// POST /sig/:sigId/join { answers } (or the older { q1, q2, q3 }): applies
+// to join the SIG. The answers follow the SIG's join questions; a SIG that
+// is not recruiting (closed, or past `until`) answers 403/4033
+// (contract v4 §5.6).
 export const join: RequestHandler<Record<string, string>> = async (
   req: Request<Record<string, string>> | ExtendedRequest,
   res,
@@ -30,24 +38,6 @@ export const join: RequestHandler<Record<string, string>> = async (
         new Error("Invalid sig id"),
       );
 
-    new CheckRequestRequirement(req as Request).matchBody(["q1", "q2", "q3"]);
-
-    const { q1, q2, q3 } = body;
-
-    if (q1.length > 250 || q2.length > 250 || q3.length > 250) {
-      throw new CustomError(
-        CustomStatus.INVALID_CONTENT_LENGTH,
-        new Error("Invalid content length"),
-      );
-    }
-
-    if (q1.trim() === "" || q2.trim() === "" || q3.trim() === "") {
-      throw new CustomError(
-        CustomStatus.INVALID_BODY,
-        new Error("q1, q2 or q3 is empty"),
-      );
-    }
-
     const sigData = await SigDB.read({ id: sigId }).catch(() => null);
     if (!sigData || sigData.removed) {
       throw new CustomError(
@@ -55,6 +45,18 @@ export const join: RequestHandler<Record<string, string>> = async (
         new Error("Sig not found"),
       );
     }
+
+    if (!isRecruiting(sigData)) {
+      throw new CustomError(
+        CustomStatus.NOT_RECRUITING,
+        new Error("Not recruiting"),
+      );
+    }
+
+    const { answers, q1, q2, q3 } = parseJoinAnswers(
+      body,
+      resolveJoinQuestions(sigData),
+    );
 
     const userData = await UserDB.read({ id: userId });
     if (userData.sig?.includes(sigId)) {
@@ -77,6 +79,7 @@ export const join: RequestHandler<Record<string, string>> = async (
     const requestData = await JoinRequestDB.write({
       user: userId,
       sig: sigId,
+      answers,
       q1,
       q2,
       q3,
@@ -104,6 +107,12 @@ export const join: RequestHandler<Record<string, string>> = async (
       data: requestData,
     });
   } catch (error: any) {
+    if (error?.statusCode === CustomStatus.NOT_RECRUITING) {
+      return res.status(HttpStatus.FORBIDDEN).json({
+        status: CustomStatus.NOT_RECRUITING,
+        message: "Not recruiting",
+      });
+    }
     return res
       .status(HttpStatus.BAD_REQUEST)
       .json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });
