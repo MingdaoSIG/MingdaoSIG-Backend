@@ -22,6 +22,7 @@ import {
   listTopHashtags,
 } from "@controller/cloud/post/hashtag";
 import { sitemap } from "@controller/cloud/post/sitemap";
+import { createFeedback, listFeedback } from "@controller/cloud/feedback";
 
 const post: Router = Router();
 
@@ -47,6 +48,8 @@ post.use("/", JWTverifier);
 
 post.post("/:id/like", like);
 post.delete("/:id/like", dislike);
+post.get("/:id/feedback", listFeedback);
+post.post("/:id/feedback", createFeedback);
 
 post.post("/", write);
 
