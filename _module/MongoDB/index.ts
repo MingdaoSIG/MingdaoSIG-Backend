@@ -120,6 +120,11 @@ export class PostDB {
       throw new Error("Search is required");
     }
   }
+
+  // Ranked text search (see @DBfunc/post/search).
+  async search(pattern: string, option: { skip: number; limit: number }) {
+    return await post.search(pattern, option);
+  }
 }
 
 export class SigDB {
