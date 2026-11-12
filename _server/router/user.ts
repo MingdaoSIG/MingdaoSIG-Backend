@@ -9,11 +9,13 @@ import {
   readMe,
 } from "@controller/cloud/user/read";
 import { write } from "@controller/cloud/user/write";
+import { portfolio } from "@controller/cloud/user/portfolio";
 
 const user: Router = Router();
 
 user.use(rateLimiter(RateLimiterOption.BY_METHOD));
 user.get("/me", JWTverifier, readMe);
+user.get("/me/portfolio", JWTverifier, portfolio);
 user.get("/@:id", readByCustomId);
 user.get("/:id/full", JWTverifier, readFullById);
 user.get("/:id", readById);
