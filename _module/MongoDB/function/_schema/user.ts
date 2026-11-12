@@ -34,8 +34,8 @@ const userSchema = new Schema(
 // (adding a SIG leader) and sig (listing SIG members).
 // email and customId are NOT unique on purpose: production still holds
 // duplicates from a login race. Make them unique only after a dedupe migration.
-userSchema.index({ email: 1 });
-userSchema.index({ customId: 1 });
+userSchema.index({ email: 1 }, { unique: true });
+userSchema.index({ customId: 1 }, { unique: true });
 userSchema.index({ code: 1 });
 userSchema.index({ sig: 1 });
 
