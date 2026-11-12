@@ -6,12 +6,14 @@ import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
 import MongoDB from "@module/MongoDB";
 import { recordView } from "@module/PostViews";
+import { seriesNavigation } from "@module/Series";
 
 const PostDB = new MongoDB.Post();
 
 /**
  * GET /post/:id. Counts a view (at most once per viewer per 6 h, see
- * @module/PostViews) and adds `views`.
+ * @module/PostViews) and adds `views` and `series` (every series that
+ * contains the post, with its place and the neighbours).
  */
 export const read: RequestHandler<Record<string, string>> = async (
   req,
@@ -35,7 +37,17 @@ export const read: RequestHandler<Record<string, string>> = async (
         new Error("Post not found"),
       );
 
-    const counted = await recordView(String(postData._id), req);
+    const postId = String(postData._id);
+    const [counted, series] = await Promise.all([
+      recordView(postId, req),
+      seriesNavigation(postId).catch((error) => {
+        console.error(
+          `Post : failed to load the series of post ${postId}:`,
+          error instanceof Error ? error.message : error,
+        );
+        return [];
+      }),
+    ]);
 
     return res.status(HttpStatus.OK).json({
       status: CustomStatus.OK,
@@ -43,6 +55,7 @@ export const read: RequestHandler<Record<string, string>> = async (
       data: {
         ...postData,
         views: (postData.views ?? 0) + (counted ? 1 : 0),
+        series,
       },
     });
   } catch (error: any) {

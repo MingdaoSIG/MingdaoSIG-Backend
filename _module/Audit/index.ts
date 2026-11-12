@@ -27,11 +27,18 @@ export const AUDIT_ACTIONS = [
   "sig.member.remove",
   "join.accept",
   "join.reject",
+  "series.remove",
 ] as const;
 
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
 
-export type AuditTargetKind = "post" | "comment" | "user" | "sig" | "join";
+export type AuditTargetKind =
+  | "post"
+  | "comment"
+  | "user"
+  | "sig"
+  | "join"
+  | "series";
 
 export interface AuditEntryInput {
   /** user id of whoever performed the action */

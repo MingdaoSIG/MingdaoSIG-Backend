@@ -19,6 +19,7 @@ const TARGET_KINDS: readonly AuditTargetKind[] = [
   "user",
   "sig",
   "join",
+  "series",
 ];
 
 // GET /admin/audit (admin): newest first.

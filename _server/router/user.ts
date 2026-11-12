@@ -14,6 +14,7 @@ import {
   listBookmarkIds,
   listBookmarks,
 } from "@controller/cloud/post/bookmark";
+import { listByUser as listSeriesByUser } from "@controller/cloud/series";
 
 const user: Router = Router();
 
@@ -24,6 +25,7 @@ user.get("/me/bookmarks", JWTverifier, listBookmarks);
 user.get("/me/bookmarks/ids", JWTverifier, listBookmarkIds);
 user.get("/@:id", readByCustomId);
 user.get("/:id/full", JWTverifier, readFullById);
+user.get("/:id/series", listSeriesByUser);
 user.get("/:id", readById);
 
 user.use(JWTverifier);
