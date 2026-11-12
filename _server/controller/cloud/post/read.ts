@@ -5,9 +5,14 @@ import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
 import MongoDB from "@module/MongoDB";
+import { recordView } from "@module/PostViews";
 
 const PostDB = new MongoDB.Post();
 
+/**
+ * GET /post/:id. Counts a view (at most once per viewer per 6 h, see
+ * @module/PostViews) and adds `views`.
+ */
 export const read: RequestHandler<Record<string, string>> = async (
   req,
   res,
@@ -30,10 +35,15 @@ export const read: RequestHandler<Record<string, string>> = async (
         new Error("Post not found"),
       );
 
+    const counted = await recordView(String(postData._id), req);
+
     return res.status(HttpStatus.OK).json({
       status: CustomStatus.OK,
       id: postData._id,
-      data: postData,
+      data: {
+        ...postData,
+        views: (postData.views ?? 0) + (counted ? 1 : 0),
+      },
     });
   } catch (error: any) {
     return res
