@@ -28,6 +28,8 @@ export const AUDIT_ACTIONS = [
   "join.accept",
   "join.reject",
   "series.remove",
+  "report.resolve",
+  "report.dismiss",
 ] as const;
 
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
@@ -38,7 +40,8 @@ export type AuditTargetKind =
   | "user"
   | "sig"
   | "join"
-  | "series";
+  | "series"
+  | "report";
 
 export interface AuditEntryInput {
   /** user id of whoever performed the action */
