@@ -7,6 +7,7 @@ import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
 import MongoDB from "@module/MongoDB";
 import CheckRequestRequirement from "@module/CheckRequestRequirement";
+import { scanForKeywords } from "@module/KeywordFilter";
 import { checkContent, formatComment, readAuthors, sendError } from "./_shared";
 
 const CommentDB = new MongoDB.Comment();
@@ -43,6 +44,8 @@ export const edit: RequestHandler<Record<string, string>> = async (
         CustomStatus.NOT_FOUND,
         new Error("Comment not found"),
       );
+
+    scanForKeywords({ kind: "comment", id: commentId, texts: [content] });
 
     const authors = await readAuthors([userId]);
     return res.status(HttpStatus.OK).json({

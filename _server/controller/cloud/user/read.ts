@@ -10,6 +10,7 @@ import { isAdmin } from "@module/Permission";
 import toPublicUser from "@module/PublicUser";
 import { withOwnUserFields } from "@module/Onboarding";
 import { findUserByPreviousCustomId } from "@module/CheckValidCustomId";
+import { withActiveSuspension } from "@module/Suspension";
 
 const ProfileDB = new MongoDB.User();
 
@@ -91,8 +92,9 @@ export const readByCustomId: RequestHandler<Record<string, string>> = async (
 };
 
 // GET /user/me: the caller's own full document (JWT required), with
-// `notificationSettings` merged with the defaults, `followedSigs` and
-// `onboardedAt` (contract v4 §6.1, §6.2).
+// `notificationSettings` merged with the defaults, `followedSigs`,
+// `onboardedAt` (contract v4 §6.1, §6.2) and `suspension` while it is in
+// force (a banned caller gets 403/4041 from JWTverifier instead).
 export const readMe: RequestHandler<Record<string, string>> = async (
   req,
   res,
@@ -100,7 +102,9 @@ export const readMe: RequestHandler<Record<string, string>> = async (
   try {
     return res.status(HttpStatus.OK).json({
       status: CustomStatus.OK,
-      data: await withOwnUserFields((req as ExtendedRequest).userData),
+      data: withActiveSuspension(
+        await withOwnUserFields((req as ExtendedRequest).userData),
+      ),
     });
   } catch (error: any) {
     return res

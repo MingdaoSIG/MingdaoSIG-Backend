@@ -25,6 +25,7 @@ function httpStatusFor(code: number) {
     case CustomStatus.INVALID_JWT:
       return HttpStatus.UNAUTHORIZED;
     case CustomStatus.FORBIDDEN:
+    case CustomStatus.ACCOUNT_SUSPENDED:
       return HttpStatus.FORBIDDEN;
     case CustomStatus.NOT_FOUND:
     case CustomStatus.INVALID_QUERY:

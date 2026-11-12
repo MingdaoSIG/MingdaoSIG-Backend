@@ -9,6 +9,7 @@ import MongoDB from "@module/MongoDB";
 import CheckRequestRequirement from "@module/CheckRequestRequirement";
 import { notificationSettingsUpdate } from "@module/NotificationSettings";
 import { withOwnUserFields } from "@module/Onboarding";
+import { withActiveSuspension } from "@module/Suspension";
 // import CheckValidCustomId from "@module/CheckValidCustomId";
 
 const UserDB = new MongoDB.User();
@@ -103,7 +104,7 @@ export const write: RequestHandler = async (
     return res.status(HttpStatus.OK).json({
       status: CustomStatus.OK,
       id: savedData._id,
-      data: await withOwnUserFields(savedData),
+      data: withActiveSuspension(await withOwnUserFields(savedData)),
     });
   } catch (error: any) {
     return res

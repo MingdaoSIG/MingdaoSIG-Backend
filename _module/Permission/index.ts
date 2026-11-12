@@ -2,10 +2,42 @@ import { Sig } from "@type/sig";
 import { User } from "@type/user";
 
 export const ANNOUNCEMENT_SIG_ID = "652d60b842cdf6a660c2b778"; // 公告
+export const USER_PERMISSION = 1;
 export const ADMIN_PERMISSION = 2;
+/** 內容管理員: moderates posts, comments, reports and mutes users. */
+export const CONTENT_MODERATOR_PERMISSION = 3;
 
-export function isAdmin(user?: User | null) {
+/**
+ * The site-wide roles (contract v4 §5.2). "moderator" is the content
+ * moderator (permission 3), not a SIG moderator (指導老師).
+ */
+export const ROLES = ["user", "moderator", "admin"] as const;
+export type Role = (typeof ROLES)[number];
+
+const ROLE_PERMISSIONS: Record<Role, number> = {
+  user: USER_PERMISSION,
+  moderator: CONTENT_MODERATOR_PERMISSION,
+  admin: ADMIN_PERMISSION,
+};
+
+export function isAdmin(user?: Pick<User, "permission"> | null) {
   return user?.permission === ADMIN_PERMISSION;
+}
+
+/** A content moderator (permission 3) or an admin. */
+export function isContentModerator(user?: Pick<User, "permission"> | null) {
+  return user?.permission === CONTENT_MODERATOR_PERMISSION || isAdmin(user);
+}
+
+/** The role for a permission value; anything unknown (0, missing) is a user. */
+export function roleOf(user?: { permission?: unknown } | null): Role {
+  if (user?.permission === ADMIN_PERMISSION) return "admin";
+  if (user?.permission === CONTENT_MODERATOR_PERMISSION) return "moderator";
+  return "user";
+}
+
+export function permissionForRole(role: Role) {
+  return ROLE_PERMISSIONS[role];
 }
 
 export function isSigLeader(sig: Sig, userId: string) {

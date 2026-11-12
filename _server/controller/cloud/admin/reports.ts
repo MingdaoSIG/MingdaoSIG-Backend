@@ -14,6 +14,7 @@ import {
   RESOLUTION_MAX,
   ReportModel,
   ReportTargetKind,
+  SYSTEM_REPORTER,
 } from "@module/Report";
 import { boundedString, objectBody } from "../_body";
 import { applyAction } from "./posts";
@@ -102,6 +103,9 @@ export const listReports: RequestHandler = async (req, res) => {
       { name: 1, customId: 1 },
     );
     const person = (id: unknown) => {
+      // The keyword filter (系統（關鍵字）)
+      if (id === SYSTEM_REPORTER)
+        return { _id: SYSTEM_REPORTER, name: "系統", customId: "" };
       const user = users.get(String(id ?? ""));
       return {
         _id: String(id ?? ""),
@@ -274,19 +278,22 @@ export const resolveReport: RequestHandler = async (req, res) => {
       },
     });
 
+    // Keyword reports have no one to tell.
     await notify(
-      closed.map((item) => ({
-        recipient: String(item.reporter),
-        type: "report_result" as const,
-        actor: null,
-        target: {
-          kind: "report" as const,
-          id: String(item._id),
-          label: target.label,
-        },
-        link: target.link,
-        meta: { action, status, targetKind: kind },
-      })),
+      closed
+        .filter((item) => String(item.reporter) !== SYSTEM_REPORTER)
+        .map((item) => ({
+          recipient: String(item.reporter),
+          type: "report_result" as const,
+          actor: null,
+          target: {
+            kind: "report" as const,
+            id: String(item._id),
+            label: target.label,
+          },
+          link: target.link,
+          meta: { action, status, targetKind: kind },
+        })),
     );
 
     return res.status(HttpStatus.OK).json({
