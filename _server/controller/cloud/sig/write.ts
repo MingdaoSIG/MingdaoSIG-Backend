@@ -7,6 +7,7 @@ import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
 import MongoDB from "@module/MongoDB";
 import CheckRequestRequirement from "@module/CheckRequestRequirement";
+import { isAdmin, isSigLeader, isSigModerator } from "@module/Permission";
 // import CheckValidCustomId from "@module/CheckValidCustomId";
 
 const SigDB = new MongoDB.Sig();
@@ -22,6 +23,8 @@ export const write: RequestHandler = async (
     } = req.body;
     const sigId = (req as Request).params.id;
     const decodedJwt: any = (req as ExtendedRequest).JWT;
+    const userId: string = decodedJwt.id;
+    const userData = (req as ExtendedRequest).userData;
 
     if (!sigId || !isValidObjectId(sigId))
       throw new CustomError(
@@ -34,8 +37,7 @@ export const write: RequestHandler = async (
       ["description"]
     );
 
-    const sigList = await SigDB.list({});
-    const sigData = sigList.find(sig => sig?._id?.toString() === sigId)!;
+    const sigData = await SigDB.read({ id: sigId }).catch(() => null);
     if (!sigData) {
       throw new CustomError(
         CustomStatus.INVALID_SIG_ID,
@@ -43,20 +45,18 @@ export const write: RequestHandler = async (
       );
     }
 
-    const isOneOfModerators = sigList
-      .flatMap(sig => sig.moderator)
-      .includes(decodedJwt.id);
-    const isOneOfLeaders = sigList
-      .flatMap(sig => sig.leader)
-      .includes(decodedJwt.id);
-    if (!isOneOfModerators && !isOneOfLeaders) {
+    // Only this sig's leaders and moderators (advisors), or an admin
+    const isModerator = isSigModerator(sigData, userId);
+    const isLeader = isSigLeader(sigData, userId);
+    const isAdminUser = isAdmin(userData);
+    if (!isModerator && !isLeader && !isAdminUser) {
       throw new CustomError(
         CustomStatus.FORBIDDEN,
-        new Error("Not leader or moderator")
+        new Error("Not leader or moderator of this sig")
       );
     }
 
-    if (sigData.removed && !sigData.moderator?.includes(decodedJwt.id)) {
+    if (sigData.removed && !isModerator && !isAdminUser) {
       throw new CustomError(
         CustomStatus.FORBIDDEN,
         new Error("Sig removed")

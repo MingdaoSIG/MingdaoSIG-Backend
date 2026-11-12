@@ -1,4 +1,4 @@
-import { RequestHandler } from "express";
+import { RequestHandler, Response } from "express";
 
 import MongoDB from "@module/MongoDB";
 import CustomError from "@module/CustomError";
@@ -11,18 +11,34 @@ const UserDB = new MongoDB.User();
 const SigDB = new MongoDB.Sig();
 const JoinRequestDB = new MongoDB.JoinRequest();
 
+// GET /sig/confirm/:confirmId?accept=true|false (links in sent emails)
 export const confirmJoinRequest: RequestHandler = async (req, res) => {
+  const accept = req.query.accept;
+
+  if (accept !== "true" && accept !== "false") {
+    return res
+      .status(HttpStatus.BAD_REQUEST)
+      .json({ status: CustomStatus.INVALID_QUERY });
+  }
+
+  return await confirm(res, req.params.confirmId, accept === "true");
+};
+
+// POST /sig/confirm/:confirmId with {"accept": true|false}
+export const confirmJoinRequestByBody: RequestHandler = async (req, res) => {
+  const accept = req.body?.accept;
+
+  if (typeof accept !== "boolean") {
+    return res
+      .status(HttpStatus.BAD_REQUEST)
+      .json({ status: CustomStatus.INVALID_BODY });
+  }
+
+  return await confirm(res, req.params.confirmId, accept);
+};
+
+async function confirm(res: Response, confirmId: string, accept: boolean) {
   try {
-    const confirmId = req.params.confirmId;
-    const accept = req.query.accept;
-
-    if (accept !== "true" && accept !== "false") {
-      throw new CustomError(
-        CustomStatus.INVALID_QUERY,
-        new Error("Invalid query")
-      );
-    }
-
     const oldJoinRequest = await JoinRequestDB.read({
       confirmId: confirmId
     }).catch(() => null);
@@ -39,15 +55,29 @@ export const confirmJoinRequest: RequestHandler = async (req, res) => {
       );
     }
 
-    const dataToSave = {
-      state:
-                accept === "true"
-                  ? "accepted"
-                  : ("rejected" as "accepted" | "rejected")
-    };
-    const savedData = await JoinRequestDB.write(dataToSave, {
-      id: oldJoinRequest._id
-    });
+    if (accept) {
+      const sigData = await SigDB.read({ id: oldJoinRequest.sig }).catch(
+        () => null
+      );
+      if (!sigData || sigData.removed) {
+        throw new CustomError(
+          CustomStatus.INVALID_SIG_ID,
+          new Error("Sig removed")
+        );
+      }
+    }
+
+    const savedData = await JoinRequestDB.confirmPending(
+      oldJoinRequest._id,
+      accept ? "accepted" : "rejected"
+    );
+    if (!savedData) {
+      // Another confirmation won the race
+      throw new CustomError(
+        CustomStatus.ALREADY_CONFIRMED,
+        new Error("Request already confirmed")
+      );
+    }
 
     if (savedData.state === "accepted") {
       await UserDB.write(
@@ -63,11 +93,14 @@ export const confirmJoinRequest: RequestHandler = async (req, res) => {
       );
     }
 
+    // The decision is saved; a failed notification must not report failure.
     await sendNotification(
       oldJoinRequest.user,
       oldJoinRequest.sig,
       savedData.state
-    );
+    ).catch(() => {
+      console.warn("Join request confirmed, but the notification email failed");
+    });
 
     return res.status(HttpStatus.OK).json({
       status: CustomStatus.OK,
@@ -80,7 +113,7 @@ export const confirmJoinRequest: RequestHandler = async (req, res) => {
       .status(HttpStatus.BAD_REQUEST)
       .json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });
   }
-};
+}
 
 async function sendNotification(userId: string, sigId: string, state: string) {
   const userData = await UserDB.read({ id: userId }).catch(() => null);

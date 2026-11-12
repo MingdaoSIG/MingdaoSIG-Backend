@@ -56,6 +56,18 @@ export class UserDB {
       throw new Error("Search is required");
     }
   }
+
+  async readOldestByEmail(email: string) {
+    return await user.readOldestByEmail(email);
+  }
+
+  async upsertByEmail(
+    email: string,
+    dataToSet: UserWrite,
+    dataToInsert: UserWrite
+  ) {
+    return await user.upsertByEmail(email, dataToSet, dataToInsert);
+  }
 }
 
 export class ImageDB {
@@ -217,6 +229,14 @@ export class JoinRequestDB {
     else {
       throw new Error("Search is required");
     }
+  }
+
+  async confirmPending(id: string, state: "accepted" | "rejected") {
+    return await joinRequest.confirmPending(id, state);
+  }
+
+  async remove(id: string) {
+    return await joinRequest.markRemoved(id);
   }
 }
 

@@ -66,11 +66,15 @@ export default async function NewJoinRequest(
       to: targetEmails
     });
 
+    // The leaders have the request; a failed receipt to the applicant must
+    // not fail (and roll back) the application.
     await SendText(
       "SIG 申請遞交通知",
       `您的${sigName} SIG 加入申請已經成功遞交至 SIG Leader，請靜候 Leader 審核。`,
       [userData.email]
-    );
+    ).catch(() => {
+      console.warn("Join request saved, but the applicant receipt email failed");
+    });
 
     return true;
   }

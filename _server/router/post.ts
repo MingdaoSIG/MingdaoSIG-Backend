@@ -18,6 +18,7 @@ import { dislike, like } from "@controller/cloud/post/like";
 
 const post: Router = Router();
 
+post.use(rateLimiter(RateLimiterOption.BY_METHOD));
 post.get("/list", listAll);
 
 post.get("/list/user/:id", listAllByUser);
@@ -30,11 +31,9 @@ post.get("/:id", read);
 
 post.use("/", JWTverifier);
 
-post.use("/:id/like", rateLimiter(RateLimiterOption._1m_200req));
 post.post("/:id/like", like);
 post.delete("/:id/like", dislike);
 
-post.use("/", rateLimiter(RateLimiterOption._1m_100req));
 post.post("/", write);
 
 post.post("/:id", write);

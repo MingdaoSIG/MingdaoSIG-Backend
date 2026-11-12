@@ -31,7 +31,9 @@ export default async function JWTverifier(
     const token = authHeader.replace("Bearer ", "");
     let decoded: JwtPayload;
     try {
-      const verifiedJwt = jwt.verify(token, SECRET_KEY);
+      const verifiedJwt = jwt.verify(token, SECRET_KEY, {
+        algorithms: ["HS256"]
+      });
       if (typeof verifiedJwt === "string") {
         throw new Error("Invalid JWT");
       }
@@ -41,7 +43,8 @@ export default async function JWTverifier(
       throw new CustomError(CustomStatus.INVALID_JWT, error);
     }
 
-    checkData(decoded, ["id", "iat"]);
+    // Tokens issued before expiry was added carry only id and iat.
+    checkData(decoded, ["id", "iat"], ["exp"]);
 
     let userData: User;
     try {
@@ -70,15 +73,22 @@ export default async function JWTverifier(
   }
 }
 
-function checkData(data: unknown, keys: string[]) {
+function checkData(
+  data: unknown,
+  requiredKeys: string[],
+  optionalKeys: string[] = []
+) {
   try {
     // Check if input is an object
     if (data !== null && typeof data === "object") {
-      // Check if object have all required keys
-      if (Object.keys(data).length !== keys.length)
-        throw new Error("Invalid data");
+      // Check if object have all required keys and nothing unexpected
+      const keys = Object.keys(data);
+      for (const key of requiredKeys) {
+        if (!keys.includes(key)) throw new Error("Invalid data");
+      }
       for (const key of keys) {
-        if (!(key in data)) throw new Error("Invalid data");
+        if (!requiredKeys.includes(key) && !optionalKeys.includes(key))
+          throw new Error("Invalid data");
       }
     }
     else {
