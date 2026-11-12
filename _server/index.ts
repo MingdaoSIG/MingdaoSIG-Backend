@@ -2,6 +2,7 @@ import express, { Express } from "express";
 import bodyParser from "body-parser";
 
 import router from "@router/_main";
+import healthz from "@router/healthz";
 import configuredCors from "@middleware/cors";
 import errorHandler from "@middleware/errorHandler";
 import requestLogger from "@middleware/requestLogger";
@@ -20,6 +21,8 @@ cloud.use(errorHandler);
 
 const server: Express = express();
 server.set("trust proxy", 1);
+// Mounted before the app: no auth, no rate limit, no access log noise.
+server.use("/healthz", healthz);
 server.use("/", cloud);
 
 export default server;
