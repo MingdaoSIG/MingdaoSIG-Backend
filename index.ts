@@ -10,6 +10,7 @@ import {
   isShuttingDown,
   shutdown,
 } from "@module/GracefulShutdown";
+import { pushConfig } from "@module/WebPush";
 
 // Like dotenv: values already set in the environment win over .env, and a
 // missing .env is fine (deployments set the variables directly).
@@ -33,6 +34,8 @@ process.on("SIGTERM", () => shutdown("SIGTERM"));
 process.on("SIGINT", () => shutdown("SIGINT"));
 
 const env = ValidateEnv();
+// Reads the WEB_PUSH_* values now, so invalid ones are reported at startup.
+pushConfig();
 
 async function start() {
   const connected = await ConnectMongoDB(env.MONGO_URI, {
