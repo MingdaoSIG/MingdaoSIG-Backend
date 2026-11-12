@@ -6,7 +6,6 @@ import forbiddenBody from "./functions/forbiddenBody.js";
 import onlyIncludesBody from "./functions/onlyIncludesBody.js";
 import onlyIncludesQuery from "./functions/onlyIncludesQuery.js";
 
-
 export default class CheckRequestRequirement {
   request: Request;
   constructor(request: Request) {

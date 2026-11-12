@@ -3,7 +3,7 @@ const REQUIRED = ["MONGO_URI", "JWT_SECRET"] as const;
 // Missing these does not stop the server, but a feature degrades.
 const RECOMMENDED: Record<string, string> = {
   FRONTEND_BASE_URL: "join request emails will link to an invalid URL",
-  GITHUB_TOKEN: "/ping fetches the latest versions from GitHub without a token"
+  GITHUB_TOKEN: "/ping fetches the latest versions from GitHub without a token",
 };
 
 export type Env = {
@@ -20,23 +20,21 @@ export type Env = {
  */
 export default function ValidateEnv(): Env {
   const missing = REQUIRED.filter(
-    name => !process.env[name] || process.env[name]?.trim() === ""
+    (name) => !process.env[name] || process.env[name]?.trim() === "",
   );
 
   if (missing.length > 0) {
     console.error(
       `Config : missing required environment variable(s): ${missing.join(
-        ", "
-      )}. Set them in the deployment environment or in .env, then restart.`
+        ", ",
+      )}. Set them in the deployment environment or in .env, then restart.`,
     );
     process.exit(1);
   }
 
   const port = Number(process.env.PORT || 3001);
   if (!Number.isInteger(port) || port <= 0 || port > 65535) {
-    console.error(
-      "Config : PORT must be an integer between 1 and 65535."
-    );
+    console.error("Config : PORT must be an integer between 1 and 65535.");
     process.exit(1);
   }
 
@@ -50,6 +48,6 @@ export default function ValidateEnv(): Env {
     MONGO_URI: process.env.MONGO_URI as string,
     JWT_SECRET: process.env.JWT_SECRET as string,
     HOST: process.env.HOST || "localhost",
-    PORT: port
+    PORT: port,
   };
 }

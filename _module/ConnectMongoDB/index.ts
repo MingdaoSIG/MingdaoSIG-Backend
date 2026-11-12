@@ -1,6 +1,4 @@
-/* eslint-disable no-console */
 import mongoose from "mongoose";
-
 
 const FIRST_RETRY_DELAY_MS = 1000;
 const MAX_RETRY_DELAY_MS = 30 * 1000;
@@ -21,7 +19,7 @@ type ConnectOptions = {
  */
 export default async function ConnectMongoDB(
   uri: string,
-  options: ConnectOptions = {}
+  options: ConnectOptions = {},
 ): Promise<boolean> {
   mongoose.set("strictQuery", false);
   registerConnectionLogs();
@@ -36,22 +34,21 @@ export default async function ConnectMongoDB(
         // Indexes are built in the background by EnsureIndexes, which logs
         // failures instead of swallowing them.
         autoIndex: false,
-        serverSelectionTimeoutMS: SERVER_SELECTION_TIMEOUT_MS
+        serverSelectionTimeoutMS: SERVER_SELECTION_TIMEOUT_MS,
       });
       console.log(
-        `MongoDB : connected, database name: "${db.connections[0].name}"`
+        `MongoDB : connected, database name: "${db.connections[0].name}"`,
       );
       return true;
-    }
-    catch (error: any) {
+    } catch (error: any) {
       const delay = Math.min(
         FIRST_RETRY_DELAY_MS * 2 ** (attempt - 1),
-        MAX_RETRY_DELAY_MS
+        MAX_RETRY_DELAY_MS,
       );
       console.error(
         `MongoDB : connection attempt ${attempt} failed (${
           error?.name || "Error"
-        }: ${error?.message}), retrying in ${delay / 1000} s`
+        }: ${error?.message}), retrying in ${delay / 1000} s`,
       );
       await sleep(delay);
     }
@@ -72,5 +69,5 @@ function registerConnectionLogs() {
 }
 
 function sleep(ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }

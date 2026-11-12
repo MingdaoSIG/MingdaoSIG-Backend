@@ -3,10 +3,9 @@ import { Request } from "express";
 import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 
-
 export default function onlyIncludesBody(
   request: Request,
-  requiredBody: string[]
+  requiredBody: string[],
 ) {
   try {
     const body = request.body;
@@ -17,8 +16,8 @@ export default function onlyIncludesBody(
     if (!onlyIncludesRequiredBody(body, requiredBody)) {
       throw new Error(
         `Only the following items are allowed for this route: [${requiredBody.join(
-          ", "
-        )}]`
+          ", ",
+        )}]`,
       );
     }
 
@@ -26,17 +25,14 @@ export default function onlyIncludesBody(
       throw new Error(
         `Only allowed ${
           requiredBody.length
-        } items in the body: [${requiredBody.join(", ")}]`
+        } items in the body: [${requiredBody.join(", ")}]`,
       );
     }
-  }
-  catch (error) {
+  } catch (error) {
     throw new CustomError(CustomStatus.INVALID_BODY, error);
   }
 }
 
 function onlyIncludesRequiredBody(body: object, requiredBody: string[]) {
-  return Object.keys(body).every((item: string) =>
-    requiredBody.includes(item)
-  );
+  return Object.keys(body).every((item: string) => requiredBody.includes(item));
 }

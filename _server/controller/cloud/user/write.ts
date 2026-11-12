@@ -12,20 +12,20 @@ const UserDB = new MongoDB.User();
 
 export const write: RequestHandler = async (
   req: Request | ExtendedRequest,
-  res
+  res,
 ) => {
   try {
     const {
       // customId,
-      description
-    } = req.body;
+      description,
+    } = req.body ?? {};
     const decodedJwt: any = (req as ExtendedRequest).JWT;
     const userId = decodedJwt.id;
     const userData = (req as ExtendedRequest).userData;
 
     new CheckRequestRequirement(req as Request).onlyIncludesBody(
       // ["customId", "description"],
-      ["description"]
+      ["description"],
     );
 
     // if (userData.customId !== customId) {
@@ -35,23 +35,22 @@ export const write: RequestHandler = async (
     if (description && description?.length > 250) {
       throw new CustomError(
         CustomStatus.INVALID_BODY,
-        new Error("Invalid description")
+        new Error("Invalid description"),
       );
     }
 
     const dataToSave = {
       // customId: String(customId ?? userData.customId),
-      description: String(description ?? userData.description)
+      description: String(description ?? userData.description),
     };
     const savedData = await UserDB.write(dataToSave, { id: userId });
 
     return res.status(HttpStatus.OK).json({
       status: CustomStatus.OK,
       id: savedData._id,
-      data: savedData
+      data: savedData,
     });
-  }
-  catch (error: any) {
+  } catch (error: any) {
     return res
       .status(HttpStatus.BAD_REQUEST)
       .json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });

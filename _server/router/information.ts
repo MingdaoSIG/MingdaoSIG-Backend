@@ -4,11 +4,10 @@ import { rateLimiter, RateLimiterOption } from "@middleware/rateLimiter";
 import {
   postUsers,
   users,
-  usersOfEachSigs
+  usersOfEachSigs,
 } from "@controller/cloud/information/user";
 import { posts, postsOfEachSigs } from "@controller/cloud/information/post";
 import { likes } from "@controller/cloud/information/likes";
-
 
 const information: Router = Router();
 

@@ -4,12 +4,11 @@ import mongoose from "mongoose";
 import { HttpStatus } from "@module/HttpStatusCode";
 import { isShuttingDown } from "@module/GracefulShutdown";
 
-
 const MONGO_STATES: Record<number, string> = {
   0: "disconnected",
   1: "connected",
   2: "connecting",
-  3: "disconnecting"
+  3: "disconnecting",
 };
 
 // Liveness and readiness for the orchestrator: 200 only while MongoDB is
@@ -25,6 +24,6 @@ export const healthz: RequestHandler = (_, res) => {
     .json({
       status: healthy ? "ok" : "unavailable",
       mongo,
-      shuttingDown: isShuttingDown()
+      shuttingDown: isShuttingDown(),
     });
 };

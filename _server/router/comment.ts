@@ -5,7 +5,6 @@ import { rateLimiter, RateLimiterOption } from "@middleware/rateLimiter";
 import { write } from "@controller/cloud/comment/write";
 import { listAllByPost } from "@controller/cloud/comment/list";
 
-
 const comment: Router = Router();
 
 comment.use(rateLimiter(RateLimiterOption.BY_METHOD));

@@ -1,6 +1,5 @@
 import schema from "./schema";
 
-
 export default async function post(from: Date | undefined, to: Date) {
   const TITLE = "Posts on the platform";
 
@@ -8,13 +7,13 @@ export default async function post(from: Date | undefined, to: Date) {
     removed: false,
     createdAt: {
       $gte: from ?? 0,
-      $lte: to
-    }
+      $lte: to,
+    },
   });
 
   return {
     func: post.name,
     title: TITLE,
-    content: postsCount
+    content: postsCount,
   };
 }

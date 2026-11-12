@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 
-
 const Schema = mongoose.Schema;
 
 const commentSchema = new Schema(
@@ -10,9 +9,9 @@ const commentSchema = new Schema(
     content: String,
     like: [String],
     reply: String,
-    removed: { type: Boolean, default: false }
+    removed: { type: Boolean, default: false },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // GET /comment/list/post/:postId, and the comment counts in GET /post/list

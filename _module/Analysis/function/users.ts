@@ -1,6 +1,5 @@
 import schema from "./schema";
 
-
 export default async function users(from: Date | undefined, to: Date) {
   const TITLE = "Users that have sign up";
 
@@ -11,21 +10,21 @@ export default async function users(from: Date | undefined, to: Date) {
       $match: {
         createdAt: {
           $gte: from ?? new Date(0),
-          $lte: to
-        }
-      }
+          $lte: to,
+        },
+      },
     },
     {
       $group: {
-        _id: { customId: "$customId", type: { $type: "$customId" } }
-      }
+        _id: { customId: "$customId", type: { $type: "$customId" } },
+      },
     },
-    { $count: "count" }
+    { $count: "count" },
   ]);
 
   return {
     func: users.name,
     title: TITLE,
-    content: result?.count ?? 0
+    content: result?.count ?? 0,
   };
 }

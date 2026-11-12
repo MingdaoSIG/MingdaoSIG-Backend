@@ -1,10 +1,9 @@
 import schema from "./schema";
 
-
 export default async function top_posted_sigs(
   from: Date | undefined,
   to: Date,
-  limit: number
+  limit: number,
 ) {
   const TITLE = `Top ${limit} post sigs`;
 
@@ -16,14 +15,14 @@ export default async function top_posted_sigs(
         {
           createdAt: from
             ? {
-              $gte: from,
-              $lte: to
-            }
+                $gte: from,
+                $lte: to,
+              }
             : {
-              $lte: to
-            }
-        }
-      ]
+                $lte: to,
+              },
+        },
+      ],
     })
     .group({ _id: "$sig", count: { $sum: 1 } })
     .sort({ count: -1 })
@@ -40,6 +39,6 @@ export default async function top_posted_sigs(
   return {
     func: top_posted_sigs.name,
     title: TITLE,
-    content: sigsArray
+    content: sigsArray,
   };
 }

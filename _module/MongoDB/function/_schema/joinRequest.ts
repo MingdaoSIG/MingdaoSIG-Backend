@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 
-
 const Schema = mongoose.Schema;
 
 const joinRequestSchema = new Schema(
@@ -12,9 +11,9 @@ const joinRequestSchema = new Schema(
     q3: String,
     removed: { type: Boolean, default: false },
     state: { type: String, default: "pending" }, // pending, accepted, rejected
-    confirmId: String
+    confirmId: String,
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // Lookup of a user's request to a SIG.
@@ -29,5 +28,5 @@ joinRequestSchema.index({ confirmId: 1 }, { unique: true });
 export default mongoose.model(
   "join-request",
   joinRequestSchema,
-  "join-request"
+  "join-request",
 );

@@ -9,37 +9,32 @@ import { CustomStatus } from "@module/CustomStatusCode";
 import MongoDB from "@module/MongoDB";
 import { User } from "@type/user";
 
-
 const UserDB = new MongoDB.User();
 
 export default async function JWTverifier(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const SECRET_KEY: Secret = process.env.JWT_SECRET as Secret;
 
   try {
     const authHeader = req.header("authorization");
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      throw new CustomError(
-        CustomStatus.INVALID_JWT,
-        new Error("Invalid JWT")
-      );
+    if (!authHeader?.startsWith("Bearer ")) {
+      throw new CustomError(CustomStatus.INVALID_JWT, new Error("Invalid JWT"));
     }
 
     const token = authHeader.replace("Bearer ", "");
     let decoded: JwtPayload;
     try {
       const verifiedJwt = jwt.verify(token, SECRET_KEY, {
-        algorithms: ["HS256"]
+        algorithms: ["HS256"],
       });
       if (typeof verifiedJwt === "string") {
         throw new Error("Invalid JWT");
       }
       decoded = verifiedJwt;
-    }
-    catch (error) {
+    } catch (error) {
       throw new CustomError(CustomStatus.INVALID_JWT, error);
     }
 
@@ -48,11 +43,9 @@ export default async function JWTverifier(
 
     let userData: User;
     try {
-      if (!isValidObjectId(decoded.id))
-        throw new Error("Invalid user id");
+      if (!isValidObjectId(decoded.id)) throw new Error("Invalid user id");
       userData = await UserDB.read({ id: decoded.id });
-    }
-    catch (error) {
+    } catch (error) {
       throw new CustomError(CustomStatus.INVALID_JWT, error);
     }
 
@@ -61,22 +54,17 @@ export default async function JWTverifier(
     customReq.userData = userData;
 
     next();
-  }
-  catch (error) {
-    return res
-      .status(HttpStatus.UNAUTHORIZED)
-      .json({
-        status:
-                    (error as CustomError).statusCode ||
-                    CustomStatus.UNKNOWN_ERROR
-      });
+  } catch (error) {
+    return res.status(HttpStatus.UNAUTHORIZED).json({
+      status: (error as CustomError).statusCode || CustomStatus.UNKNOWN_ERROR,
+    });
   }
 }
 
 function checkData(
   data: unknown,
   requiredKeys: string[],
-  optionalKeys: string[] = []
+  optionalKeys: string[] = [],
 ) {
   try {
     // Check if input is an object
@@ -90,12 +78,10 @@ function checkData(
         if (!requiredKeys.includes(key) && !optionalKeys.includes(key))
           throw new Error("Invalid data");
       }
-    }
-    else {
+    } else {
       throw new Error("Not a object");
     }
-  }
-  catch (error) {
+  } catch (error) {
     throw new CustomError(CustomStatus.INVALID_JWT, error);
   }
 

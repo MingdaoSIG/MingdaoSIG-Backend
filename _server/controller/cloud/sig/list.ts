@@ -4,7 +4,6 @@ import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
 import MongoDB from "@module/MongoDB";
 
-
 const SigDB = new MongoDB.Sig();
 
 export const listAll: RequestHandler = async (_, res) => {
@@ -13,10 +12,9 @@ export const listAll: RequestHandler = async (_, res) => {
 
     return res.status(HttpStatus.OK).json({
       status: CustomStatus.OK,
-      data: sigData
+      data: sigData,
     });
-  }
-  catch (error: any) {
+  } catch (error: any) {
     return res
       .status(HttpStatus.NOT_FOUND)
       .json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });

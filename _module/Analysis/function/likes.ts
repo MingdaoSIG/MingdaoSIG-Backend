@@ -1,6 +1,5 @@
 import schema from "./schema";
 
-
 export default async function likes(from: Date | undefined, to: Date) {
   const TITLE = "Likes on the platform";
 
@@ -11,11 +10,11 @@ export default async function likes(from: Date | undefined, to: Date) {
         removed: false,
         createdAt: {
           $gte: from ?? new Date(0),
-          $lte: to
-        }
-      }
+          $lte: to,
+        },
+      },
     },
-    { $group: { _id: null, total: { $sum: "$likes" } } }
+    { $group: { _id: null, total: { $sum: "$likes" } } },
   ]);
 
   const likesCount: number = result?.total ?? 0;
@@ -23,6 +22,6 @@ export default async function likes(from: Date | undefined, to: Date) {
   return {
     func: likes.name,
     title: TITLE,
-    content: likesCount
+    content: likesCount,
   };
 }

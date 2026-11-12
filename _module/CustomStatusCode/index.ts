@@ -41,7 +41,7 @@ export const CustomCode = {
 
   4290: "Too many requests",
 
-  5000: "Unknown error"
+  5000: "Unknown error",
 } as const;
 
 export const CustomStatus = {
@@ -93,5 +93,5 @@ export const CustomStatus = {
 
   TOO_MANY_REQUESTS: 4290,
 
-  UNKNOWN_ERROR: 5000
+  UNKNOWN_ERROR: 5000,
 } as const;

@@ -3,7 +3,6 @@ import { Request } from "express";
 import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 
-
 export default function matchBody(request: Request, requiredBody: string[]) {
   try {
     const body = request.body;
@@ -13,18 +12,15 @@ export default function matchBody(request: Request, requiredBody: string[]) {
     if (!hasAllRequiredBody(body, requiredBody)) {
       throw new Error(
         `The following items are all required for this route: [${requiredBody.join(
-          ", "
-        )}]`
+          ", ",
+        )}]`,
       );
     }
-  }
-  catch (error) {
+  } catch (error) {
     throw new CustomError(CustomStatus.INVALID_BODY, error);
   }
 }
 
 function hasAllRequiredBody(body: object, requiredBody: string[]) {
-  return requiredBody.every((item: string) =>
-    Object.keys(body).includes(item)
-  );
+  return requiredBody.every((item: string) => Object.keys(body).includes(item));
 }
