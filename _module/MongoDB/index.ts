@@ -158,6 +158,19 @@ export class SigDB {
       throw new Error("Search is required");
     }
   }
+
+  // $set on one SIG, only when it also matches `guard` (null otherwise).
+  async update(
+    id: string,
+    dataToSet: Record<string, unknown>,
+    guard?: Record<string, unknown>,
+  ) {
+    return await sig.update(id, dataToSet, guard);
+  }
+
+  async create(dataToSave: SigWrite) {
+    return await sig.create(dataToSave);
+  }
 }
 
 export class CommentDB {

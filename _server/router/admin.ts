@@ -23,6 +23,7 @@ import {
   restoreComment,
 } from "@controller/cloud/admin/comments";
 import { listSigs } from "@controller/cloud/admin/sigs";
+import { createSig } from "@controller/cloud/admin/sigCreate";
 import { decide, listJoinRequests } from "@controller/cloud/admin/joinRequests";
 import { listAuditEntries } from "@controller/cloud/admin/audit";
 import { previewDigest } from "@controller/cloud/admin/digest";
@@ -51,6 +52,8 @@ admin.post("/users/:id/badges", adminOnly, setBadges);
 admin.get("/comments", adminOnly, listComments);
 admin.post("/comments/:id/remove", adminOnly, removeComment);
 admin.post("/comments/:id/restore", adminOnly, restoreComment);
+
+admin.post("/sigs", adminOnly, createSig);
 
 // Admin, or SIG manager (scoped)
 admin.get("/sigs", listSigs);

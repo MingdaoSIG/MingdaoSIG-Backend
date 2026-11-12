@@ -8,6 +8,9 @@ export type Sig = {
   moderator?: string[]; // 管理者
   leader?: string[]; // 領導者
   removed?: boolean; // 刪除
+  defaultCover?: string; // 預設封面（圖片 id）
+  color?: string; // 主題色 #rrggbb
+  previousCustomIds?: string[]; // 舊的自定義ID（會轉址）
 };
 
 export type SigWrite = {
