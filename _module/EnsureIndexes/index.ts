@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import mongoose, { mongo } from "mongoose";
 
 import { isShuttingDown } from "@module/GracefulShutdown";

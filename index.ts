@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { existsSync } from "fs";
 
 import server from "./_server";

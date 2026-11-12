@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { Server, ServerResponse } from "http";
 import mongoose from "mongoose";
 
