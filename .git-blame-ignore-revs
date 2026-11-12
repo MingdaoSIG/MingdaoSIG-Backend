@@ -1,0 +1,6 @@
+# Commits that only reformat code. Hide them from git blame with:
+#   git config blame.ignoreRevsFile .git-blame-ignore-revs
+# (GitHub's blame view reads this file automatically.)
+
+# style: format with biome
+4dd632498bd06ab6ff9b1d16b960e26b1d43b1d3
