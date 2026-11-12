@@ -230,6 +230,14 @@ export class JoinRequestDB {
       throw new Error("Search is required");
     }
   }
+
+  async confirmPending(id: string, state: "accepted" | "rejected") {
+    return await joinRequest.confirmPending(id, state);
+  }
+
+  async remove(id: string) {
+    return await joinRequest.markRemoved(id);
+  }
 }
 
 const MongoDB = {

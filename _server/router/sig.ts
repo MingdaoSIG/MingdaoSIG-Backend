@@ -6,7 +6,10 @@ import { readById, readByCustomId } from "@controller/cloud/sig/read";
 import { write } from "@controller/cloud/sig/write";
 import { listAll } from "@controller/cloud/sig/list";
 import { join, readJoinRequest } from "@controller/cloud/sig/join";
-import { confirmJoinRequest } from "@controller/cloud/sig/confirm";
+import {
+  confirmJoinRequest,
+  confirmJoinRequestByBody
+} from "@controller/cloud/sig/confirm";
 import { addLeader } from "@controller/cloud/sig/addLeader";
 import { addModerator } from "@controller/cloud/sig/addModerator";
 import { deleteLeader } from "@controller/cloud/sig/deleteLeader";
@@ -24,6 +27,7 @@ sig.get("/@:customId", readByCustomId);
 sig.get("/:sigId", readById);
 
 sig.get("/confirm/:confirmId", confirmJoinRequest);
+sig.post("/confirm/:confirmId", confirmJoinRequestByBody);
 
 sig.use(JWTverifier);
 sig.post("/:id", write);

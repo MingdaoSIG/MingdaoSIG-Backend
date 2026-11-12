@@ -79,7 +79,15 @@ export const join: RequestHandler = async (
       state: "pending"
     });
 
-    await NewJoinRequest(sigId, userId, requestData);
+    try {
+      await NewJoinRequest(sigId, userId, requestData);
+    }
+    catch (error) {
+      // Leaders were not notified: drop the request so the user can retry
+      // instead of being stuck with "already applied".
+      await JoinRequestDB.remove(requestData._id).catch(() => null);
+      throw error;
+    }
 
     requestData.confirmId = undefined;
     return res.status(HttpStatus.OK).json({
