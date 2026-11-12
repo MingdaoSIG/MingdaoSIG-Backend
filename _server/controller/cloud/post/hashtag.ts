@@ -1,4 +1,5 @@
 import { RequestHandler } from "express";
+import { isValidObjectId } from "mongoose";
 
 import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
@@ -20,8 +21,9 @@ const TOP_CACHE_MS = 5 * 60 * 1000;
 
 type TagCount = { tag: string; count: number };
 
-// Every tag in use, most used first; GET /post/hashtags/top slices it.
-const topCache = new TTLCache<TagCount[]>(TOP_CACHE_MS, 1);
+// Every tag in use, most used first, site-wide ("all") and per SIG id;
+// GET /post/hashtags/top slices it.
+const topCache = new TTLCache<TagCount[]>(TOP_CACHE_MS, 100);
 
 /**
  * A stored or requested tag without the surrounding spaces and one leading
@@ -83,11 +85,15 @@ export const listAllByHashtag: RequestHandler<Record<string, string>> = async (
 };
 
 /**
- * GET /post/hashtags/top?limit=
+ * GET /post/hashtags/top?limit=&sig=&q=
  *
  * `[{ tag, count }]`: the tags of non-removed posts without "#", most used
  * first (count = number of posts). Tags that differ only in case are one
  * tag, shown in its most used spelling. Cached for 5 minutes.
+ *
+ * - `sig`: only posts of that SIG (the editor's 「這個 SIG 常用」).
+ * - `q`: only tags containing it, case-insensitive, with tags that start
+ *   with it first (the editor's tag suggestions). A leading "#" is ignored.
  */
 export const listTopHashtags: RequestHandler<Record<string, string>> = async (
   req,
@@ -99,7 +105,28 @@ export const listTopHashtags: RequestHandler<Record<string, string>> = async (
       ? Number(req.query.limit)
       : DEFAULT_TOP_LIMIT;
 
-    const tags = await allTagCounts();
+    const sig = req.query?.sig;
+    if (sig !== undefined && (typeof sig !== "string" || !isValidObjectId(sig)))
+      throw new CustomError(
+        CustomStatus.INVALID_SIG_ID,
+        new Error("sig should be a SIG id"),
+      );
+
+    const rawQ = req.query?.q;
+    if (rawQ !== undefined && typeof rawQ !== "string")
+      throw new CustomError(
+        CustomStatus.INVALID_QUERY,
+        new Error("q should be a string"),
+      );
+    const q = rawQ === undefined ? "" : normalizeTag(rawQ).toLowerCase();
+    if (q.length > MAX_TAG_LENGTH)
+      throw new CustomError(
+        CustomStatus.INVALID_QUERY,
+        new Error(`q should be at most ${MAX_TAG_LENGTH} characters`),
+      );
+
+    let tags = sig ? await sigTagCounts(sig) : await allTagCounts();
+    if (q) tags = matchingTags(tags, q);
 
     return res.status(HttpStatus.OK).json({
       status: CustomStatus.OK,
@@ -117,12 +144,36 @@ export const listTopHashtags: RequestHandler<Record<string, string>> = async (
  * (cached for 5 minutes). Also used by the unified GET /search.
  */
 export function allTagCounts() {
-  return topCache.getOrLoad("all", countTags);
+  return topCache.getOrLoad("all", () => countTags());
 }
 
-async function countTags(): Promise<TagCount[]> {
+/** Like allTagCounts, for the posts of one SIG (cached per SIG). */
+function sigTagCounts(sigId: string) {
+  return topCache.getOrLoad(`sig:${sigId}`, () => countTags(sigId));
+}
+
+/**
+ * The tags containing `q` (lower-cased, no "#"): those starting with it
+ * first, each group still most used first.
+ */
+function matchingTags(tags: TagCount[], q: string) {
+  const starts: TagCount[] = [];
+  const contains: TagCount[] = [];
+  for (const entry of tags) {
+    const key = entry.tag.toLowerCase();
+    if (key.startsWith(q)) starts.push(entry);
+    else if (key.includes(q)) contains.push(entry);
+  }
+  return [...starts, ...contains];
+}
+
+async function countTags(sigId?: string): Promise<TagCount[]> {
   const posts = await PostDB.list(
-    { removed: false, hashtag: { $exists: true, $ne: [] } },
+    {
+      removed: false,
+      hashtag: { $exists: true, $ne: [] },
+      ...(sigId ? { sig: sigId } : {}),
+    },
     { projection: { hashtag: 1 } },
   );
 
