@@ -10,6 +10,10 @@ import CheckValidCustomId from "@module/CheckValidCustomId";
 
 const UserDB = new MongoDB.User();
 
+const CUSTOM_ID_MAX_LENGTH = 25;
+const CUSTOM_ID_SUFFIX_LENGTH = 5;
+const CUSTOM_ID_MAX_ATTEMPTS = 10;
+
 export default async function getUserData(email: string, avatar: string) {
   const MD_API_URL =
         "https://mdsrl.mingdao.edu.tw/mdpp/Sig20Login/googleUserCheck";
@@ -65,16 +69,7 @@ export default async function getUserData(email: string, avatar: string) {
 
     const oldData = await UserDB.read({ email: mail }).catch(() => null);
 
-    const customId = oldData?.customId || mail.split("@")[0].toLowerCase();
-    let targetCustomId = customId;
-    let validId = oldData?.customId
-      ? true
-      : await _CheckValidCustomId(targetCustomId);
-    do {
-      if (validId) break;
-      targetCustomId = `${customId}_${UniqueId(5)}`;
-      validId = await _CheckValidCustomId(targetCustomId);
-    } while (!validId);
+    const targetCustomId = oldData?.customId || (await pickCustomId(mail));
 
     const sig = oldData?.sig || [];
     const displayName = oldData?.displayName || user_name;
@@ -106,7 +101,6 @@ export default async function getUserData(email: string, avatar: string) {
 }
 
 export async function getUserDataBySession(session: string) {
-  console.log("Get user data by session:", session);
   const MD_API_URL =
         "https://mdsrl.mingdao.edu.tw/mdpp/Sig20Login/sessUserCheck";
 
@@ -163,16 +157,7 @@ export async function getUserDataBySession(session: string) {
 
     const oldData = await UserDB.read({ email: lowMail }).catch(() => null);
 
-    const customId = oldData?.customId || mail.split("@")[0].toLowerCase();
-    let targetCustomId = customId;
-    let validId = oldData?.customId
-      ? true
-      : await _CheckValidCustomId(targetCustomId);
-    do {
-      if (validId) break;
-      targetCustomId = `${customId}_${UniqueId(5)}`;
-      validId = await _CheckValidCustomId(targetCustomId);
-    } while (!validId);
+    const targetCustomId = oldData?.customId || (await pickCustomId(mail));
 
     const sig = oldData?.sig || [];
     const displayName = oldData?.displayName || user_name;
@@ -219,6 +204,45 @@ function checkData(data: object, keys: string[]) {
   }
 
   return true;
+}
+
+/**
+ * Builds a custom id from the email's local part that matches the pattern in
+ * CheckValidCustomId (lowercase a-z, 0-9, _ and single inner dots, at most
+ * 25 characters), adding a random suffix when it is taken. Gives up after a
+ * fixed number of attempts instead of looping forever.
+ */
+export async function pickCustomId(email: string) {
+  const base = sanitizeCustomIdBase(email);
+
+  const plain = trimCustomId(base, CUSTOM_ID_MAX_LENGTH);
+  if (await _CheckValidCustomId(plain)) return plain;
+
+  const stem = trimCustomId(
+    base,
+    CUSTOM_ID_MAX_LENGTH - CUSTOM_ID_SUFFIX_LENGTH - 1
+  );
+  for (let attempt = 0; attempt < CUSTOM_ID_MAX_ATTEMPTS; attempt++) {
+    const candidate = `${stem}_${UniqueId(CUSTOM_ID_SUFFIX_LENGTH)}`;
+    if (await _CheckValidCustomId(candidate)) return candidate;
+  }
+
+  throw new Error("Could not generate a unique custom id");
+}
+
+function sanitizeCustomIdBase(email: string) {
+  return (
+    email
+      .split("@")[0]
+      .toLowerCase()
+      .replace(/[^a-z0-9_.]/g, "_")
+      .replace(/\.{2,}/g, ".")
+      .replace(/^\.+|\.+$/g, "") || "user"
+  );
+}
+
+function trimCustomId(base: string, maxLength: number) {
+  return base.slice(0, maxLength).replace(/\.+$/, "") || "user";
 }
 
 async function _CheckValidCustomId(customId: string) {
