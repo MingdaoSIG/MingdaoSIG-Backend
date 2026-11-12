@@ -32,5 +32,7 @@ postSchema.index({ user: 1, removed: 1, createdAt: -1 });
 postSchema.index({ like: 1, removed: 1, createdAt: -1 });
 // GET /post/list/range and the /information/* date filters
 postSchema.index({ removed: 1, createdAt: 1 });
+// GET /post/list/admin (newest first, _id breaks ties)
+postSchema.index({ removed: 1, createdAt: -1, _id: -1 });
 
 export default mongoose.model("post", postSchema, "post");

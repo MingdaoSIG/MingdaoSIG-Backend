@@ -11,6 +11,9 @@ export type Option = {
   sort?: Sort;
 };
 
+// Option plus a projection, for list functions that support one.
+export type ListOption = Option & Pick<ReadOption, "projection">;
+
 export type ReadOption = {
   // Return plain objects instead of Mongoose documents (faster, read only).
   lean?: boolean;
