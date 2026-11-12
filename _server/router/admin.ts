@@ -22,10 +22,13 @@ import {
   removeComment,
   restoreComment,
 } from "@controller/cloud/admin/comments";
+import { listSigs } from "@controller/cloud/admin/sigs";
+import { decide, listJoinRequests } from "@controller/cloud/admin/joinRequests";
 import { listAuditEntries } from "@controller/cloud/admin/audit";
 
 // Admin panel API (contract v3 §3). Every route needs a JWT; GETs use the
-// read tier and everything else the write tier.
+// read tier and everything else the write tier. Routes without adminOnly
+// are also open to SIG managers and scope the result themselves.
 const admin: Router = Router();
 
 admin.use(rateLimiter(RateLimiterOption.BY_METHOD));
@@ -47,6 +50,11 @@ admin.post("/users/:id/badges", adminOnly, setBadges);
 admin.get("/comments", adminOnly, listComments);
 admin.post("/comments/:id/remove", adminOnly, removeComment);
 admin.post("/comments/:id/restore", adminOnly, restoreComment);
+
+// Admin, or SIG manager (scoped)
+admin.get("/sigs", listSigs);
+admin.get("/join-requests", listJoinRequests);
+admin.post("/join-requests/:id/decision", decide);
 
 admin.get("/audit", adminOnly, listAuditEntries);
 
