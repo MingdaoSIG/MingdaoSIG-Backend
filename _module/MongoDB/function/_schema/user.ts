@@ -5,6 +5,9 @@ const Schema = mongoose.Schema;
 const userSchema = new Schema(
   {
     customId: String,
+    // Earlier customIds, kept when an admin changes it: GET /user/@<old id>
+    // answers with `redirectTo` (contract v4 §5.8).
+    previousCustomIds: [String],
     email: String,
     name: String,
     code: String,
@@ -14,16 +17,9 @@ const userSchema = new Schema(
     displayName: String,
     description: String,
     avatar: String,
-    badge: {
-      type: [
-        {
-          type: String,
-          // Same list as the frontend (app/[userID]/(User)/config/badge.ts).
-          enum: ["developer", "10.21_user", "bug_hunter"],
-        },
-      ],
-      default: [],
-    },
+    // Badge keys from the badge collection (@module/Badge); checked when an
+    // admin sets them, not by the schema.
+    badge: { type: [String], default: [] },
     follower: [String],
     permission: Number,
     // Email me when someone comments on my post or replies to my comment.
@@ -59,6 +55,8 @@ const userSchema = new Schema(
 // duplicates from a login race. Make them unique only after a dedupe migration.
 userSchema.index({ email: 1 }, { unique: true });
 userSchema.index({ customId: 1 }, { unique: true });
+// GET /user/@:id by an old customId, and the customId uniqueness check.
+userSchema.index({ previousCustomIds: 1 });
 userSchema.index({ code: 1 });
 userSchema.index({ sig: 1 });
 // GET /admin/users (newest first) and the GET /admin/overview counts

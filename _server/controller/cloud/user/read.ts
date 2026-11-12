@@ -9,6 +9,7 @@ import MongoDB from "@module/MongoDB";
 import { isAdmin } from "@module/Permission";
 import toPublicUser from "@module/PublicUser";
 import { withNotificationSettings } from "@module/NotificationSettings";
+import { findUserByPreviousCustomId } from "@module/CheckValidCustomId";
 
 const ProfileDB = new MongoDB.User();
 
@@ -46,6 +47,8 @@ export const readById: RequestHandler<Record<string, string>> = async (
   }
 };
 
+// GET /user/@:id: also by an old customId (`previousCustomIds`), then with
+// `redirectTo: "<current customId>"` in data (contract v4 §5.8).
 export const readByCustomId: RequestHandler<Record<string, string>> = async (
   req,
   res,
@@ -54,7 +57,18 @@ export const readByCustomId: RequestHandler<Record<string, string>> = async (
     const customId: string = req.params.id;
 
     const userData = await ProfileDB.read({ customId }).catch(() => null);
-    if (!userData) {
+    if (userData) {
+      return res.status(HttpStatus.OK).json({
+        status: CustomStatus.OK,
+        id: userData._id,
+        data: toPublicUser(userData),
+      });
+    }
+
+    const previous = await findUserByPreviousCustomId(customId).catch(
+      () => null,
+    );
+    if (!previous) {
       throw new CustomError(
         CustomStatus.NOT_FOUND,
         new Error("User not found"),
@@ -63,8 +77,11 @@ export const readByCustomId: RequestHandler<Record<string, string>> = async (
 
     return res.status(HttpStatus.OK).json({
       status: CustomStatus.OK,
-      id: userData._id,
-      data: toPublicUser(userData),
+      id: previous.user._id,
+      data: {
+        ...toPublicUser(previous.user as any),
+        redirectTo: previous.redirectTo,
+      },
     });
   } catch (error: any) {
     return res

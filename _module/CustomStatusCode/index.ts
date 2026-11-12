@@ -25,6 +25,13 @@ export const CustomCode = {
   4029: "Already applied",
   4030: "Not a member",
   4031: "Already confirmed",
+  4032: "Already leader",
+  4033: "Already moderator",
+  4034: "Not leader",
+  4035: "Not moderator",
+  4036: "Invalid session",
+  4037: "Invalid time range",
+  4040: "Not recruiting",
 
   4100: "Error reading user from db",
   4101: "Error writing user to db",
@@ -77,6 +84,7 @@ export const CustomStatus = {
   NOT_MODERATOR: 4035,
   INVALID_SESSION: 4036,
   INVALID_TIME_RANGE: 4037,
+  NOT_RECRUITING: 4040,
 
   ERROR_READING_USER_FROM_DB: 4100,
   ERROR_WRITING_USER_TO_DB: 4101,

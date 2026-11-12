@@ -13,6 +13,10 @@ const LIST_FIELDS = {
   description: 1,
   leader: 1,
   moderator: 1,
+  removed: 1,
+  color: 1,
+  defaultCover: 1,
+  previousCustomIds: 1,
 } as const;
 
 /** SIGs matching the filter (admin SIG list fields), in creation order. */

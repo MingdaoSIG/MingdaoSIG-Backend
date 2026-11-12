@@ -24,10 +24,21 @@ const LIST_FIELDS = {
   createdAt: 1,
 } as const;
 
-/** The values the user schema accepts in `badge`. */
-export function badgeValues(): string[] {
-  const path: any = user.schema.path("badge");
-  return [...(path?.embeddedSchemaType?.enumValues ?? [])];
+/** Number of users with each badge key (GET /admin/badges). */
+export async function badgeUserCounts() {
+  try {
+    const counts: Record<string, number> = {};
+    const groups: { _id: string; count: number }[] = await user.aggregate([
+      { $match: { "badge.0": { $exists: true } } },
+      { $project: { badge: { $setUnion: ["$badge", []] } } },
+      { $unwind: "$badge" },
+      { $group: { _id: "$badge", count: { $sum: 1 } } },
+    ]);
+    for (const group of groups) counts[String(group._id)] = group.count;
+    return counts;
+  } catch (error) {
+    throw new CustomError(CustomStatus.ERROR_READING_USER_FROM_DB, error);
+  }
 }
 
 /** One page of users (newest first) and the total for the same filter. */
@@ -167,6 +178,47 @@ export async function removeSigMembership(userId: string, sigId: string) {
       )
       .lean()) as any;
   } catch (error) {
+    throw new CustomError(CustomStatus.ERROR_WRITING_USER_TO_DB, error);
+  }
+}
+
+const PROFILE_FIELDS = {
+  name: 1,
+  customId: 1,
+  previousCustomIds: 1,
+  displayName: 1,
+  description: 1,
+} as const;
+
+/** The fields an admin edits (POST /admin/users/:id), or null. */
+export async function readUserProfile(id: string) {
+  try {
+    return (await user.findById(id, PROFILE_FIELDS).lean()) as any;
+  } catch (error) {
+    throw new CustomError(CustomStatus.ERROR_READING_USER_FROM_DB, error);
+  }
+}
+
+/**
+ * Sets profile fields while the user still has `customId`. Returns the
+ * user after the change, or null when the customId changed meanwhile or the
+ * new one is taken (duplicate key).
+ */
+export async function updateUserProfile(
+  id: string,
+  set: Record<string, unknown>,
+  customId: string | undefined,
+) {
+  try {
+    return (await user
+      .findOneAndUpdate(
+        { _id: id, customId: customId ?? null },
+        { $set: set },
+        { returnDocument: "after", projection: PROFILE_FIELDS },
+      )
+      .lean()) as any;
+  } catch (error: any) {
+    if (error?.code === 11000) return null;
     throw new CustomError(CustomStatus.ERROR_WRITING_USER_TO_DB, error);
   }
 }

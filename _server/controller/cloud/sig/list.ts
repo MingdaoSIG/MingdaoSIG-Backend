@@ -3,6 +3,7 @@ import { RequestHandler } from "express";
 import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
 import MongoDB from "@module/MongoDB";
+import { toSigResponse } from "@module/SigSettings";
 
 const SigDB = new MongoDB.Sig();
 
@@ -12,7 +13,7 @@ export const listAll: RequestHandler = async (_, res) => {
 
     return res.status(HttpStatus.OK).json({
       status: CustomStatus.OK,
-      data: sigData,
+      data: sigData.map(toSigResponse),
     });
   } catch (error: any) {
     return res
