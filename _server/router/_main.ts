@@ -19,6 +19,7 @@ import push from "./push";
 import site from "./site";
 import event from "./event";
 import feedback from "./feedback";
+import badge from "./badge";
 
 const router: Router = Router();
 
@@ -39,6 +40,7 @@ router.use("/push", push);
 router.use("/site", site);
 router.use("/event", event);
 router.use("/feedback", feedback);
+router.use("/badge", badge);
 
 router.use((_: Request, res: Response) => {
   res.status(HttpStatus.NOT_FOUND).json({ status: CustomStatus.NOT_FOUND });

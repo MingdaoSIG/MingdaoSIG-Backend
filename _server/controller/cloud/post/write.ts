@@ -9,6 +9,7 @@ import { HttpStatus } from "@module/HttpStatusCode";
 import MongoDB from "@module/MongoDB";
 import CheckRequestRequirement from "@module/CheckRequestRequirement";
 import { canPostToSig, isAdmin, isSigModerator } from "@module/Permission";
+import { sigDefaultCover } from "@module/SigDefaults";
 import { scanForKeywords } from "@module/KeywordFilter";
 import { announceNewPost } from "@module/DiscordWebhook";
 
@@ -17,33 +18,6 @@ const SigDB = new MongoDB.Sig();
 
 // Matches the editor's limit in the frontend (app/new/page.tsx).
 const MAX_CONTENT_LENGTH = 100000;
-
-// Image ids (served by GET /image/:id), like the frontend's own table in
-// app/new/(new)/apis/postAPI.ts. A full URL would tie stored posts to one
-// API host.
-const sigDefaultCover: { [key: string]: string } = {
-  "6529ed87df4ae96f279cd5e3": "653299ff0b891d1f6b5b4460", // 資訊程式設計
-  "6529ee3cdf4ae96f279cd5e4": "653297ed0b891d1f6b5b4416", // 機器人
-  "6529ee57df4ae96f279cd5e5": "653299f10b891d1f6b5b445c", // 建築設計
-  "6529eed9df4ae96f279cd5e6": "6532988f0b891d1f6b5b4432", // 生科動科與環境
-  "6529eeeddf4ae96f279cd5e7": "653298e00b891d1f6b5b4446", // 醫學
-  "6529efbfdf4ae96f279cd5ec": "6532983d0b891d1f6b5b4422", // 醫學相關
-  "6529efe9df4ae96f279cd5ee": "6532982d0b891d1f6b5b441e", // 法政
-  "6529effbdf4ae96f279cd5ef": "653298c70b891d1f6b5b4442", // 社心教育
-  "6529f011df4ae96f279cd5f0": "65329a0f0b891d1f6b5b4464", // 音樂表藝
-  "6529f05ddf4ae96f279cd5f1": "653298fa0b891d1f6b5b444e", // 大眾傳播
-  "6529f06edf4ae96f279cd5f2": "653298490b891d1f6b5b4426", // 文史哲
-  "6529f094df4ae96f279cd5f4": "653298b00b891d1f6b5b443e", // 無人機
-  "6529f0a2df4ae96f279cd5f5": "653298620b891d1f6b5b442e", // 經濟管科
-  "6529f0c4df4ae96f279cd5f6": "653298a60b891d1f6b5b443a", // 元宇宙
-  "6529f0dbdf4ae96f279cd5f7": "653298570b891d1f6b5b442a", // 直播
-  "6529f0eedf4ae96f279cd5f8": "653298110b891d1f6b5b441a", // 科學教育
-  "652d60b842cdf6a660c2b778": "653299930b891d1f6b5b4458", // 公告
-  "65321d65e226c78161c22807": "653298990b891d1f6b5b4436", // 遊憩運動
-  "65321d83e226c78161c22808": "653299040b891d1f6b5b4452", // 電機物理
-  "6ad18a858a01ead1f9d558a7": "6ad18a858a01ead1f9d558a8", // 模擬聯合國
-  "6ad18a858a01ead1f9d558a9": "6ad18a858a01ead1f9d558aa", // 數學
-};
 
 export const write: RequestHandler<Record<string, string>> = async (
   req: Request<Record<string, string>> | ExtendedRequest,
@@ -140,9 +114,10 @@ export const write: RequestHandler<Record<string, string>> = async (
     const dataToSave = {
       sig: sigId || oldData?.sig,
       title: title || oldData?.title,
-      // No cover at all for a SIG missing from the table: the frontend
-      // shows the post without one.
-      cover: cover || oldData?.cover || sigDefaultCover[sigId] || "",
+      // The SIG's default cover (sig.defaultCover, else the old hardcoded
+      // table); none at all when it has neither: the frontend shows the post
+      // without one.
+      cover: cover || oldData?.cover || sigDefaultCover(sigData),
       content: content || oldData?.content,
       user: oldData?.user || userId,
       hashtag: hashtag || oldData?.hashtag || [],

@@ -7,27 +7,49 @@ import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
 import MongoDB from "@module/MongoDB";
 import CheckRequestRequirement from "@module/CheckRequestRequirement";
-import { isAdmin, isSigLeader, isSigModerator } from "@module/Permission";
+import {
+  ANNOUNCEMENT_SIG_ID,
+  isAdmin,
+  isSigLeader,
+  isSigModerator,
+} from "@module/Permission";
 import { recordAudit } from "@module/Audit";
-import { SigWrite } from "@type/sig";
+import { assertCustomIdAvailable } from "@module/CheckValidCustomId";
+import {
+  parseBoolean,
+  parseImageId,
+  parseJoinQuestions,
+  parseRecruiting,
+  parseSigColor,
+  parseSigDescription,
+  parseSigName,
+  toSigResponse,
+} from "@module/SigSettings";
 import { parseFeaturedPosts } from "./showcase";
 import { parseDiscordWebhook } from "./discord";
 
 const SigDB = new MongoDB.Sig();
-const AdminDB = new MongoDB.Admin();
 
-const NAME_MAX_LENGTH = 30;
-const DESCRIPTION_MAX_LENGTH = 250;
+// Fields the SIG's managers (leaders, moderators) and admins may set.
+const MANAGER_FIELDS = [
+  "description",
+  "avatar",
+  "featuredPosts",
+  "discordWebhook",
+  "joinQuestions",
+  "recruiting",
+];
+// Fields only an admin may set (API contract v4 §3.7).
+const ADMIN_FIELDS = ["name", "customId", "color", "defaultCover", "removed"];
 
-// POST /sig/:id { description?, avatar?, name?, featuredPosts?,
-// discordWebhook? }: the SIG's leaders and moderators (advisors) or an admin;
-// only an admin may rename it.
+// POST /sig/:id: the SIG's leaders and moderators (advisors) or an admin.
+// Body: any of MANAGER_FIELDS, and for an admin ADMIN_FIELDS too.
 export const write: RequestHandler<Record<string, string>> = async (
   req: Request<Record<string, string>> | ExtendedRequest,
   res,
 ) => {
   try {
-    const { description, avatar, name } = req.body ?? {};
+    const body = req.body ?? {};
     const sigId = req.params.id;
     const decodedJwt: any = (req as ExtendedRequest).JWT;
     const userId: string = decodedJwt.id;
@@ -40,11 +62,8 @@ export const write: RequestHandler<Record<string, string>> = async (
       );
 
     new CheckRequestRequirement(req as Request).onlyIncludesBody([
-      "description",
-      "avatar",
-      "name",
-      "featuredPosts",
-      "discordWebhook",
+      ...MANAGER_FIELDS,
+      ...ADMIN_FIELDS,
     ]);
 
     const sigData = await SigDB.read({ id: sigId }).catch(() => null);
@@ -70,83 +89,127 @@ export const write: RequestHandler<Record<string, string>> = async (
       throw new CustomError(CustomStatus.FORBIDDEN, new Error("Sig removed"));
     }
 
-    if (name !== undefined && !isAdminUser) {
+    const adminOnly = ADMIN_FIELDS.filter((field) => body[field] !== undefined);
+    if (adminOnly.length > 0 && !isAdminUser) {
       throw new CustomError(
         CustomStatus.FORBIDDEN,
-        new Error("Only an admin can rename a sig"),
+        new Error(`Only an admin can change: ${adminOnly.join(", ")}`),
       );
     }
 
-    const dataToSave: SigWrite = {};
+    const dataToSave: Record<string, unknown> = {};
+    const auditMeta: Record<string, unknown> = {};
 
-    if (description !== undefined) {
-      if (typeof description !== "string")
-        throw new CustomError(
-          CustomStatus.INVALID_BODY,
-          new Error("Invalid description"),
-        );
-      if (description.length > DESCRIPTION_MAX_LENGTH)
-        throw new CustomError(
-          CustomStatus.INVALID_CONTENT_LENGTH,
-          new Error("Invalid description"),
-        );
-      dataToSave.description = description;
-    }
+    if (body.description !== undefined)
+      dataToSave.description = parseSigDescription(body.description);
 
     // An image id from POST /image
-    if (avatar !== undefined) {
-      if (
-        typeof avatar !== "string" ||
-        !isValidObjectId(avatar) ||
-        !(await AdminDB.imageExists(avatar))
-      )
-        throw new CustomError(
-          CustomStatus.INVALID_IMAGE_ID,
-          new Error("Invalid avatar image id"),
-        );
-      dataToSave.avatar = avatar;
-    }
-
-    if (name !== undefined) {
-      if (typeof name !== "string")
-        throw new CustomError(
-          CustomStatus.INVALID_BODY,
-          new Error("Invalid name"),
-        );
-      const newName = name.trim();
-      const length = Array.from(newName).length;
-      if (length < 1 || length > NAME_MAX_LENGTH)
-        throw new CustomError(
-          CustomStatus.INVALID_CONTENT_LENGTH,
-          new Error("Invalid name"),
-        );
-      dataToSave.name = newName;
-    }
+    if (body.avatar !== undefined)
+      dataToSave.avatar = await parseImageId(body.avatar, "avatar");
 
     // Showcase (contract v4 §3.4)
-    if (req.body.featuredPosts !== undefined)
+    if (body.featuredPosts !== undefined)
       dataToSave.featuredPosts = await parseFeaturedPosts(
-        req.body.featuredPosts,
+        body.featuredPosts,
         sigId,
       );
 
     // Discord announcements (contract v4 §3.6); never logged or returned
-    if (req.body.discordWebhook !== undefined)
-      dataToSave.discordWebhook = parseDiscordWebhook(req.body.discordWebhook);
+    if (body.discordWebhook !== undefined)
+      dataToSave.discordWebhook = parseDiscordWebhook(body.discordWebhook);
 
-    const savedData = await SigDB.write(dataToSave, { id: sigId });
+    // Join questions and recruiting (contract v4 §5.6); null questions go
+    // back to the three global ones.
+    const unset: string[] = [];
+    if (body.joinQuestions !== undefined) {
+      const questions = parseJoinQuestions(body.joinQuestions);
+      if (questions) dataToSave.joinQuestions = questions;
+      else unset.push("joinQuestions");
+    }
 
-    await recordAudit({
-      actor: userId,
-      action: "sig.update",
-      target: { kind: "sig", id: sigId, label: savedData.name ?? "" },
-      meta: { fields: Object.keys(dataToSave) },
-    });
+    if (body.recruiting !== undefined)
+      dataToSave.recruiting = parseRecruiting(
+        body.recruiting,
+        sigData.recruiting,
+      );
+
+    // ---- Admin only (contract v4 §3.7) ----
+    if (body.name !== undefined) dataToSave.name = parseSigName(body.name);
+
+    if (body.color !== undefined) dataToSave.color = parseSigColor(body.color);
+
+    if (body.defaultCover !== undefined)
+      dataToSave.defaultCover = await parseImageId(
+        body.defaultCover,
+        "defaultCover",
+      );
+
+    if (body.removed !== undefined) {
+      const removed = parseBoolean(body.removed, "removed");
+      // Stored with removed: true on purpose and in use: "always archived
+      // but active". Neither archiving nor unarchiving applies to it.
+      if (sigId === ANNOUNCEMENT_SIG_ID)
+        throw new CustomError(
+          CustomStatus.FORBIDDEN,
+          new Error("The announcement SIG cannot be archived or unarchived"),
+        );
+      if (removed !== Boolean(sigData.removed)) {
+        dataToSave.removed = removed;
+        auditMeta.removed = removed;
+      }
+    }
+
+    // Unique across users and SIGs; the old id keeps redirecting.
+    let guard: Record<string, unknown> = {};
+    if (body.customId !== undefined && body.customId !== sigData.customId) {
+      const next = await assertCustomIdAvailable(body.customId, {
+        kind: "sig",
+        id: sigId,
+      });
+      const previous = sigData.customId ?? "";
+      dataToSave.customId = next;
+      dataToSave.previousCustomIds = Array.from(
+        new Set([
+          ...(sigData.previousCustomIds ?? []).filter((id) => id !== next),
+          ...(previous ? [previous] : []),
+        ]),
+      );
+      auditMeta.from = previous;
+      auditMeta.to = next;
+      // Two renames at once: only the first one applies.
+      guard = { customId: sigData.customId ?? null };
+    }
+
+    const fields = [
+      ...Object.keys(dataToSave).filter(
+        (field) => field !== "previousCustomIds",
+      ),
+      ...unset,
+    ];
+    const savedData =
+      fields.length > 0
+        ? await SigDB.update(sigId, dataToSave, guard, unset)
+        : sigData;
+    if (!savedData) {
+      throw new CustomError(
+        CustomStatus.CUSTOM_ID_ALREADY_EXISTS,
+        new Error("The SIG's customId changed meanwhile"),
+      );
+    }
+
+    if (fields.length > 0) {
+      await recordAudit({
+        actor: userId,
+        action: "sig.update",
+        target: { kind: "sig", id: sigId, label: savedData.name ?? "" },
+        meta: { fields, ...auditMeta },
+      });
+    }
 
     return res.status(HttpStatus.OK).json({
       status: CustomStatus.OK,
       id: savedData._id,
-      data: savedData,
+      data: toSigResponse(savedData),
     });
   } catch (error: any) {
     return res

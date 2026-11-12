@@ -30,6 +30,11 @@ export const AUDIT_ACTIONS = [
   "series.remove",
   "report.resolve",
   "report.dismiss",
+  "post.move",
+  "sig.merge",
+  "rollover.apply",
+  "user.update",
+  "badge.update",
   "user.suspend",
   "user.unsuspend",
   "banner.update",
@@ -47,6 +52,9 @@ export type AuditTargetKind =
   | "join"
   | "series"
   | "report"
+  // Site-wide actions such as the year rollover (id names the action).
+  | "site"
+  | "badge"
   | "banner"
   | "broadcast"
   | "setting";

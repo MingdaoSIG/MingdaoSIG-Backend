@@ -38,6 +38,20 @@ import {
   removeBanner,
 } from "@controller/cloud/admin/banners";
 import { listSigs } from "@controller/cloud/admin/sigs";
+import { createSig } from "@controller/cloud/admin/sigCreate";
+import { updateUser } from "@controller/cloud/admin/userEdit";
+import {
+  listAdminBadges,
+  retireBadge,
+  saveBadge,
+} from "@controller/cloud/admin/badges";
+import {
+  applyRolloverHandler,
+  batchLeaders,
+  mergeSig,
+  movePostsHandler,
+  previewRollover,
+} from "@controller/cloud/admin/sigOps";
 import { decide, listJoinRequests } from "@controller/cloud/admin/joinRequests";
 import { listAuditEntries } from "@controller/cloud/admin/audit";
 import { listReports, resolveReport } from "@controller/cloud/admin/reports";
@@ -59,12 +73,14 @@ admin.get("/traffic", adminOnly, traffic);
 
 admin.get("/posts", contentModeratorOnly, listPosts);
 admin.post("/posts/batch", contentModeratorOnly, batchPosts);
+admin.post("/posts/move", adminOnly, movePostsHandler);
 admin.post("/posts/:id/pin", contentModeratorOnly, pinPost);
 admin.post("/posts/:id/remove", contentModeratorOnly, removePost);
 admin.post("/posts/:id/restore", contentModeratorOnly, restorePost);
 
 admin.get("/users", contentModeratorOnly, listUsers);
 admin.get("/users/:id", contentModeratorOnly, readUser);
+admin.post("/users/:id", adminOnly, updateUser);
 // Content moderators may mute (and lift mutes), never ban (v4 §5.1).
 admin.post("/users/:id/suspend", contentModeratorOnly, suspend);
 admin.post("/users/:id/unsuspend", contentModeratorOnly, unsuspend);
@@ -75,6 +91,13 @@ admin.post("/users/:id/badges", adminOnly, setBadges);
 admin.get("/comments", contentModeratorOnly, listComments);
 admin.post("/comments/:id/remove", contentModeratorOnly, removeComment);
 admin.post("/comments/:id/restore", contentModeratorOnly, restoreComment);
+
+admin.post("/sigs", adminOnly, createSig);
+admin.post("/sigs/leaders/batch", adminOnly, batchLeaders);
+admin.post("/sigs/:id/merge", adminOnly, mergeSig);
+
+admin.get("/rollover/preview", adminOnly, previewRollover);
+admin.post("/rollover/apply", adminOnly, applyRolloverHandler);
 
 // Admin, or SIG manager (scoped)
 admin.get("/sigs", listSigs);
@@ -95,6 +118,12 @@ admin.post("/keyword-filter", adminOnly, writeKeywordFilter);
 
 admin.get("/reports", contentModeratorOnly, listReports);
 admin.post("/reports/:id/resolve", contentModeratorOnly, resolveReport);
+
+admin.get("/badges", adminOnly, listAdminBadges);
+admin.post("/badges", adminOnly, saveBadge);
+admin.delete("/badges", adminOnly, retireBadge);
+admin.delete("/badges/:key", adminOnly, retireBadge);
+
 admin.post("/digest/preview", adminOnly, previewDigest);
 
 export default admin;

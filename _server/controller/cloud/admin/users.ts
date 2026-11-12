@@ -13,6 +13,7 @@ import {
   roleOf,
 } from "@module/Permission";
 import { recordAudit } from "@module/Audit";
+import { badgeKeys } from "@module/Badge";
 import { activeSuspension, suspensionView } from "@module/Suspension";
 import { objectBody } from "../_body";
 import {
@@ -238,22 +239,32 @@ async function refuseIfLastAdmin(id: string) {
     fail(CustomStatus.FORBIDDEN, "There must be at least one admin");
 }
 
-// POST /admin/users/:id/badges { badges } (admin)
+// POST /admin/users/:id/badges { badges } (admin): keys of badges in the
+// badge collection that are not retired (contract v4 §5.9). Badges the user
+// already has stay valid even when retired (or from before the collection).
 export const setBadges: RequestHandler = async (req, res) => {
   try {
     const id = pathId(req);
     const { badges } = exactBody(req, ["badges"]);
-
-    const allowed = AdminDB.badgeValues();
     if (
       !Array.isArray(badges) ||
-      !badges.every(
-        (badge) => typeof badge === "string" && allowed.includes(badge),
-      )
+      !badges.every((badge) => typeof badge === "string")
     )
+      fail(CustomStatus.INVALID_BODY, "badges must be a list of badge keys");
+
+    const [keys, current] = await Promise.all([
+      badgeKeys(),
+      AdminDB.usersByIds([id], { badge: 1 }),
+    ]);
+    if (!current.has(id)) fail(CustomStatus.NOT_FOUND, "User not found");
+    const held = new Set<string>((current.get(id).badge ?? []).map(String));
+    const unknown = (badges as string[]).filter(
+      (badge) => !keys.active.has(badge) && !held.has(badge),
+    );
+    if (unknown.length > 0)
       fail(
         CustomStatus.INVALID_BODY,
-        `badges must be a list of: ${allowed.join(", ")}`,
+        `Unknown or retired badges: ${unknown.join(", ")}`,
       );
 
     const next = Array.from(new Set(badges as string[]));

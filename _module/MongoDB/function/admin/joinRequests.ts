@@ -9,6 +9,7 @@ import { CustomStatus } from "@module/CustomStatusCode";
 const LIST_FIELDS = {
   user: 1,
   sig: 1,
+  answers: 1,
   q1: 1,
   q2: 1,
   q3: 1,

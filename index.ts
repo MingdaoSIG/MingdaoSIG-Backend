@@ -12,6 +12,8 @@ import {
   shutdown,
 } from "@module/GracefulShutdown";
 import { pushConfig } from "@module/WebPush";
+import { backfillSigDefaults } from "@module/SigDefaults";
+import { seedBadges } from "@module/Badge";
 import { closeUmami, umamiConfig } from "@module/UmamiTraffic";
 import {
   startDigestScheduler,
@@ -67,6 +69,13 @@ async function start() {
 
   EnsureIndexes().catch((error) => {
     console.error("MongoDB : index build stopped:", error);
+  });
+  // One-time data migrations: idempotent, they only fill missing fields.
+  backfillSigDefaults().catch((error) => {
+    console.error("SigDefaults : backfill failed:", error);
+  });
+  seedBadges().catch((error) => {
+    console.error("Badge : seed failed:", error);
   });
   prefetchOnlineAppVersion();
   startDigestScheduler();
