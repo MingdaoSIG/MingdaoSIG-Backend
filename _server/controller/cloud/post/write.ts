@@ -10,6 +10,7 @@ import MongoDB from "@module/MongoDB";
 import CheckRequestRequirement from "@module/CheckRequestRequirement";
 import { canPostToSig, isAdmin, isSigModerator } from "@module/Permission";
 import { scanForKeywords } from "@module/KeywordFilter";
+import { announceNewPost } from "@module/DiscordWebhook";
 
 const PostDB = new MongoDB.Post();
 const SigDB = new MongoDB.Sig();
@@ -154,6 +155,13 @@ export const write: RequestHandler<Record<string, string>> = async (
       id: String(savedData._id),
       texts: [savedData.title, savedData.content, ...(savedData.hashtag ?? [])],
     });
+    // A new post goes to the SIG's Discord channel, if set (fire and forget).
+    if (!postId)
+      announceNewPost({
+        post: savedData,
+        authorName: userData?.name ?? "",
+        apiBaseUrl: `${req.protocol}://${req.get("host") ?? ""}`,
+      });
     return res.status(HttpStatus.OK).json({
       status: CustomStatus.OK,
       id: savedData._id,
