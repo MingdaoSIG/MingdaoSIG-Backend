@@ -13,6 +13,7 @@ import information from "./information";
 import admin from "./admin";
 import notification from "./notification";
 import push from "./push";
+import badge from "./badge";
 
 const router: Router = Router();
 
@@ -27,6 +28,7 @@ router.use("/information", information);
 router.use("/admin", admin);
 router.use("/notification", notification);
 router.use("/push", push);
+router.use("/badge", badge);
 
 router.use((_: Request, res: Response) => {
   res.status(HttpStatus.NOT_FOUND).json({ status: CustomStatus.NOT_FOUND });

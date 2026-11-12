@@ -24,10 +24,21 @@ const LIST_FIELDS = {
   createdAt: 1,
 } as const;
 
-/** The values the user schema accepts in `badge`. */
-export function badgeValues(): string[] {
-  const path: any = user.schema.path("badge");
-  return [...(path?.embeddedSchemaType?.enumValues ?? [])];
+/** Number of users with each badge key (GET /admin/badges). */
+export async function badgeUserCounts() {
+  try {
+    const counts: Record<string, number> = {};
+    const groups: { _id: string; count: number }[] = await user.aggregate([
+      { $match: { "badge.0": { $exists: true } } },
+      { $project: { badge: { $setUnion: ["$badge", []] } } },
+      { $unwind: "$badge" },
+      { $group: { _id: "$badge", count: { $sum: 1 } } },
+    ]);
+    for (const group of groups) counts[String(group._id)] = group.count;
+    return counts;
+  } catch (error) {
+    throw new CustomError(CustomStatus.ERROR_READING_USER_FROM_DB, error);
+  }
 }
 
 /** One page of users (newest first) and the total for the same filter. */

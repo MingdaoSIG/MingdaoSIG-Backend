@@ -26,6 +26,11 @@ import { listSigs } from "@controller/cloud/admin/sigs";
 import { createSig } from "@controller/cloud/admin/sigCreate";
 import { updateUser } from "@controller/cloud/admin/userEdit";
 import {
+  listAdminBadges,
+  retireBadge,
+  saveBadge,
+} from "@controller/cloud/admin/badges";
+import {
   applyRolloverHandler,
   batchLeaders,
   mergeSig,
@@ -76,6 +81,11 @@ admin.get("/join-requests", listJoinRequests);
 admin.post("/join-requests/:id/decision", decide);
 
 admin.get("/audit", adminOnly, listAuditEntries);
+
+admin.get("/badges", adminOnly, listAdminBadges);
+admin.post("/badges", adminOnly, saveBadge);
+admin.delete("/badges", adminOnly, retireBadge);
+admin.delete("/badges/:key", adminOnly, retireBadge);
 
 admin.post("/digest/preview", adminOnly, previewDigest);
 

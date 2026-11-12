@@ -17,16 +17,9 @@ const userSchema = new Schema(
     displayName: String,
     description: String,
     avatar: String,
-    badge: {
-      type: [
-        {
-          type: String,
-          // Same list as the frontend (app/[userID]/(User)/config/badge.ts).
-          enum: ["developer", "10.21_user", "bug_hunter"],
-        },
-      ],
-      default: [],
-    },
+    // Badge keys from the badge collection (@module/Badge); checked when an
+    // admin sets them, not by the schema.
+    badge: { type: [String], default: [] },
     follower: [String],
     permission: Number,
     // Email me when someone comments on my post or replies to my comment.

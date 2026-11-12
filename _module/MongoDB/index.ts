@@ -273,7 +273,7 @@ export class AdminDB {
   listPosts = admin.listPosts;
   setPostFlag = admin.setPostFlag;
   userIdsMatching = admin.userIdsMatching;
-  badgeValues = admin.badgeValues;
+  badgeUserCounts = admin.badgeUserCounts;
   countAdmins = admin.countAdmins;
   listUsers = admin.listUsers;
   readFullUser = admin.readFullUser;

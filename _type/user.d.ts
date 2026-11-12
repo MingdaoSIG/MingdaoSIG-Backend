@@ -21,7 +21,7 @@ export type User = {
   displayName?: string; // 顯示名稱
   description?: string; // 描述
   avatar?: string; // 大頭貼
-  badge?: ("developer" | "10.21_user" | "bug_hunter")[]; // 徽章
+  badge?: string[]; // 徽章（badge collection 的 key）
   follower?: string[]; // 追隨者
   permission?: Permission; // 權限
   notifyComments?: boolean; // 有人留言時寄信通知（未設定視為 true）

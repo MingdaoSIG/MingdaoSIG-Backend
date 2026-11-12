@@ -3,7 +3,7 @@
 import overview from "./overview";
 import { listPosts, setPostFlag, userIdsMatching } from "./posts";
 import {
-  badgeValues,
+  badgeUserCounts,
   countAdmins,
   listUsers,
   readFullUser,
@@ -30,7 +30,7 @@ export default {
   listPosts,
   setPostFlag,
   userIdsMatching,
-  badgeValues,
+  badgeUserCounts,
   countAdmins,
   listUsers,
   readFullUser,
