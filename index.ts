@@ -8,9 +8,14 @@ import { prefetchOnlineAppVersion } from "@module/GetOnlineAppVersion";
 import {
   attachServer,
   isShuttingDown,
+  onShutdown,
   shutdown,
 } from "@module/GracefulShutdown";
 import { pushConfig } from "@module/WebPush";
+import {
+  startDigestScheduler,
+  stopDigestScheduler,
+} from "@module/WeeklyDigest";
 
 // Like dotenv: values already set in the environment win over .env, and a
 // missing .env is fine (deployments set the variables directly).
@@ -61,6 +66,8 @@ async function start() {
     console.error("MongoDB : index build stopped:", error);
   });
   prefetchOnlineAppVersion();
+  startDigestScheduler();
+  onShutdown(stopDigestScheduler);
 }
 
 start().catch((error) => {
