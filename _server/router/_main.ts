@@ -1,6 +1,5 @@
 import { Request, Response, Router } from "express";
 
-import JWTverifier from "@middleware/JWTverifier";
 import { HttpStatus } from "@HttpStatusCode";
 import { CustomStatus } from "@module/CustomStatusCode";
 import image from "./image";
@@ -24,11 +23,6 @@ router.use("/image", image);
 router.use("/ping", ping);
 router.use("/information", information);
 router.use("/admin", admin);
-
-router.use("/needauth", JWTverifier);
-router.get("/needauth", (_: Request, res: Response) => {
-  res.status(HttpStatus.OK).send("You got it here!");
-});
 
 router.use((_: Request, res: Response) => {
   res.status(HttpStatus.NOT_FOUND).json({ status: CustomStatus.NOT_FOUND });

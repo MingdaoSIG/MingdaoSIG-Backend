@@ -217,6 +217,11 @@ export class JoinRequestDB {
     }
   }
 
+  // The user's newest request to the SIG, or null when there is none.
+  async readLatest(user: string, sig: string) {
+    return await joinRequest.readLatestByUserIdAndSigId(user, sig);
+  }
+
   async confirmPending(id: string, state: "accepted" | "rejected") {
     return await joinRequest.confirmPending(id, state);
   }
