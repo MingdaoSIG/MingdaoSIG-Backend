@@ -15,8 +15,11 @@
     "keywords": [],
     "author": "",
     "license": "ISC",
+    "engines": {
+        "node": "24"
+    },
+    "packageManager": "pnpm@10.34.9",
     "dependencies": {
-        "@types/jsonwebtoken": "^9.0.10",
         "axios": "^1.21.1",
         "compression": "^1.8.2",
         "cors": "^2.8.6",
@@ -25,23 +28,24 @@
         "jsonwebtoken": "^9.0.3",
         "mongoose": "^9.12.1",
         "morgan": "^1.12.1",
-        "sharp": "^0.35.5",
-        "tsc-alias": "^1.9.10"
+        "sharp": "^0.35.5"
     },
     "devDependencies": {
         "@types/compression": "^1.8.1",
         "@types/cors": "^2.8.19",
         "@types/express": "^5.0.6",
+        "@types/jsonwebtoken": "^9.0.10",
         "@types/morgan": "^1.9.10",
         "@types/node": "^24.19.2",
         "@typescript-eslint/eslint-plugin": "^6.21.0",
         "@typescript-eslint/parser": "^5.62.0",
-        "concurrently": "^8.2.2",
+        "concurrently": "^10.0.7",
         "eslint": "^8.57.1",
         "eslint-plugin-import": "^2.32.0",
         "nodemon": "^3.1.14",
         "prettier": "^2.8.8",
         "prettier-eslint": "^16.4.2",
+        "tsc-alias": "^1.9.10",
         "typescript": "^6.0.3"
     }
 }
