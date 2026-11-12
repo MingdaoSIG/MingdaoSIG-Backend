@@ -17,7 +17,6 @@ export const write: RequestHandler<Record<string, string>> = async (
 ) => {
   try {
     const { body } = req;
-    const commentId = req.params.commentId;
     const decodedJwt: any = (req as ExtendedRequest).JWT;
     const userId = decodedJwt.id;
 
@@ -74,9 +73,9 @@ export const write: RequestHandler<Record<string, string>> = async (
       reply: replyId,
     };
 
-    const savedComment = await CommentDB.write(dataToSave, {
-      id: commentId,
-    });
+    // Always a new comment. There is no comment edit yet; one needs its own
+    // route that checks the caller wrote the comment.
+    const savedComment = await CommentDB.write(dataToSave);
     return res.status(HttpStatus.OK).json({
       status: CustomStatus.OK,
       id: savedComment._id,
