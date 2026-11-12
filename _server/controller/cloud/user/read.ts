@@ -11,8 +11,36 @@ import toPublicUser from "@module/PublicUser";
 import { withOwnUserFields } from "@module/Onboarding";
 import { findUserByPreviousCustomId } from "@module/CheckValidCustomId";
 import { withActiveSuspension } from "@module/Suspension";
+import post from "@schema/post";
 
 const ProfileDB = new MongoDB.User();
+
+/**
+ * The public totals on a profile: the user's visible posts and the likes
+ * they got (sum of `likes` over those posts). Zero on a failed count, so a
+ * profile still loads.
+ */
+async function publicTotals(userId: string) {
+  try {
+    const [row] = await post.aggregate<{ posts: number; likes: number }>([
+      { $match: { user: userId, removed: false } },
+      {
+        $group: {
+          _id: null,
+          posts: { $sum: 1 },
+          likes: { $sum: { $ifNull: ["$likes", 0] } },
+        },
+      },
+    ]);
+    return { postCount: row?.posts ?? 0, likeCount: row?.likes ?? 0 };
+  } catch (error) {
+    console.error(
+      "User : failed to count public totals:",
+      error instanceof Error ? error.message : error,
+    );
+    return { postCount: 0, likeCount: 0 };
+  }
+}
 
 export const readById: RequestHandler<Record<string, string>> = async (
   req,
@@ -39,7 +67,10 @@ export const readById: RequestHandler<Record<string, string>> = async (
     return res.status(HttpStatus.OK).json({
       status: CustomStatus.OK,
       id: userData._id,
-      data: toPublicUser(userData),
+      data: {
+        ...toPublicUser(userData),
+        ...(await publicTotals(String(userData._id))),
+      },
     });
   } catch (error: any) {
     return res
@@ -62,7 +93,10 @@ export const readByCustomId: RequestHandler<Record<string, string>> = async (
       return res.status(HttpStatus.OK).json({
         status: CustomStatus.OK,
         id: userData._id,
-        data: toPublicUser(userData),
+        data: {
+          ...toPublicUser(userData),
+          ...(await publicTotals(String(userData._id))),
+        },
       });
     }
 
