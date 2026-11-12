@@ -7,25 +7,34 @@ import { HttpStatus } from "@module/HttpStatusCode";
 import { CustomStatus } from "@module/CustomStatusCode";
 
 
+let currentVersion: string | undefined;
+function getCurrentVersion() {
+  if (!currentVersion) {
+    currentVersion = JSON.parse(
+      readFileSync("./package.json").toString()
+    ).version as string;
+  }
+  return currentVersion;
+}
+
 export const ping: RequestHandler = async (req, res) => {
   try {
-    const packageJSON = JSON.parse(
-      readFileSync("./package.json").toString()
-    );
+    const current = getCurrentVersion();
+    // Cached and never throws, so GitHub being down cannot fail the ping.
     const { mainVersion, developmentVersion } = await GetOnlineAppVersion();
 
     res.status(HttpStatus.OK).json({
       service: "up",
       uptime: ReadableTime(Math.round(performance.now()))["string"],
       version: {
-        current: packageJSON.version,
+        current,
         latest: {
           main: mainVersion,
           development: developmentVersion
         },
         upToDate: {
-          main: mainVersion === packageJSON.version,
-          development: developmentVersion === packageJSON.version
+          main: mainVersion === current,
+          development: developmentVersion === current
         }
       }
     });
