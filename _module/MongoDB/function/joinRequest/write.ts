@@ -1,4 +1,4 @@
-import { randomUUID } from "crypto";
+import { randomUUID } from "node:crypto";
 import { ObjectId } from "mongoose";
 
 import { JoinRequest, JoinRequestWrite } from "@type/joinRequest";

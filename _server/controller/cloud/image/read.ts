@@ -16,7 +16,7 @@ export const read: RequestHandler<Record<string, string>> = async (
   res,
 ) => {
   try {
-    const id: string = req.params.id!;
+    const id: string = req.params.id;
 
     if (!id || !isValidObjectId(id))
       throw new CustomError(

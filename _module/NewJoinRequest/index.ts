@@ -56,11 +56,11 @@ export default async function NewJoinRequest(
           email: userData.email,
         },
         question: {
-          q1: requestMessage["q1"],
-          q2: requestMessage["q2"],
-          q3: requestMessage["q3"],
+          q1: requestMessage.q1,
+          q2: requestMessage.q2,
+          q3: requestMessage.q3,
         },
-        confirmId: requestMessage["confirmId"]!,
+        confirmId: requestMessage.confirmId!,
       },
       to: targetEmails,
     });

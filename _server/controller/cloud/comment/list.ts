@@ -19,7 +19,7 @@ export const listAllByPost: RequestHandler<Record<string, string>> = async (
   res,
 ) => {
   try {
-    const postId: string = req.params.postId!;
+    const postId: string = req.params.postId;
     const skip = req.query?.skip;
     const limit = req.query?.limit;
 

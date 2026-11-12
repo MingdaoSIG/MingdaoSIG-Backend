@@ -4,7 +4,6 @@ import { JoinRequest } from "@type/joinRequest";
 import joinRequest from "@schema/joinRequest";
 import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
-import user from "../user";
 
 export async function readById(id: string | ObjectId) {
   return await readData("_id", id);

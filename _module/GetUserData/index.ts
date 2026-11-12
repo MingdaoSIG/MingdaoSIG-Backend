@@ -264,7 +264,7 @@ async function _CheckValidCustomId(customId: string) {
   try {
     await CheckValidCustomId(customId);
     return true;
-  } catch (error) {
+  } catch {
     return false;
   }
 }

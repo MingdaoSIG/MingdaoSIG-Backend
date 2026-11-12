@@ -218,7 +218,7 @@ async function isValidCover(url: string) {
   try {
     await axios.get(url);
     return true;
-  } catch (error) {
+  } catch {
     return false;
   }
 }

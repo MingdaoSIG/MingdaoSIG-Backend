@@ -8,7 +8,6 @@ import type { Request, RequestHandler } from "express";
 import { isValidObjectId } from "mongoose";
 
 const SigDB = new MongoDB.Sig();
-const UserDB = new MongoDB.User();
 
 export const deleteLeader: RequestHandler<Record<string, string>> = async (
   request: Request<Record<string, string>> | ExtendedRequest,
@@ -52,7 +51,7 @@ export const deleteLeader: RequestHandler<Record<string, string>> = async (
       throw new CustomError(CustomStatus.FORBIDDEN, new Error("Not admin"));
     }
 
-    if (!sigData.leader || !sigData.leader?.includes(leaderId)) {
+    if (!sigData.leader?.includes(leaderId)) {
       throw new CustomError(
         CustomStatus.NOT_LEADER,
         new Error("User is not a leader of this SIG"),

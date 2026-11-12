@@ -69,7 +69,7 @@ export default function PlainTextExcerpt(
   const characters = Array.from(text);
   if (characters.length <= length) return text;
 
-  return characters.slice(0, length).join("").trimEnd() + "…";
+  return `${characters.slice(0, length).join("").trimEnd()}…`;
 }
 
 const cache = new Map<string, string>();

@@ -33,7 +33,7 @@ export const like: RequestHandler<Record<string, string>> = async (
     if (!oldData.like?.includes(decodedJwt.id)) {
       await PostDB.write(
         {
-          // @ts-ignore
+          // @ts-expect-error
           $addToSet: {
             like: decodedJwt.id,
           },
@@ -77,7 +77,7 @@ export const dislike: RequestHandler<Record<string, string>> = async (
     if (oldData.like?.includes(decodedJwt.id)) {
       await PostDB.write(
         {
-          // @ts-ignore
+          // @ts-expect-error
           $pull: {
             like: decodedJwt.id,
           },

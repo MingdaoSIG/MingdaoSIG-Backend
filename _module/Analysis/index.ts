@@ -24,7 +24,7 @@ function cached<T>(
 ): Promise<T> {
   // An invalid date used to fail in the Mongoose cast; keep failing (and
   // never cache) instead of sending NaN to MongoDB.
-  if (isNaN(from.getTime()) || isNaN(to.getTime())) {
+  if (Number.isNaN(from.getTime()) || Number.isNaN(to.getTime())) {
     return Promise.reject(new Error("Invalid date"));
   }
   const key = `${func}:${from.getTime()}:${to.getTime()}:${extra}`;

@@ -16,7 +16,7 @@ export const readById: RequestHandler<Record<string, string>> = async (
   res,
 ) => {
   try {
-    const id: string = req.params.id!;
+    const id: string = req.params.id;
 
     if (!id || !isValidObjectId(id)) {
       throw new CustomError(
@@ -50,7 +50,7 @@ export const readByCustomId: RequestHandler<Record<string, string>> = async (
   res,
 ) => {
   try {
-    const customId: string = req.params.id!;
+    const customId: string = req.params.id;
 
     const userData = await ProfileDB.read({ customId }).catch(() => null);
     if (!userData) {
@@ -89,7 +89,7 @@ export const readFullById: RequestHandler<Record<string, string>> = async (
   res,
 ) => {
   try {
-    const id: string = req.params.id!;
+    const id: string = req.params.id;
     const caller = (req as ExtendedRequest).userData;
 
     if (String(caller?._id) !== id && !isAdmin(caller)) {

@@ -84,7 +84,7 @@ async function confirm(res: Response, confirmId: string, accept: boolean) {
     if (savedData.state === "accepted") {
       await UserDB.write(
         {
-          // @ts-ignore
+          // @ts-expect-error
           $addToSet: {
             sig: oldJoinRequest.sig,
           },

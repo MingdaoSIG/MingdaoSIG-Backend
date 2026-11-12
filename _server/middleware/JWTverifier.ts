@@ -20,7 +20,7 @@ export default async function JWTverifier(
 
   try {
     const authHeader = req.header("authorization");
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    if (!authHeader?.startsWith("Bearer ")) {
       throw new CustomError(CustomStatus.INVALID_JWT, new Error("Invalid JWT"));
     }
 

@@ -1,4 +1,4 @@
-import { createHash } from "crypto";
+import { createHash } from "node:crypto";
 import { RequestHandler } from "express";
 import sharp from "sharp";
 

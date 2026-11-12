@@ -31,7 +31,7 @@ export const login: RequestHandler = async (req, res) => {
       const jwt = signJWT({ id: userData._id });
       return res.status(HttpStatus.OK).json({
         status: CustomStatus.OK,
-        authorization: "Bearer " + jwt,
+        authorization: `Bearer ${jwt}`,
         data: userData,
       });
     } else if (session) {
@@ -44,7 +44,7 @@ export const login: RequestHandler = async (req, res) => {
       const jwt = signJWT({ id: userData._id });
       return res.status(HttpStatus.OK).json({
         status: CustomStatus.OK,
-        authorization: "Bearer " + jwt,
+        authorization: `Bearer ${jwt}`,
         data: userData,
       });
     }

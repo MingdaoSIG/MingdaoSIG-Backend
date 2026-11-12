@@ -1,4 +1,4 @@
-import { existsSync } from "fs";
+import { existsSync } from "node:fs";
 
 import server from "./_server";
 import ValidateEnv from "@module/ValidateEnv";

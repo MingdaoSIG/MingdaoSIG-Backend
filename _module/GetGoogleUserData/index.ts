@@ -68,10 +68,10 @@ async function checkAudience(googleToken: string, clientIds: string[]) {
 
 function checkData(data: object, keys: string[]) {
   // Check if input is an object
-  if (typeof data != "object") throw new Error("Not a object");
+  if (typeof data !== "object") throw new Error("Not a object");
 
   // Check if object have all required keys
-  if (Object.keys(data).length != keys.length) throw new Error("Invalid data");
+  if (Object.keys(data).length !== keys.length) throw new Error("Invalid data");
   for (const key of keys) {
     if (!(key in data)) throw new Error("Invalid data");
   }

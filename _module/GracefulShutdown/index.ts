@@ -1,4 +1,4 @@
-import { Server, ServerResponse } from "http";
+import { Server, ServerResponse } from "node:http";
 import mongoose from "mongoose";
 
 // Docker Swarm sends SIGKILL 10 s after SIGTERM by default, so drain in less.

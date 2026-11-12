@@ -1,4 +1,4 @@
-import { readFileSync } from "fs";
+import { readFileSync } from "node:fs";
 
 import ReadableTime from "@module/ReadableTime/index.js";
 import GetOnlineAppVersion from "@module/GetOnlineAppVersion";
@@ -15,7 +15,7 @@ function getCurrentVersion() {
   return currentVersion;
 }
 
-export const ping: RequestHandler = async (req, res) => {
+export const ping: RequestHandler = async (_req, res) => {
   try {
     const current = getCurrentVersion();
     // Cached and never throws, so GitHub being down cannot fail the ping.
@@ -23,7 +23,7 @@ export const ping: RequestHandler = async (req, res) => {
 
     res.status(HttpStatus.OK).json({
       service: "up",
-      uptime: ReadableTime(Math.round(performance.now()))["string"],
+      uptime: ReadableTime(Math.round(performance.now())).string,
       version: {
         current,
         latest: {

@@ -10,11 +10,11 @@ export default async function write(
   dataToSave: SigWrite,
 ) {
   try {
-    const data = await sig.findOne({ ["_id"]: id });
+    const data = await sig.findOne({ _id: id });
     const code = data ? 1 : 0;
 
     if (code) {
-      return (await sig.findOneAndUpdate({ ["_id"]: id }, dataToSave, {
+      return (await sig.findOneAndUpdate({ _id: id }, dataToSave, {
         returnDocument: "after",
       })) as unknown as Sig;
     } else {

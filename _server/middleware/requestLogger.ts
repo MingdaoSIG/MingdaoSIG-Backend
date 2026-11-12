@@ -1,4 +1,4 @@
-import { IncomingMessage } from "http";
+import { IncomingMessage } from "node:http";
 import morgan from "morgan";
 
 // Join-request confirm ids work like passwords: anyone holding one can accept

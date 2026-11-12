@@ -8,7 +8,6 @@ import type { Request, RequestHandler } from "express";
 import { isValidObjectId } from "mongoose";
 
 const SigDB = new MongoDB.Sig();
-const UserDB = new MongoDB.User();
 
 export const deleteModerator: RequestHandler<Record<string, string>> = async (
   request: Request<Record<string, string>> | ExtendedRequest,
@@ -54,7 +53,7 @@ export const deleteModerator: RequestHandler<Record<string, string>> = async (
       throw new CustomError(CustomStatus.FORBIDDEN, new Error("Not admin"));
     }
 
-    if (!sigData.moderator || !sigData.moderator?.includes(moderatorId)) {
+    if (!sigData.moderator?.includes(moderatorId)) {
       throw new CustomError(
         CustomStatus.NOT_MODERATOR,
         new Error("User is not a moderator of this SIG"),

@@ -26,7 +26,7 @@ function tierLimit(tier: Tier) {
 
 function userIdFromJwt(req: Request): string | null {
   const authHeader = req.header("authorization");
-  if (!authHeader || !authHeader.startsWith("Bearer ")) return null;
+  if (!authHeader?.startsWith("Bearer ")) return null;
 
   try {
     const decoded = jwt.verify(
@@ -38,7 +38,7 @@ function userIdFromJwt(req: Request): string | null {
       return null;
     }
     return decoded.id;
-  } catch (error) {
+  } catch {
     return null;
   }
 }

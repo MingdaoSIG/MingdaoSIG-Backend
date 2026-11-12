@@ -58,7 +58,7 @@ export const listAllBySig: RequestHandler<Record<string, string>> = async (
   res,
 ) => {
   try {
-    const sigId: string = req.params.id!;
+    const sigId: string = req.params.id;
     const skip = req.query?.skip;
     const limit = req.query?.limit;
 
@@ -95,7 +95,7 @@ export const listAllByUser: RequestHandler<Record<string, string>> = async (
   res,
 ) => {
   try {
-    const userId: string = req.params.id!;
+    const userId: string = req.params.id;
     const skip = req.query?.skip;
     const limit = req.query?.limit;
 
@@ -132,7 +132,7 @@ export const listAllByUserLike: RequestHandler<Record<string, string>> = async (
   res,
 ) => {
   try {
-    const userId: string = req.params.id!;
+    const userId: string = req.params.id;
     const skip = req.query?.skip;
     const limit = req.query?.limit;
 
@@ -293,7 +293,7 @@ export const listAllByTimeRange: RequestHandler<
     const startTime = new Date(String(start));
     const endTime = new Date(String(end));
 
-    if (isNaN(startTime.getTime()) || isNaN(endTime.getTime())) {
+    if (Number.isNaN(startTime.getTime()) || Number.isNaN(endTime.getTime())) {
       throw new CustomError(
         CustomStatus.INVALID_TIME_RANGE,
         new Error("Invalid time format"),
