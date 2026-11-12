@@ -8,6 +8,7 @@ export type Sig = {
   moderator?: string[]; // 管理者
   leader?: string[]; // 領導者
   removed?: boolean; // 刪除
+  featuredPosts?: string[]; // 精選成果（貼文 id，依序）
 };
 
 export type SigWrite = {

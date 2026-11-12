@@ -5,6 +5,7 @@ import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
 import MongoDB from "@module/MongoDB";
+import { withShowcase } from "./showcase";
 
 const SigDB = new MongoDB.Sig();
 
@@ -30,7 +31,7 @@ export const readById: RequestHandler<Record<string, string>> = async (
     return res.status(HttpStatus.OK).json({
       status: CustomStatus.OK,
       id: sigData._id,
-      data: sigData,
+      data: await withShowcase(sigData),
     });
   } catch (error: any) {
     return res
@@ -54,7 +55,7 @@ export const readByCustomId: RequestHandler<Record<string, string>> = async (
     return res.status(HttpStatus.OK).json({
       status: CustomStatus.OK,
       id: sigData._id,
-      data: sigData,
+      data: await withShowcase(sigData),
     });
   } catch (error: any) {
     return res
