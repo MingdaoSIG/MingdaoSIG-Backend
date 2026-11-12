@@ -19,6 +19,8 @@ const TARGET_KINDS: readonly AuditTargetKind[] = [
   "user",
   "sig",
   "join",
+  "series",
+  "report",
   "site",
   "badge",
 ];

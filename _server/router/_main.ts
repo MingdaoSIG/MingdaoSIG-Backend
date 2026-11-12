@@ -11,8 +11,13 @@ import comment from "./comment";
 import ping from "./ping";
 import information from "./information";
 import admin from "./admin";
+import series from "./series";
+import draft from "./draft";
+import report from "./report";
 import notification from "./notification";
 import push from "./push";
+import event from "./event";
+import feedback from "./feedback";
 import badge from "./badge";
 
 const router: Router = Router();
@@ -26,8 +31,13 @@ router.use("/image", image);
 router.use("/ping", ping);
 router.use("/information", information);
 router.use("/admin", admin);
+router.use("/series", series);
+router.use("/draft", draft);
+router.use("/report", report);
 router.use("/notification", notification);
 router.use("/push", push);
+router.use("/event", event);
+router.use("/feedback", feedback);
 router.use("/badge", badge);
 
 router.use((_: Request, res: Response) => {

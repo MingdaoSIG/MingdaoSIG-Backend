@@ -27,6 +27,9 @@ export const AUDIT_ACTIONS = [
   "sig.member.remove",
   "join.accept",
   "join.reject",
+  "series.remove",
+  "report.resolve",
+  "report.dismiss",
   "post.move",
   "sig.merge",
   "rollover.apply",
@@ -42,6 +45,8 @@ export type AuditTargetKind =
   | "user"
   | "sig"
   | "join"
+  | "series"
+  | "report"
   // Site-wide actions such as the year rollover (id names the action).
   | "site"
   | "badge";

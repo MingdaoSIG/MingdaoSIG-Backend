@@ -4,6 +4,7 @@ import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
 import MongoDB from "@module/MongoDB";
 import TTLCache from "@module/TTLCache";
+import { countOpenReports } from "@module/Report";
 import { sendError } from "./_shared";
 
 const AdminDB = new MongoDB.Admin();
@@ -52,11 +53,17 @@ async function loadOverview() {
   };
 }
 
-// GET /admin/overview (admin). Cached for 60 s.
+// GET /admin/overview (admin). Cached for 60 s, except `openReports`, which
+// is counted on every call so the 檢舉 badge updates as soon as one is handled.
 export const overview: RequestHandler = async (_req, res) => {
   try {
-    const data = await cache.getOrLoad("overview", loadOverview);
-    return res.status(HttpStatus.OK).json({ status: CustomStatus.OK, data });
+    const [data, openReports] = await Promise.all([
+      cache.getOrLoad("overview", loadOverview),
+      countOpenReports(),
+    ]);
+    return res
+      .status(HttpStatus.OK)
+      .json({ status: CustomStatus.OK, data: { ...data, openReports } });
   } catch (error) {
     return sendError(res, error);
   }

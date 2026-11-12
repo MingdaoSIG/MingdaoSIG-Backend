@@ -346,6 +346,8 @@ export function joinRequestAnswers(request: {
 export function toSigResponse(doc: any): Record<string, any> {
   const plain =
     typeof doc?.toObject === "function" ? doc.toObject() : { ...doc };
+  // Private (contract v4 §3.6), even if a query selected it.
+  delete plain.discordWebhook;
   return {
     ...plain,
     color: sigColor(plain),

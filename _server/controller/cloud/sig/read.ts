@@ -7,6 +7,7 @@ import { HttpStatus } from "@module/HttpStatusCode";
 import MongoDB from "@module/MongoDB";
 import { findSigByCustomId } from "@module/CheckValidCustomId";
 import { toSigResponse } from "@module/SigSettings";
+import { withShowcase } from "./showcase";
 
 const SigDB = new MongoDB.Sig();
 
@@ -32,7 +33,7 @@ export const readById: RequestHandler<Record<string, string>> = async (
     return res.status(HttpStatus.OK).json({
       status: CustomStatus.OK,
       id: sigData._id,
-      data: toSigResponse(sigData),
+      data: toSigResponse(await withShowcase(sigData)),
     });
   } catch (error: any) {
     return res
@@ -55,7 +56,7 @@ export const readByCustomId: RequestHandler<Record<string, string>> = async (
       throw new CustomError(CustomStatus.NOT_FOUND, new Error("Sig not found"));
     }
 
-    const data = toSigResponse(found.sig);
+    const data = toSigResponse(await withShowcase(found.sig));
     if (found.redirectTo) data.redirectTo = found.redirectTo;
 
     return res.status(HttpStatus.OK).json({

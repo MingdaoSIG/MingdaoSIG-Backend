@@ -25,11 +25,20 @@ import {
   parseSigName,
   toSigResponse,
 } from "@module/SigSettings";
+import { parseFeaturedPosts } from "./showcase";
+import { parseDiscordWebhook } from "./discord";
 
 const SigDB = new MongoDB.Sig();
 
 // Fields the SIG's managers (leaders, moderators) and admins may set.
-const MANAGER_FIELDS = ["description", "avatar", "joinQuestions", "recruiting"];
+const MANAGER_FIELDS = [
+  "description",
+  "avatar",
+  "featuredPosts",
+  "discordWebhook",
+  "joinQuestions",
+  "recruiting",
+];
 // Fields only an admin may set (API contract v4 §3.7).
 const ADMIN_FIELDS = ["name", "customId", "color", "defaultCover", "removed"];
 
@@ -97,6 +106,17 @@ export const write: RequestHandler<Record<string, string>> = async (
     // An image id from POST /image
     if (body.avatar !== undefined)
       dataToSave.avatar = await parseImageId(body.avatar, "avatar");
+
+    // Showcase (contract v4 §3.4)
+    if (body.featuredPosts !== undefined)
+      dataToSave.featuredPosts = await parseFeaturedPosts(
+        body.featuredPosts,
+        sigId,
+      );
+
+    // Discord announcements (contract v4 §3.6); never logged or returned
+    if (body.discordWebhook !== undefined)
+      dataToSave.discordWebhook = parseDiscordWebhook(body.discordWebhook);
 
     // Join questions and recruiting (contract v4 §5.6); null questions go
     // back to the three global ones.

@@ -22,7 +22,9 @@ import {
   listTopHashtags,
 } from "@controller/cloud/post/hashtag";
 import { sitemap } from "@controller/cloud/post/sitemap";
+import { bookmark, unbookmark } from "@controller/cloud/post/bookmark";
 import { listMySig } from "@controller/cloud/post/mysig";
+import { createFeedback, listFeedback } from "@controller/cloud/feedback";
 
 const post: Router = Router();
 
@@ -49,6 +51,10 @@ post.use("/", JWTverifier);
 
 post.post("/:id/like", like);
 post.delete("/:id/like", dislike);
+post.post("/:id/bookmark", bookmark);
+post.delete("/:id/bookmark", unbookmark);
+post.get("/:id/feedback", listFeedback);
+post.post("/:id/feedback", createFeedback);
 
 post.post("/", write);
 
