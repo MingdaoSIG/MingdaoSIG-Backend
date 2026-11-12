@@ -21,7 +21,7 @@ export const readById: RequestHandler = async (req, res) => {
     }
 
     const sigData = await SigDB.read({ id: sigId }).catch(() => null);
-    if (!sigData || sigData.removed) {
+    if (!sigData) {
       throw new CustomError(
         CustomStatus.NOT_FOUND,
         new Error("Sig not found")
@@ -46,7 +46,7 @@ export const readByCustomId: RequestHandler = async (req, res) => {
     const customId: string = req.params.customId;
 
     const sigData = await SigDB.read({ customId }).catch(() => null);
-    if (!sigData || sigData.removed) {
+    if (!sigData) {
       throw new CustomError(
         CustomStatus.NOT_FOUND,
         new Error("Sig not found")
