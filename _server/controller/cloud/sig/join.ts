@@ -20,7 +20,7 @@ const JoinRequestDB = new MongoDB.JoinRequest();
 
 // POST /sig/:sigId/join { answers } (or the older { q1, q2, q3 }): applies
 // to join the SIG. The answers follow the SIG's join questions; a SIG that
-// is not recruiting (closed, or past `until`) answers 403/4033
+// is not recruiting (closed, or past `until`) answers 403/4040
 // (contract v4 §5.6).
 export const join: RequestHandler<Record<string, string>> = async (
   req: Request<Record<string, string>> | ExtendedRequest,

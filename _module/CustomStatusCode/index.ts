@@ -25,9 +25,7 @@ export const CustomCode = {
   4029: "Already applied",
   4030: "Not a member",
   4031: "Already confirmed",
-  // POST /sig/:sigId/join only (contract v4 §5.6). POST /sig/:sigId/moderator
-  // has long answered 4033 for ALREADY_MODERATOR; the routes never overlap.
-  4033: "Not recruiting",
+  4040: "Not recruiting",
 
   4100: "Error reading user from db",
   4101: "Error writing user to db",
@@ -76,11 +74,11 @@ export const CustomStatus = {
   ALREADY_CONFIRMED: 4031,
   ALREADY_LEADER: 4032,
   ALREADY_MODERATOR: 4033,
-  NOT_RECRUITING: 4033,
   NOT_LEADER: 4034,
   NOT_MODERATOR: 4035,
   INVALID_SESSION: 4036,
   INVALID_TIME_RANGE: 4037,
+  NOT_RECRUITING: 4040,
 
   ERROR_READING_USER_FROM_DB: 4100,
   ERROR_WRITING_USER_TO_DB: 4101,
