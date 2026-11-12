@@ -25,6 +25,7 @@ import {
 import { listSigs } from "@controller/cloud/admin/sigs";
 import { decide, listJoinRequests } from "@controller/cloud/admin/joinRequests";
 import { listAuditEntries } from "@controller/cloud/admin/audit";
+import { listReports, resolveReport } from "@controller/cloud/admin/reports";
 import { previewDigest } from "@controller/cloud/admin/digest";
 
 // Admin panel API (contract v3 §3). Every route needs a JWT; GETs use the
@@ -59,6 +60,8 @@ admin.post("/join-requests/:id/decision", decide);
 
 admin.get("/audit", adminOnly, listAuditEntries);
 
+admin.get("/reports", adminOnly, listReports);
+admin.post("/reports/:id/resolve", adminOnly, resolveReport);
 admin.post("/digest/preview", adminOnly, previewDigest);
 
 export default admin;
