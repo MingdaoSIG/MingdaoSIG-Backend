@@ -27,9 +27,9 @@ post.get("/list/user/:id", listAllByUser);
 post.get("/list/user/:id/like", listAllByUserLike);
 post.get("/list/sig/:id", listAllBySig);
 post.get("/list/pinned", listAllByPinned);
-// Admin page only: JWT required, then permission 2.
+// Admin pages only: JWT required, then permission 2.
 post.get("/list/admin", JWTverifier, adminOnly, listForAdmin);
-post.get("/list/range", listAllByTimeRange);
+post.get("/list/range", JWTverifier, adminOnly, listAllByTimeRange);
 
 post.get("/:id", read);
 
