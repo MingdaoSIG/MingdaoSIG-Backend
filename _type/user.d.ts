@@ -17,6 +17,7 @@ export type User = {
   badge?: ("developer" | "10.21_user" | "bug_hunter")[]; // 徽章
   follower?: string[]; // 追隨者
   permission?: Permission; // 權限
+  notifyComments?: boolean; // 有人留言時寄信通知（未設定視為 true）
   createAt?: string; // 建立時間
   updateAt?: string; // 更新時間
   __v?: number; // 版本

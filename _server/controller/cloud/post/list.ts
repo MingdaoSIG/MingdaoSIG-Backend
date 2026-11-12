@@ -1,21 +1,19 @@
 import { RequestHandler, Response } from "express";
 import { QueryFilter, isValidObjectId } from "mongoose";
 
-import { Post } from "@type/post";
-import { User } from "@type/user";
-import { Sig } from "@type/sig";
+import { Post, PostFilter } from "@type/post";
 import { Sort } from "@type/database";
 import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
 import MongoDB from "@module/MongoDB";
 import CheckValidPaginationOption from "@module/CheckValidPaginationOption";
-import { CachedPlainTextExcerpt } from "@module/PlainTextExcerpt";
+import EscapeRegExp from "@module/EscapeRegExp";
+import { toPostListItems } from "./_listItems";
 
 const PostDB = new MongoDB.Post();
 const UserDB = new MongoDB.User();
 const SigDB = new MongoDB.Sig();
-const CommentDB = new MongoDB.Comment();
 
 const sortMethods = {
   mostLikes: { likes: -1 },
@@ -25,6 +23,9 @@ const sortMethods = {
 
 // Page size of GET /post/list when the caller sends no `limit`.
 const DEFAULT_LIST_LIMIT = 50;
+// GET /post/list?days=N keeps the posts of the last N days.
+const MAX_DAYS = 365;
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 // GET /post/list/admin
 const ADMIN_DEFAULT_LIMIT = 50;
@@ -55,9 +56,13 @@ export const listAll: RequestHandler<Record<string, string>> = async (
         sortMethods.mostLikes
       : sortMethods.mostLikes;
 
+    const filter: PostFilter = { pinned: false };
+    const days = recentDays(req.query?.days);
+    if (days) filter.createdAt = { $gte: new Date(Date.now() - days * DAY_MS) };
+
     return await listPostBy(
       res,
-      { pinned: false },
+      filter,
       skip ? Number(skip) : 0,
       limit ? Number(limit) : DEFAULT_LIST_LIMIT,
       sortMethod,
@@ -207,7 +212,7 @@ export const listForAdmin: RequestHandler<Record<string, string>> = async (
     const q = adminTitleQuery(req.query?.q);
 
     const filter: QueryFilter<Post> = { removed: false };
-    if (q) filter.title = { $regex: escapeRegExp(q), $options: "i" };
+    if (q) filter.title = { $regex: EscapeRegExp(q), $options: "i" };
 
     const [postData, total] = await Promise.all([
       PostDB.list(filter, {
@@ -260,9 +265,28 @@ function adminTitleQuery(value: unknown) {
   return q;
 }
 
-// Matches the text literally inside a regular expression.
-function escapeRegExp(text: string) {
-  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+/**
+ * Optional `days` of GET /post/list (an integer from 1 to 365): only posts
+ * created within the last N days. The home page's 熱門貼文 sends it with
+ * sort=mostLikes; it filters every sort order the same way.
+ */
+function recentDays(value: unknown) {
+  if (value === undefined) return 0;
+
+  if (typeof value !== "string" || !/^\d+$/.test(value))
+    throw new CustomError(
+      CustomStatus.INVALID_QUERY,
+      new Error("days is not a positive integer"),
+    );
+
+  const days = Number(value);
+  if (days < 1 || days > MAX_DAYS)
+    throw new CustomError(
+      CustomStatus.INVALID_QUERY,
+      new Error(`days should be from 1 to ${MAX_DAYS}`),
+    );
+
+  return days;
 }
 
 async function listPostBy(
@@ -284,67 +308,9 @@ async function listPostBy(
     },
   );
 
-  const userIds = new Set<string>();
-  const sigIds = new Set<string>();
-  const postIds = new Set<string>();
-  postData.forEach((post) => {
-    userIds.add(post.user);
-    sigIds.add(post.sig);
-    postIds.add(String(post._id));
-  });
-
-  const [usersData, sigsData, commentNumberMap] = await Promise.all([
-    UserDB.list(
-      { _id: { $in: Array.from(userIds) } },
-      { lean: true, projection: { name: 1 } },
-    ),
-    SigDB.list(
-      { _id: { $in: Array.from(sigIds) } },
-      { lean: true, projection: { name: 1 } },
-    ),
-    CommentDB.countByPost(Array.from(postIds)),
-  ]);
-
-  const usersDataMap: Record<string, User> = {};
-  usersData.forEach((user) => {
-    if (user._id) {
-      usersDataMap[String(user._id)] = user;
-    }
-  });
-
-  const sigsDataMap: Record<string, Sig> = {};
-  sigsData.forEach((sig) => {
-    if (sig._id) {
-      sigsDataMap[String(sig._id)] = sig;
-    }
-  });
-
-  const fullPostData = postData.map((post) => {
-    const postId = String(post._id);
-    return {
-      ...post,
-      user: {
-        _id: usersDataMap[post.user]?._id,
-        name: usersDataMap[post.user]?.name,
-      },
-      sig: {
-        _id: sigsDataMap[post.sig]?._id,
-        name: sigsDataMap[post.sig]?.name,
-      },
-      comments: commentNumberMap[postId] ?? 0,
-      // Plain text preview, so list views do not need the full content.
-      excerpt: CachedPlainTextExcerpt(
-        `${postId}:${new Date(post.updatedAt ?? 0).getTime()}:${
-          post.content?.length ?? 0
-        }`,
-        post.content,
-      ),
-    };
-  });
-
   return res.status(HttpStatus.OK).json({
     status: CustomStatus.OK,
-    data: fullPostData,
+    data: await toPostListItems(postData),
   });
 }
 

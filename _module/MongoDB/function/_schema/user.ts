@@ -26,6 +26,9 @@ const userSchema = new Schema(
     },
     follower: [String],
     permission: Number,
+    // Email me when someone comments on my post or replies to my comment.
+    // Private: returned by /login and /user/me, set through POST /user.
+    notifyComments: { type: Boolean, default: true },
   },
   { timestamps: true },
 );
