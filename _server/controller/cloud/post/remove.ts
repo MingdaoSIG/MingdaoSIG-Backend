@@ -6,6 +6,7 @@ import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
 import MongoDB from "@module/MongoDB";
+import { isAdmin } from "@module/Permission";
 
 const PostDB = new MongoDB.Post();
 const SigDB = new MongoDB.Sig();
@@ -18,6 +19,7 @@ export const remove: RequestHandler<Record<string, string>> = async (
     const postId = req.params.id;
     const decodedJwt: any = (req as ExtendedRequest).JWT;
     const userId = decodedJwt.id;
+    const userData = (req as ExtendedRequest).userData;
 
     if (!isValidObjectId(postId))
       throw new CustomError(
@@ -32,6 +34,8 @@ export const remove: RequestHandler<Record<string, string>> = async (
         new Error("Invalid post id"),
       );
 
+    // The author, a leader of the post's SIG, a moderator of any SIG, or an
+    // admin may delete a post.
     const sigList = await SigDB.list({});
     const isModerator = sigList
       .flatMap((sig) => sig.moderator)
@@ -39,7 +43,12 @@ export const remove: RequestHandler<Record<string, string>> = async (
     const sigData = sigList.find((sig) => sig._id?.toString() === oldData.sig);
     const isLeader = sigData?.leader?.includes(userId);
 
-    if (oldData.user !== userId && !isModerator && !isLeader) {
+    if (
+      oldData.user !== userId &&
+      !isModerator &&
+      !isLeader &&
+      !isAdmin(userData)
+    ) {
       throw new CustomError(CustomStatus.INVALID_USER, new Error("Not author"));
     }
 
