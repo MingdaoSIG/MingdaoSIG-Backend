@@ -32,24 +32,11 @@ export const search: RequestHandler<Record<string, string>> = async (
     const skip = req.query?.skip ? Number(req.query.skip) : 0;
     const limit = req.query?.limit ? Number(req.query.limit) : DEFAULT_LIMIT;
 
-    const { ids, total } = await PostDB.search(EscapeRegExp(q), {
-      skip,
-      limit,
-    });
-
-    const posts =
-      ids.length > 0
-        ? await PostDB.list({ _id: { $in: ids }, removed: false })
-        : [];
-    const byId = new Map(posts.map((post) => [String(post._id), post]));
-    const ranked = ids.flatMap((id) => {
-      const post = byId.get(id);
-      return post ? [post] : [];
-    });
+    const { data, total } = await searchPosts(q, { skip, limit });
 
     return res.status(HttpStatus.OK).json({
       status: CustomStatus.OK,
-      data: await toPostListItems(ranked),
+      data,
       total,
     });
   } catch (error: any) {
@@ -59,8 +46,31 @@ export const search: RequestHandler<Record<string, string>> = async (
   }
 };
 
+/**
+ * One page of the ranked post search for `q` (taken literally) as list
+ * items, with the total. Also used by the unified GET /search.
+ */
+export async function searchPosts(
+  q: string,
+  option: { skip: number; limit: number },
+) {
+  const { ids, total } = await PostDB.search(EscapeRegExp(q), option);
+
+  const posts =
+    ids.length > 0
+      ? await PostDB.list({ _id: { $in: ids }, removed: false })
+      : [];
+  const byId = new Map(posts.map((post) => [String(post._id), post]));
+  const ranked = ids.flatMap((id) => {
+    const post = byId.get(id);
+    return post ? [post] : [];
+  });
+
+  return { data: await toPostListItems(ranked), total };
+}
+
 // Required `q`: 1 to 100 characters once trimmed.
-function searchText(value: unknown) {
+export function searchText(value: unknown) {
   if (typeof value !== "string")
     throw new CustomError(
       CustomStatus.INVALID_QUERY,
