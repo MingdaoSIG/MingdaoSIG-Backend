@@ -21,6 +21,7 @@ import {
   listSigEvents,
   sigCalendar,
 } from "@controller/cloud/event";
+import { analytics } from "@controller/cloud/sig/analytics";
 import { testDiscordWebhook } from "@controller/cloud/sig/discord";
 
 const sig: Router = Router();
@@ -48,6 +49,7 @@ sig.delete("/:sigId/moderator", deleteModerator);
 sig.get("/:sigId/members", listMembers);
 sig.delete("/:sigId/members/:userId", removeMember);
 sig.post("/:sigId/events", createSigEvent);
+sig.get("/:id/analytics", analytics);
 sig.post("/:id/discord/test", testDiscordWebhook);
 
 export default sig;
