@@ -24,6 +24,7 @@ import {
   restoreComment,
 } from "@controller/cloud/admin/comments";
 import { suspend, unsuspend } from "@controller/cloud/admin/suspension";
+import { listAllLogins, listUserLogins } from "@controller/cloud/admin/logins";
 import { listSigs } from "@controller/cloud/admin/sigs";
 import { decide, listJoinRequests } from "@controller/cloud/admin/joinRequests";
 import { listAuditEntries } from "@controller/cloud/admin/audit";
@@ -55,6 +56,7 @@ admin.get("/users/:id", contentModeratorOnly, readUser);
 admin.post("/users/:id/suspend", contentModeratorOnly, suspend);
 admin.post("/users/:id/unsuspend", contentModeratorOnly, unsuspend);
 admin.post("/users/:id/permission", adminOnly, setPermission);
+admin.get("/users/:id/logins", adminOnly, listUserLogins);
 admin.post("/users/:id/badges", adminOnly, setBadges);
 
 admin.get("/comments", contentModeratorOnly, listComments);
@@ -67,6 +69,7 @@ admin.get("/join-requests", listJoinRequests);
 admin.post("/join-requests/:id/decision", decide);
 
 admin.get("/audit", adminOnly, listAuditEntries);
+admin.get("/logins", adminOnly, listAllLogins);
 
 admin.get("/reports", contentModeratorOnly, listReports);
 admin.post("/reports/:id/resolve", contentModeratorOnly, resolveReport);

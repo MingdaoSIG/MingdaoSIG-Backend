@@ -1,4 +1,4 @@
-import { RequestHandler, Response } from "express";
+import { Request, RequestHandler, Response } from "express";
 
 // import CheckRequestRequirement from "@module/CheckRequestRequirement";
 import { HttpStatus } from "@module/HttpStatusCode";
@@ -14,17 +14,31 @@ import {
   sendSuspended,
   withActiveSuspension,
 } from "@module/Suspension";
+import { LoginMethod, recordLogin } from "@module/LoginLog";
 import { User } from "@type/user";
 
 /**
  * The login response, or 403/4041 for a user with a ban in force (contract
- * v4 §5.1). An expired suspension is cleared.
+ * v4 §5.1). An expired suspension is cleared. A successful login is
+ * recorded in the login log (§5.3).
  */
-function loggedIn(res: Response, userData: User) {
+function loggedIn(
+  req: Request,
+  res: Response,
+  userData: User,
+  method: LoginMethod,
+) {
   const suspension = activeSuspension(userData.suspension);
   if (suspension?.type === "ban") return sendSuspended(res, suspension);
   if (isExpiredSuspension(userData.suspension))
     clearExpiredSuspension(String(userData._id));
+
+  recordLogin({
+    user: String(userData._id),
+    method,
+    ip: req.ip,
+    userAgent: req.header("user-agent"),
+  });
 
   const jwt = signJWT({ id: userData._id });
   return res.status(HttpStatus.OK).json({
@@ -55,7 +69,7 @@ export const login: RequestHandler = async (req, res) => {
         googleUserData.picture,
       );
 
-      return loggedIn(res, userData);
+      return loggedIn(req, res, userData, "google");
     } else if (session) {
       const userData = await getUserDataBySession(session);
       if (!userData) {
@@ -63,7 +77,7 @@ export const login: RequestHandler = async (req, res) => {
           .status(HttpStatus.UNAUTHORIZED)
           .json({ status: CustomStatus.INVALID_SESSION });
       }
-      return loggedIn(res, userData);
+      return loggedIn(req, res, userData, "session");
     }
   } catch (error: any) {
     return res
