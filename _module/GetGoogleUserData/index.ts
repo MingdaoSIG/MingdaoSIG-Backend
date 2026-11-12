@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 
 import { GoogleUserData } from "@type/googleUserData";
 import CustomError from "@module/CustomError";
@@ -52,16 +52,31 @@ export default async function getGoogleUserData(
   }
 }
 
-// A valid token issued to another app must not log in here.
+// A valid token issued to another app must not log in here. Both failures
+// are logged (without the token, the email, or a full client id), so a
+// GOOGLE_CLIENT_IDS rollout can be watched.
 async function checkAudience(googleToken: string, clientIds: string[]) {
-  const response = await axios.get(GOOGLE_TOKENINFO_URL, {
-    params: { access_token: googleToken },
-  });
+  let response: AxiosResponse;
+  try {
+    response = await axios.get(GOOGLE_TOKENINFO_URL, {
+      params: { access_token: googleToken },
+    });
+  } catch (error: any) {
+    console.warn(
+      `Login : Google tokeninfo request failed: ${
+        error?.response?.status ?? error?.code ?? "unknown error"
+      }`,
+    );
+    throw error;
+  }
   const { aud, azp } = response.data ?? {};
 
   if (
     ![aud, azp].some((id) => typeof id === "string" && clientIds.includes(id))
   ) {
+    const audPrefix =
+      typeof aud === "string" ? `${aud.slice(0, 12)}…` : "missing";
+    console.warn(`Login : Google token audience mismatch (aud=${audPrefix})`);
     throw new Error("Google access token was issued to another client");
   }
 }

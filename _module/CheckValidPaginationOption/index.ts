@@ -8,12 +8,14 @@ const MAX_LIMIT = 50;
 
 export default function CheckValidPaginationOption(
   req: Request | ExtendedRequest,
+  maxLimit: number = MAX_LIMIT,
 ) {
   const skip = req.query?.skip;
   const limit = req.query?.limit;
 
-  // ! Without skip and limit the caller gets every item. The admin post page
-  // ! (GET /post/list with no query) depends on this. Remove once it paginates.
+  // Nothing to check. The caller picks the default page size: 50 for
+  // GET /post/list and /post/list/admin; the user, like and SIG post lists
+  // still return every item.
   if (skip === undefined && limit === undefined) return true;
 
   // Each value that is present is checked on its own, so sending only
@@ -22,10 +24,10 @@ export default function CheckValidPaginationOption(
 
   if (limit !== undefined) {
     const value = toNonNegativeInteger(limit, "Limit");
-    if (value <= 0 || value > MAX_LIMIT)
+    if (value <= 0 || value > maxLimit)
       throw new CustomError(
         CustomStatus.INVALID_QUERY,
-        new Error("Limit should be above 0 and less than 50"),
+        new Error(`Limit should be from 1 to ${maxLimit}`),
       );
   }
 
