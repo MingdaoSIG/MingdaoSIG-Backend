@@ -18,6 +18,7 @@ import notification from "./notification";
 import push from "./push";
 import event from "./event";
 import feedback from "./feedback";
+import badge from "./badge";
 import search from "./search";
 
 const router: Router = Router();
@@ -38,6 +39,7 @@ router.use("/notification", notification);
 router.use("/push", push);
 router.use("/event", event);
 router.use("/feedback", feedback);
+router.use("/badge", badge);
 router.use("/search", search);
 
 router.use((_: Request, res: Response) => {

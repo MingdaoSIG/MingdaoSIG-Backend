@@ -30,6 +30,11 @@ export const AUDIT_ACTIONS = [
   "series.remove",
   "report.resolve",
   "report.dismiss",
+  "post.move",
+  "sig.merge",
+  "rollover.apply",
+  "user.update",
+  "badge.update",
 ] as const;
 
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
@@ -41,7 +46,10 @@ export type AuditTargetKind =
   | "sig"
   | "join"
   | "series"
-  | "report";
+  | "report"
+  // Site-wide actions such as the year rollover (id names the action).
+  | "site"
+  | "badge";
 
 export interface AuditEntryInput {
   /** user id of whoever performed the action */

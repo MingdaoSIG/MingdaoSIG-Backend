@@ -158,6 +158,21 @@ export class SigDB {
       throw new Error("Search is required");
     }
   }
+
+  // $set (and $unset) on one SIG, only when it also matches `guard` (null
+  // otherwise).
+  async update(
+    id: string,
+    dataToSet: Record<string, unknown>,
+    guard?: Record<string, unknown>,
+    fieldsToUnset?: string[],
+  ) {
+    return await sig.update(id, dataToSet, guard, fieldsToUnset);
+  }
+
+  async create(dataToSave: SigWrite) {
+    return await sig.create(dataToSave);
+  }
 }
 
 export class CommentDB {
@@ -258,7 +273,7 @@ export class AdminDB {
   listPosts = admin.listPosts;
   setPostFlag = admin.setPostFlag;
   userIdsMatching = admin.userIdsMatching;
-  badgeValues = admin.badgeValues;
+  badgeUserCounts = admin.badgeUserCounts;
   countAdmins = admin.countAdmins;
   listUsers = admin.listUsers;
   readFullUser = admin.readFullUser;
@@ -266,6 +281,8 @@ export class AdminDB {
   setBadges = admin.setBadges;
   setPermission = admin.setPermission;
   userActivity = admin.userActivity;
+  readUserProfile = admin.readUserProfile;
+  updateUserProfile = admin.updateUserProfile;
   listComments = admin.listComments;
   setCommentRemoved = admin.setCommentRemoved;
   imageExists = admin.imageExists;

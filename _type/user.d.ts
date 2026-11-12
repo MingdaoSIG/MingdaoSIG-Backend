@@ -11,6 +11,7 @@ export type Permission = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 export type User = {
   _id: string; // ID
   customId?: string; // 自定義ID
+  previousCustomIds?: string[]; // 舊的自定義ID（會轉址）
   email: string; // 帳號
   name: string; // 姓名
   code: string; // 學號
@@ -20,7 +21,7 @@ export type User = {
   displayName?: string; // 顯示名稱
   description?: string; // 描述
   avatar?: string; // 大頭貼
-  badge?: ("developer" | "10.21_user" | "bug_hunter")[]; // 徽章
+  badge?: string[]; // 徽章（badge collection 的 key）
   follower?: string[]; // 追隨者
   permission?: Permission; // 權限
   notifyComments?: boolean; // 有人留言時寄信通知（未設定視為 true）

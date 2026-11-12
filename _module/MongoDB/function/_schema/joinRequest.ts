@@ -6,9 +6,23 @@ const joinRequestSchema = new Schema(
   {
     user: String,
     sig: String,
+    // Answers to the SIG's questions (contract v4 §5.6), labelled with the
+    // question as it was asked. q1..q3 keep the first three answers (extra
+    // ones appended to q3) for the email template and older readers.
+    answers: {
+      type: [
+        new Schema(
+          { question: { type: String }, answer: { type: String } },
+          { _id: false, id: false },
+        ),
+      ],
+      default: undefined,
+    },
     q1: String,
     q2: String,
     q3: String,
+    // Why the platform decided the request itself (a SIG merge).
+    note: String,
     removed: { type: Boolean, default: false },
     state: { type: String, default: "pending" }, // pending, accepted, rejected
     confirmId: String,

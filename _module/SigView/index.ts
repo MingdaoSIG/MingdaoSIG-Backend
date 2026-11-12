@@ -1,70 +1,50 @@
 import { activityOf, SigActivity } from "@module/SigActivity";
+import { sigColor, sigDefaultCover } from "@module/SigDefaults";
 import { followerCount, isFollowedBy } from "@module/SigFollow";
+import { resolveRecruiting, toSigResponse } from "@module/SigSettings";
 
 /**
  * Public SIG fields added for the user-side redesign (API contract v4 §6):
  * what GET /sig/list, GET /sig/:id, GET /sig/@:customId, the unified search
  * and the cross-SIG event list show about a SIG.
  *
- * `color`, `defaultCover` and `recruiting` are SIG settings (§3.7, §5.6).
- * They are read from the document as stored, with the documented defaults
- * when a field is missing; nothing here writes them.
+ * `color`, `defaultCover` and `recruiting` are the SIG settings of §3.7 and
+ * §5.6, resolved by @module/SigDefaults and @module/SigSettings (the SIG's
+ * own value, else the old hardcoded one or the default).
  */
-
-export type SigRecruiting = {
-  open: boolean;
-  message: string;
-  until: string | null;
-};
 
 type SigLike = Record<string, any>;
 
-/** The SIG's accent colour (#rrggbb), or "" when none is stored. */
+/** The SIG's accent colour (#rrggbb), or "". */
 export function sigColorOf(sigData: SigLike | null | undefined): string {
-  return typeof sigData?.color === "string" ? sigData.color : "";
+  return sigColor(sigData) ?? "";
 }
 
-/** The SIG's default post cover (an image id), or "" when none is stored. */
+/** The SIG's default post cover (an image id), or "". */
 export function sigDefaultCoverOf(sigData: SigLike | null | undefined) {
-  return typeof sigData?.defaultCover === "string" ? sigData.defaultCover : "";
+  return sigDefaultCover(sigData) ?? "";
 }
 
 /** The SIG's recruiting settings; missing ones mean open, "", no end date. */
-export function sigRecruitingOf(
-  sigData: SigLike | null | undefined,
-): SigRecruiting {
-  const recruiting = sigData?.recruiting ?? {};
-  const until = recruiting.until ? new Date(recruiting.until) : null;
-  return {
-    open: recruiting.open !== false,
-    message: typeof recruiting.message === "string" ? recruiting.message : "",
-    until: until && !Number.isNaN(until.getTime()) ? until.toISOString() : null,
-  };
-}
-
-function toPlain(doc: any): SigLike {
-  return typeof doc?.toJSON === "function" ? doc.toJSON() : { ...doc };
+export function sigRecruitingOf(sigData: SigLike | null | undefined) {
+  return resolveRecruiting(sigData ?? {});
 }
 
 /**
- * A SIG as the public reads return it: the stored fields without the
- * follower ids (private) and the Discord webhook, plus `color`,
- * `defaultCover`, `recruiting`, `memberCount`, `followerCount` and
- * `latestPostAt`. `followedByMe` is added when `viewerId` is given (the
- * request carried a valid JWT).
+ * A SIG as the public reads return it: the stored fields with the settings
+ * resolved (see toSigResponse), without the follower ids (private), plus
+ * `memberCount`, `followerCount` and `latestPostAt`. `followedByMe` is added
+ * when `viewerId` is given (the request carried a valid JWT).
  */
 export function toPublicSig(
   doc: any,
   activity: Map<string, SigActivity>,
   viewerId?: string | null,
 ) {
-  const { follower, discordWebhook: _webhook, ...rest } = toPlain(doc);
+  const { follower, ...rest } = toSigResponse(doc);
   const { memberCount, latestPostAt } = activityOf(activity, rest._id);
   const data: SigLike = {
     ...rest,
-    color: sigColorOf(rest),
-    defaultCover: sigDefaultCoverOf(rest),
-    recruiting: sigRecruitingOf(rest),
     memberCount,
     followerCount: followerCount({ follower }),
     latestPostAt,
