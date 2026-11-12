@@ -11,6 +11,7 @@ import user from "./user";
 import comment from "./comment";
 import ping from "./ping";
 import information from "./information";
+import admin from "./admin";
 
 const router: Router = Router();
 
@@ -22,6 +23,7 @@ router.use("/comment", comment);
 router.use("/image", image);
 router.use("/ping", ping);
 router.use("/information", information);
+router.use("/admin", admin);
 
 router.use("/needauth", JWTverifier);
 router.get("/needauth", (_: Request, res: Response) => {

@@ -1,0 +1,53 @@
+import { Router } from "express";
+
+import JWTverifier from "@middleware/JWTverifier";
+import adminOnly from "@middleware/adminOnly";
+import { rateLimiter, RateLimiterOption } from "@middleware/rateLimiter";
+import { overview } from "@controller/cloud/admin/overview";
+import {
+  batchPosts,
+  listPosts,
+  pinPost,
+  removePost,
+  restorePost,
+} from "@controller/cloud/admin/posts";
+import {
+  listUsers,
+  readUser,
+  setBadges,
+  setPermission,
+} from "@controller/cloud/admin/users";
+import {
+  listComments,
+  removeComment,
+  restoreComment,
+} from "@controller/cloud/admin/comments";
+import { listAuditEntries } from "@controller/cloud/admin/audit";
+
+// Admin panel API (contract v3 §3). Every route needs a JWT; GETs use the
+// read tier and everything else the write tier.
+const admin: Router = Router();
+
+admin.use(rateLimiter(RateLimiterOption.BY_METHOD));
+admin.use(JWTverifier);
+
+admin.get("/overview", adminOnly, overview);
+
+admin.get("/posts", adminOnly, listPosts);
+admin.post("/posts/batch", adminOnly, batchPosts);
+admin.post("/posts/:id/pin", adminOnly, pinPost);
+admin.post("/posts/:id/remove", adminOnly, removePost);
+admin.post("/posts/:id/restore", adminOnly, restorePost);
+
+admin.get("/users", adminOnly, listUsers);
+admin.get("/users/:id", adminOnly, readUser);
+admin.post("/users/:id/permission", adminOnly, setPermission);
+admin.post("/users/:id/badges", adminOnly, setBadges);
+
+admin.get("/comments", adminOnly, listComments);
+admin.post("/comments/:id/remove", adminOnly, removeComment);
+admin.post("/comments/:id/restore", adminOnly, restoreComment);
+
+admin.get("/audit", adminOnly, listAuditEntries);
+
+export default admin;
