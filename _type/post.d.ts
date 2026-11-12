@@ -8,6 +8,7 @@ export type Post = {
   hashtag: string[]; // 標籤
   like?: string[]; // 按讚者
   likes?: number; // 按讚數
+  views?: number; // 瀏覽數
   priority?: number; // 重要性
   pinned?: boolean; // 推薦
   removed?: boolean; // 刪除

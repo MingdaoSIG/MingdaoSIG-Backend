@@ -111,9 +111,10 @@ const ACTIONS: Record<
 
 /**
  * Applies the action to one post and records it when something changed.
- * Returns the post as it is now, or null when there is no such post.
+ * Returns the post as it is now, or null when there is no such post. Also
+ * used by report handling (POST /admin/reports/:id/resolve).
  */
-async function applyAction(
+export async function applyAction(
   actor: string,
   id: string,
   action: PostAction,

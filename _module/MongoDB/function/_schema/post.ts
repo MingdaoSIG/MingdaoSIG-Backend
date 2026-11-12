@@ -12,6 +12,8 @@ const postSchema = new Schema(
     hashtag: [String],
     like: [String],
     likes: { type: Number, default: 0 },
+    // Counted by GET /post/:id (see @module/PostViews), never by a write.
+    views: { type: Number, default: 0 },
     priority: { type: Number, default: 0 },
     pinned: { type: Boolean, default: false },
     removed: { type: Boolean, default: false },
