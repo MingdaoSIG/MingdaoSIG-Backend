@@ -8,6 +8,7 @@ const MAX_LIMIT = 50;
 
 export default function CheckValidPaginationOption(
   req: Request | ExtendedRequest,
+  maxLimit: number = MAX_LIMIT,
 ) {
   const skip = req.query?.skip;
   const limit = req.query?.limit;
@@ -22,10 +23,10 @@ export default function CheckValidPaginationOption(
 
   if (limit !== undefined) {
     const value = toNonNegativeInteger(limit, "Limit");
-    if (value <= 0 || value > MAX_LIMIT)
+    if (value <= 0 || value > maxLimit)
       throw new CustomError(
         CustomStatus.INVALID_QUERY,
-        new Error("Limit should be above 0 and less than 50"),
+        new Error(`Limit should be from 1 to ${maxLimit}`),
       );
   }
 

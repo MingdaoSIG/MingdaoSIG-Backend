@@ -4,7 +4,7 @@ import { PostFilter, PostSearch, PostWrite } from "@type/post";
 import { SigFilter, SigSearch, SigWrite } from "@type/sig";
 import { CommentFilter, CommentSearch, CommentWrite } from "@type/comment";
 import { JoinRequestWrite, JoinRequestSearch } from "@type/joinRequest";
-import { Option, ReadOption } from "@type/database";
+import { ListOption, Option, ReadOption } from "@type/database";
 import user from "@DBfunc/user";
 import image from "@DBfunc/image";
 import post from "@DBfunc/post";
@@ -105,9 +105,17 @@ export class PostDB {
     }
   }
 
-  async list(filter: PostFilter, option?: Option) {
+  async list(filter: PostFilter, option?: ListOption) {
     if (filter) {
       return await post.list(filter, option);
+    } else {
+      throw new Error("Search is required");
+    }
+  }
+
+  async count(filter: PostFilter) {
+    if (filter) {
+      return await post.count(filter);
     } else {
       throw new Error("Search is required");
     }

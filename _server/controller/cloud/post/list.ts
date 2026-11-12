@@ -23,6 +23,19 @@ const sortMethods = {
   oldest: { createdAt: 1 },
 };
 
+// GET /post/list/admin
+const ADMIN_DEFAULT_LIMIT = 50;
+const ADMIN_MAX_LIMIT = 100;
+const ADMIN_MAX_QUERY_LENGTH = 100;
+const ADMIN_LIST_PROJECTION = {
+  title: 1,
+  sig: 1,
+  user: 1,
+  createdAt: 1,
+  pinned: 1,
+  likes: 1,
+} as const;
+
 export const listAll: RequestHandler<Record<string, string>> = async (
   req,
   res,
@@ -176,6 +189,78 @@ export const listAllByPinned: RequestHandler<Record<string, string>> = async (
       .json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });
   }
 };
+
+// Admin post list: newest first, only the fields the table shows, and the
+// total for the same filter. Mounted behind JWTverifier and adminOnly.
+export const listForAdmin: RequestHandler<Record<string, string>> = async (
+  req,
+  res,
+) => {
+  try {
+    const skip = req.query?.skip;
+    const limit = req.query?.limit;
+
+    CheckValidPaginationOption(req, ADMIN_MAX_LIMIT);
+    const q = adminTitleQuery(req.query?.q);
+
+    const filter: QueryFilter<Post> = { removed: false };
+    if (q) filter.title = { $regex: escapeRegExp(q), $options: "i" };
+
+    const [postData, total] = await Promise.all([
+      PostDB.list(filter, {
+        skip: skip ? Number(skip) : 0,
+        limit: limit ? Number(limit) : ADMIN_DEFAULT_LIMIT,
+        sort: { createdAt: -1, _id: -1 },
+        projection: ADMIN_LIST_PROJECTION,
+      }),
+      PostDB.count(filter),
+    ]);
+
+    return res.status(HttpStatus.OK).json({
+      status: CustomStatus.OK,
+      data: postData.map((post) => ({
+        _id: post._id,
+        title: post.title,
+        sig: post.sig,
+        user: post.user,
+        createdAt: post.createdAt,
+        pinned: post.pinned ?? false,
+        likes: post.likes ?? 0,
+      })),
+      total,
+    });
+  } catch (error: any) {
+    return res
+      .status(HttpStatus.NOT_FOUND)
+      .json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });
+  }
+};
+
+// Optional `q` (title search): a string of at most 100 characters once
+// trimmed. An empty value means no search.
+function adminTitleQuery(value: unknown) {
+  if (value === undefined) return "";
+
+  if (typeof value !== "string")
+    throw new CustomError(
+      CustomStatus.INVALID_QUERY,
+      new Error("q is not a string"),
+    );
+
+  const q = value.trim();
+  if (q.length > ADMIN_MAX_QUERY_LENGTH)
+    throw new CustomError(
+      CustomStatus.INVALID_QUERY,
+      new Error(`q is longer than ${ADMIN_MAX_QUERY_LENGTH} characters`),
+    );
+
+  return q;
+}
+
+// Matches the text literally inside a regular expression.
+function escapeRegExp(text: string) {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
 
 async function listPostBy(
   res: Response,
