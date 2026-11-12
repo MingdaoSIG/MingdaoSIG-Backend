@@ -3,7 +3,12 @@ import bodyParser from "body-parser";
 
 import JWTverifier from "@middleware/JWTverifier";
 import { rateLimiter, RateLimiterOption } from "@middleware/rateLimiter";
-import { upload } from "@controller/cloud/image/upload";
+import {
+  ALLOWED_IMAGE_TYPES,
+  MAX_UPLOAD_BYTES,
+  checkUploadHeaders,
+  upload
+} from "@controller/cloud/image/upload";
 import { read } from "@controller/cloud/image/read";
 
 
@@ -14,13 +19,14 @@ image.get("/:id", read);
 
 image.use("/", rateLimiter(RateLimiterOption.UPLOAD));
 image.use("/", JWTverifier);
-image.use(
+image.post(
   "/",
+  checkUploadHeaders,
   bodyParser.raw({
-    type: "*/*",
-    limit: "1gb"
-  })
+    type: ALLOWED_IMAGE_TYPES,
+    limit: MAX_UPLOAD_BYTES
+  }),
+  upload
 );
-image.post("/", upload);
 
 export default image;
