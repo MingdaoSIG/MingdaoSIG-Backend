@@ -3,8 +3,10 @@ import { Comment, CommentFilter } from "@type/comment";
 import comment from "@schema/comment";
 import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
+import leanDefaults from "@DBfunc/_helper/leanDefaults";
 
 
+// Read only: returns plain objects (lean) with schema defaults filled in.
 export default async function list(search: CommentFilter, option?: Option) {
   try {
     const { skip, limit, sort } = option || {};
@@ -13,13 +15,16 @@ export default async function list(search: CommentFilter, option?: Option) {
       .find(search)
       .sort(sort || { createdAt: -1 })
       .skip(skip || 0)
-      .limit(limit || 0);
+      .limit(limit || 0)
+      .lean();
 
     if (!data) {
       throw new Error("Comment not found");
     }
 
-    return data as unknown as Comment[];
+    return data.map(item =>
+      leanDefaults(comment, item)
+    ) as unknown as Comment[];
   }
   catch (error: any) {
     throw new CustomError(
