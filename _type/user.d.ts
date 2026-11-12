@@ -37,6 +37,7 @@ export type User = {
   digestLastSentWeek?: string; // 上次寄出每週摘要的 ISO 週，例如 2026-W46
   onboardedAt?: Date | string | null; // 完成（或略過）新手導覽的時間
   suspension?: StoredSuspension; // 停權／禁言（未設定表示沒有）
+  sigOrder?: string[]; // 側欄「我的 SIG」的排序（SIG id）
   createAt?: string; // 建立時間
   updateAt?: string; // 更新時間
   __v?: number; // 版本

@@ -67,6 +67,10 @@ const userSchema = new Schema(
     // force) on /login and /user/me; admins and content moderators in
     // /admin/users.
     suspension: { type: suspensionSchema, default: undefined },
+    // The order the user dragged their SIGs into in the desktop side rail
+    // (SIG ids; SIGs not in it follow in the default order). Private: only
+    // on /user/me and POST /user.
+    sigOrder: { type: [String], default: undefined },
   },
   { timestamps: true },
 );
