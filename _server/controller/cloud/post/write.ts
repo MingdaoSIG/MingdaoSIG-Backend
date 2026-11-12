@@ -8,11 +8,14 @@ import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
 import MongoDB from "@module/MongoDB";
 import CheckRequestRequirement from "@module/CheckRequestRequirement";
+import { canPostToSig, isAdmin, isSigModerator } from "@module/Permission";
 
 
 const PostDB = new MongoDB.Post();
 const SigDB = new MongoDB.Sig();
-const UserDB = new MongoDB.User();
+
+// Matches the editor's limit in the frontend (app/new/page.tsx).
+const MAX_CONTENT_LENGTH = 100000;
 
 const sigDefaultCover: { [key: string]: string } = {
   "6529ed87df4ae96f279cd5e3":
@@ -68,6 +71,7 @@ export const write: RequestHandler = async (
     const postId = (req as Request).params.id;
     const decodedJwt: any = (req as ExtendedRequest).JWT;
     const userId = decodedJwt.id;
+    const userData = (req as ExtendedRequest).userData;
 
     new CheckRequestRequirement(req as Request).forbiddenBody([
       "_id",
@@ -84,6 +88,7 @@ export const write: RequestHandler = async (
     const { sig: sigId, title, cover, content, hashtag } = body;
 
     checkHashtag(hashtag);
+    checkContent(content);
 
     if (
       !isValidObjectId(sigId) ||
@@ -100,62 +105,57 @@ export const write: RequestHandler = async (
     }
 
     const sigList = await SigDB.list({});
-    const sigData = sigList.find(sig => sig?._id?.toString() === sigId)!;
-    if (sigId) {
-      if (!sigData) {
-        throw new CustomError(
-          CustomStatus.INVALID_SIG_ID,
-          new Error("Sig not found")
-        );
-      }
-      // removed sig only allow moderator
-      if (sigData.removed && !sigData.moderator?.includes(userId)) {
-        throw new CustomError(
-          CustomStatus.FORBIDDEN,
-          new Error("Sig removed")
-        );
-      }
+    const sigData = sigList.find(sig => sig?._id?.toString() === sigId);
+    if (!sigData) {
+      throw new CustomError(
+        CustomStatus.INVALID_SIG_ID,
+        new Error("Sig not found")
+      );
+    }
+    // removed sig only allow its moderators
+    if (
+      sigData.removed &&
+      !isSigModerator(sigData, userId) &&
+      !isAdmin(userData)
+    ) {
+      throw new CustomError(CustomStatus.FORBIDDEN, new Error("Sig removed"));
     }
 
-    const oldData = await PostDB.read({ id: postId }).catch(() => null);
-    const isModerator = sigList
-      .flatMap(sig => sig.moderator)
-      .includes(userId);
-    const isLeader = sigList.flatMap(sig => sig.leader).includes(userId);
-    const userData = await UserDB.read({ id: userId }).catch(() => null);
-    const isMember = userData?.sig?.includes(sigId);
+    const oldData = postId
+      ? await PostDB.read({ id: postId }).catch(() => null)
+      : null;
 
-    if (oldData) {
-      if (!isValidObjectId(postId)) {
+    if (postId) {
+      if (!isValidObjectId(postId) || !oldData) {
         throw new CustomError(
           CustomStatus.INVALID_POST_ID,
           new Error("Invalid post id")
         );
       }
 
-      if (
-        oldData.user !== userId &&
-                oldData.sig !== "652d60b842cdf6a660c2b778" // 公告
-      ) {
+      if (oldData.user !== userId && !isAdmin(userData)) {
         throw new CustomError(
           CustomStatus.FORBIDDEN,
           new Error("Not author")
         );
       }
-    }
-    else {
-      if (postId) {
-        throw new CustomError(
-          CustomStatus.INVALID_POST_ID,
-          new Error("Invalid post id")
-        );
-      }
-      else if (!isModerator && !isLeader && !isMember) {
+
+      // Moving a post needs the same permission as posting in the new sig
+      if (
+        String(sigId) !== String(oldData.sig) &&
+        !canPostToSig(userData, userId, sigData, sigList)
+      ) {
         throw new CustomError(
           CustomStatus.FORBIDDEN,
-          new Error("Not sig leader, moderator or member")
+          new Error("Not allowed to post in the target sig")
         );
       }
+    }
+    else if (!canPostToSig(userData, userId, sigData, sigList)) {
+      throw new CustomError(
+        CustomStatus.FORBIDDEN,
+        new Error("Not allowed to post in this sig")
+      );
     }
 
     const dataToSave = {
@@ -184,6 +184,22 @@ export const write: RequestHandler = async (
       .json({ status: error.statusCode || CustomStatus.UNKNOWN_ERROR });
   }
 };
+
+function checkContent(content: unknown) {
+  if (content === undefined || content === null) return;
+
+  if (typeof content !== "string")
+    throw new CustomError(
+      CustomStatus.INVALID_BODY,
+      new Error("Invalid content")
+    );
+
+  if (content.length > MAX_CONTENT_LENGTH)
+    throw new CustomError(
+      CustomStatus.INVALID_CONTENT_LENGTH,
+      new Error("Invalid content length")
+    );
+}
 
 function checkHashtag(hashtags: string[]) {
   if (!hashtags || hashtags.length === 0) return true;
