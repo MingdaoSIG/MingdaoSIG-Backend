@@ -55,6 +55,18 @@ async function confirm(res: Response, confirmId: string, accept: boolean) {
       );
     }
 
+    if (accept) {
+      const sigData = await SigDB.read({ id: oldJoinRequest.sig }).catch(
+        () => null
+      );
+      if (!sigData || sigData.removed) {
+        throw new CustomError(
+          CustomStatus.INVALID_SIG_ID,
+          new Error("Sig removed")
+        );
+      }
+    }
+
     const savedData = await JoinRequestDB.confirmPending(
       oldJoinRequest._id,
       accept ? "accepted" : "rejected"

@@ -11,6 +11,7 @@ import MongoDB from "@module/MongoDB";
 
 
 const UserDB = new MongoDB.User();
+const SigDB = new MongoDB.Sig();
 const JoinRequestDB = new MongoDB.JoinRequest();
 
 export const join: RequestHandler = async (
@@ -48,6 +49,14 @@ export const join: RequestHandler = async (
       throw new CustomError(
         CustomStatus.INVALID_BODY,
         new Error("q1, q2 or q3 is empty")
+      );
+    }
+
+    const sigData = await SigDB.read({ id: sigId }).catch(() => null);
+    if (!sigData || sigData.removed) {
+      throw new CustomError(
+        CustomStatus.INVALID_SIG_ID,
+        new Error("Sig not found")
       );
     }
 
