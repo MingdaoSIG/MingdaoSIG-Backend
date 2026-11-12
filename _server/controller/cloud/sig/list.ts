@@ -9,7 +9,7 @@ const SigDB = new MongoDB.Sig();
 
 export const listAll: RequestHandler = async (_, res) => {
   try {
-    const sigData = await SigDB.list({ removed: false });
+    const sigData = await SigDB.list({ removed: false }, { lean: true });
 
     return res.status(HttpStatus.OK).json({
       status: CustomStatus.OK,
