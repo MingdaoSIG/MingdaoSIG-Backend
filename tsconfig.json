@@ -22,42 +22,23 @@
         // "useDefineForClassFields": true,                  /* Emit ECMAScript-standard-compliant class fields. */
         // "moduleDetection": "auto",                        /* Control what method is used to detect module-format JS files. */
         /* Modules */
-        "module": "commonjs" /* Specify what module code is generated. */,
+        "module": "nodenext" /* Specify what module code is generated. Emits CommonJS here, because package.json has no "type": "module". */,
         // "rootDir": "./",                                  /* Specify the root folder within your source files. */
         // "moduleResolution": "node10",                     /* Specify how TypeScript looks up a file from a given module specifier. */
-        "baseUrl": "./" /* Specify the base directory to resolve non-relative module names. */,
         "paths": {
-            "@module/*": [
-                "_module/*"
-            ],
-            "@controller/*": [
-                "_server/controller/*"
-            ],
-            "@middleware/*": [
-                "_server/middleware/*"
-            ],
-            "@router/*": [
-                "_server/router/*"
-            ],
-            "@schema/*": [
-                "_module/MongoDB/function/_schema/*"
-            ],
-            "@type/*": [
-                "_type/*"
-            ],
-            "@DBfunc/*": [
-                "_module/MongoDB/function/*"
-            ],
-            "@CustomStatusCode": [
-                "_module/CustomStatusCode"
-            ],
-            "@HttpStatusCode": [
-                "_module/HttpStatusCode"
-            ]
+            "@module/*": ["./_module/*"],
+            "@controller/*": ["./_server/controller/*"],
+            "@middleware/*": ["./_server/middleware/*"],
+            "@router/*": ["./_server/router/*"],
+            "@schema/*": ["./_module/MongoDB/function/_schema/*"],
+            "@type/*": ["./_type/*"],
+            "@DBfunc/*": ["./_module/MongoDB/function/*"],
+            "@CustomStatusCode": ["./_module/CustomStatusCode"],
+            "@HttpStatusCode": ["./_module/HttpStatusCode"]
         } /* Specify a set of entries that re-map imports to additional lookup locations. */,
         // "rootDirs": [],                                   /* Allow multiple folders to be treated as one when resolving modules. */
         // "typeRoots": [],                                  /* Specify multiple folders that act like './node_modules/@types'. */
-        // "types": [],                                      /* Specify type package names to be included without being referenced in a source file. */
+        "types": ["node"] /* Specify type package names to be included without being referenced in a source file. */,
         // "allowUmdGlobalAccess": true,                     /* Allow accessing UMD globals from modules. */
         // "moduleSuffixes": [],                             /* List of file name suffixes to search when resolving a module. */
         // "allowImportingTsExtensions": true,               /* Allow imports to include TypeScript file extensions. Requires '--moduleResolution bundler' and either '--noEmit' or '--emitDeclarationOnly' to be set. */
