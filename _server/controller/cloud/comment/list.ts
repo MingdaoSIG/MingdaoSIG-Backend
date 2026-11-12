@@ -25,7 +25,10 @@ export const listAllByPost: RequestHandler = async (req, res) => {
 
     if (
       !isValidObjectId(postId) ||
-            !(await PostDB.read({ id: postId }).catch(() => null))
+            !(await PostDB.read(
+              { id: postId },
+              { lean: true, projection: { _id: 1 } }
+            ).catch(() => null))
     )
       throw new CustomError(
         CustomStatus.INVALID_POST_ID,
@@ -37,7 +40,7 @@ export const listAllByPost: RequestHandler = async (req, res) => {
       { post: postId, reply: "" },
       skip ? Number(skip) : 0,
       limit ? Number(limit) : 0,
-      { createAt: -1 }
+      { createdAt: -1 }
     );
   }
   catch (error: any) {
@@ -76,15 +79,17 @@ async function listByPost(
   });
 
   const usersDataMap: Record<string, User> = {};
-  const usersData = await UserDB.list({ _id: { $in: Array.from(userIds) } });
+  const usersData = await UserDB.list(
+    { _id: { $in: Array.from(userIds) } },
+    { lean: true, projection: { customId: 1, avatar: 1 } }
+  );
   usersData.forEach(user => {
     if (user._id) {
-      usersDataMap[user._id] = user;
+      usersDataMap[String(user._id)] = user;
     }
   });
 
-  const commentDataWithUser = commentData?.map(comment => {
-    comment = JSON.parse(JSON.stringify(comment));
+  const commentDataWithUser = commentData.map(comment => {
     return {
       ...comment,
       user: {

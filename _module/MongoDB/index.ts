@@ -4,7 +4,7 @@ import { PostFilter, PostSearch, PostWrite } from "@type/post";
 import { SigFilter, SigSearch, SigWrite } from "@type/sig";
 import { CommentFilter, CommentSearch, CommentWrite } from "@type/comment";
 import { JoinRequestWrite, JoinRequestSearch } from "@type/joinRequest";
-import { Option } from "@type/database";
+import { Option, ReadOption } from "@type/database";
 import user from "@DBfunc/user";
 import image from "@DBfunc/image";
 import post from "@DBfunc/post";
@@ -48,9 +48,9 @@ export class UserDB {
     }
   }
 
-  async list(filter: UserFilter) {
+  async list(filter: UserFilter, option?: ReadOption) {
     if (filter) {
-      return await user.list(filter);
+      return await user.list(filter, option);
     }
     else {
       throw new Error("Search is required");
@@ -93,11 +93,11 @@ export class ImageDB {
 }
 
 export class PostDB {
-  async read(search: PostSearch) {
+  async read(search: PostSearch, option?: ReadOption) {
     const { id } = search;
 
     if (id) {
-      return await post.read(id);
+      return await post.read(id, option);
     }
     else {
       throw new Error("Search is required");
@@ -154,9 +154,9 @@ export class SigDB {
     }
   }
 
-  async list(filter: SigFilter) {
+  async list(filter: SigFilter, option?: ReadOption) {
     if (filter) {
-      return await sig.list(filter);
+      return await sig.list(filter, option);
     }
     else {
       throw new Error("Search is required");
@@ -197,6 +197,10 @@ export class CommentDB {
     else {
       throw new Error("Search is required");
     }
+  }
+
+  async countByPost(postIds: string[]) {
+    return await comment.countByPost(postIds);
   }
 }
 
