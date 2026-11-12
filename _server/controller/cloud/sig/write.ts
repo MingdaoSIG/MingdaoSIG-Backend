@@ -10,6 +10,8 @@ import CheckRequestRequirement from "@module/CheckRequestRequirement";
 import { isAdmin, isSigLeader, isSigModerator } from "@module/Permission";
 import { recordAudit } from "@module/Audit";
 import { SigWrite } from "@type/sig";
+import { parseFeaturedPosts } from "./showcase";
+import { parseDiscordWebhook } from "./discord";
 
 const SigDB = new MongoDB.Sig();
 const AdminDB = new MongoDB.Admin();
@@ -17,8 +19,9 @@ const AdminDB = new MongoDB.Admin();
 const NAME_MAX_LENGTH = 30;
 const DESCRIPTION_MAX_LENGTH = 250;
 
-// POST /sig/:id { description?, avatar?, name? }: the SIG's leaders and
-// moderators (advisors) or an admin; only an admin may rename it.
+// POST /sig/:id { description?, avatar?, name?, featuredPosts?,
+// discordWebhook? }: the SIG's leaders and moderators (advisors) or an admin;
+// only an admin may rename it.
 export const write: RequestHandler<Record<string, string>> = async (
   req: Request<Record<string, string>> | ExtendedRequest,
   res,
@@ -40,6 +43,8 @@ export const write: RequestHandler<Record<string, string>> = async (
       "description",
       "avatar",
       "name",
+      "featuredPosts",
+      "discordWebhook",
     ]);
 
     const sigData = await SigDB.read({ id: sigId }).catch(() => null);
@@ -117,6 +122,17 @@ export const write: RequestHandler<Record<string, string>> = async (
         );
       dataToSave.name = newName;
     }
+
+    // Showcase (contract v4 §3.4)
+    if (req.body.featuredPosts !== undefined)
+      dataToSave.featuredPosts = await parseFeaturedPosts(
+        req.body.featuredPosts,
+        sigId,
+      );
+
+    // Discord announcements (contract v4 §3.6); never logged or returned
+    if (req.body.discordWebhook !== undefined)
+      dataToSave.discordWebhook = parseDiscordWebhook(req.body.discordWebhook);
 
     const savedData = await SigDB.write(dataToSave, { id: sigId });
 

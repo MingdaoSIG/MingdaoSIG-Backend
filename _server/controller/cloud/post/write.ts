@@ -9,6 +9,7 @@ import { HttpStatus } from "@module/HttpStatusCode";
 import MongoDB from "@module/MongoDB";
 import CheckRequestRequirement from "@module/CheckRequestRequirement";
 import { canPostToSig, isAdmin, isSigModerator } from "@module/Permission";
+import { announceNewPost } from "@module/DiscordWebhook";
 
 const PostDB = new MongoDB.Post();
 const SigDB = new MongoDB.Sig();
@@ -147,6 +148,13 @@ export const write: RequestHandler<Record<string, string>> = async (
     };
     const writeOptions = postId ? { id: postId } : undefined;
     const savedData = await PostDB.write(dataToSave, writeOptions);
+    // A new post goes to the SIG's Discord channel, if set (fire and forget).
+    if (!postId)
+      announceNewPost({
+        post: savedData,
+        authorName: userData?.name ?? "",
+        apiBaseUrl: `${req.protocol}://${req.get("host") ?? ""}`,
+      });
     return res.status(HttpStatus.OK).json({
       status: CustomStatus.OK,
       id: savedData._id,

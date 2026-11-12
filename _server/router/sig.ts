@@ -16,6 +16,13 @@ import { deleteLeader } from "@controller/cloud/sig/deleteLeader";
 import { deleteModerator } from "@controller/cloud/sig/deleteModerator";
 import { listMembers } from "@controller/cloud/sig/listMembers";
 import { removeMember } from "@controller/cloud/sig/removeMember";
+import {
+  createSigEvent,
+  listSigEvents,
+  sigCalendar,
+} from "@controller/cloud/event";
+import { analytics } from "@controller/cloud/sig/analytics";
+import { testDiscordWebhook } from "@controller/cloud/sig/discord";
 
 const sig: Router = Router();
 
@@ -25,6 +32,8 @@ sig.get("/list", listAll);
 sig.get("/@:customId", readByCustomId);
 
 sig.get("/:sigId", readById);
+sig.get("/:sigId/events", listSigEvents);
+sig.get("/:sigId/calendar.ics", sigCalendar);
 
 sig.get("/confirm/:confirmId", confirmJoinRequest);
 sig.post("/confirm/:confirmId", confirmJoinRequestByBody);
@@ -39,5 +48,8 @@ sig.delete("/:sigId/leader", deleteLeader);
 sig.delete("/:sigId/moderator", deleteModerator);
 sig.get("/:sigId/members", listMembers);
 sig.delete("/:sigId/members/:userId", removeMember);
+sig.post("/:sigId/events", createSigEvent);
+sig.get("/:id/analytics", analytics);
+sig.post("/:id/discord/test", testDiscordWebhook);
 
 export default sig;
