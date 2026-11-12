@@ -21,3 +21,6 @@ export type ReadOption = {
   // not filled in.
   projection?: Record<string, 0 | 1>;
 };
+
+// A MongoDB filter built at run time (field names and operators).
+export type Filter = Record<string, any>;

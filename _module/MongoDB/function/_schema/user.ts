@@ -26,6 +26,9 @@ const userSchema = new Schema(
     },
     follower: [String],
     permission: Number,
+    // Email me when someone comments on my post or replies to my comment.
+    // Private: returned by /login and /user/me, set through POST /user.
+    notifyComments: { type: Boolean, default: true },
   },
   { timestamps: true },
 );
@@ -38,5 +41,7 @@ userSchema.index({ email: 1 }, { unique: true });
 userSchema.index({ customId: 1 }, { unique: true });
 userSchema.index({ code: 1 });
 userSchema.index({ sig: 1 });
+// GET /admin/users (newest first) and the GET /admin/overview counts
+userSchema.index({ createdAt: -1, _id: -1 });
 
 export default mongoose.model("user", userSchema, "user");

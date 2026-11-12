@@ -1,5 +1,6 @@
 import { Request, RequestHandler } from "express";
 
+import { UserWrite } from "@type/user";
 import { ExtendedRequest } from "@type/request";
 import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
@@ -10,6 +11,9 @@ import CheckRequestRequirement from "@module/CheckRequestRequirement";
 
 const UserDB = new MongoDB.User();
 
+// POST /user: the caller updates their own `description` and/or
+// `notifyComments` (comment notification emails). Fields left out keep their
+// value.
 export const write: RequestHandler = async (
   req: Request | ExtendedRequest,
   res,
@@ -18,14 +22,14 @@ export const write: RequestHandler = async (
     const {
       // customId,
       description,
+      notifyComments,
     } = req.body ?? {};
     const decodedJwt: any = (req as ExtendedRequest).JWT;
     const userId = decodedJwt.id;
-    const userData = (req as ExtendedRequest).userData;
 
     new CheckRequestRequirement(req as Request).onlyIncludesBody(
       // ["customId", "description"],
-      ["description"],
+      ["description", "notifyComments"],
     );
 
     // if (userData.customId !== customId) {
@@ -39,10 +43,21 @@ export const write: RequestHandler = async (
       );
     }
 
-    const dataToSave = {
+    if (notifyComments !== undefined && typeof notifyComments !== "boolean") {
+      throw new CustomError(
+        CustomStatus.INVALID_BODY,
+        new Error("notifyComments must be true or false"),
+      );
+    }
+
+    const dataToSave: UserWrite = {
       // customId: String(customId ?? userData.customId),
-      description: String(description ?? userData.description),
     };
+    if (description !== undefined && description !== null)
+      dataToSave.description = String(description);
+    if (notifyComments !== undefined)
+      dataToSave.notifyComments = notifyComments;
+
     const savedData = await UserDB.write(dataToSave, { id: userId });
 
     return res.status(HttpStatus.OK).json({

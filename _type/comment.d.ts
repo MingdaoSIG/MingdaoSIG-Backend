@@ -8,13 +8,15 @@ export type Comment = {
   removed?: boolean; // 是否被刪除，標識該評論是否被刪除
   createAt?: string; // 創建時間，記錄評論的創建時間
   updateAt?: string; // 更新時間，記錄評論的最後更新時間
+  createdAt?: string | Date; // 建立時間 (Mongoose timestamps)
+  updatedAt?: string | Date; // 更新時間 (Mongoose timestamps)
   __v?: number; // 版本，用於記錄評論的版本號
 };
 
 export type CommentWrite = {
   [K in keyof Omit<
     Comment,
-    "_id" | "createAt" | "updateAt" | "__v"
+    "_id" | "createAt" | "updateAt" | "createdAt" | "updatedAt" | "__v"
   >]?: Comment[K];
 };
 
