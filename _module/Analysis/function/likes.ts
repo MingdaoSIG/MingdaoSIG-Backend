@@ -4,18 +4,21 @@ import schema from "./schema";
 export default async function likes(from: Date | undefined, to: Date) {
   const TITLE = "Likes on the platform";
 
-  const posts = await schema.post.find({
-    removed: false,
-    createdAt: {
-      $gte: from ?? 0,
-      $lte: to
-    }
-  });
+  // Sums in MongoDB; never loads post documents.
+  const [result] = await schema.post.aggregate<{ total: number }>([
+    {
+      $match: {
+        removed: false,
+        createdAt: {
+          $gte: from ?? new Date(0),
+          $lte: to
+        }
+      }
+    },
+    { $group: { _id: null, total: { $sum: "$likes" } } }
+  ]);
 
-  let likesCount: number = 0;
-  for (const post of posts) {
-    likesCount += post.likes;
-  }
+  const likesCount: number = result?.total ?? 0;
 
   return {
     func: likes.name,

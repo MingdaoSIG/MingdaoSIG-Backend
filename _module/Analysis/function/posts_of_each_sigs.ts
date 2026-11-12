@@ -1,4 +1,5 @@
 import schema from "./schema";
+import { countByNameInFirstSeenOrder, readSigNames } from "./sig_counts";
 
 
 export default async function posts_of_each_sigs(
@@ -7,39 +8,45 @@ export default async function posts_of_each_sigs(
 ) {
   const TITLE = "Posts of each sigs";
 
-  const posts = await schema.post.find({
-    removed: false,
-    createdAt: {
-      $gte: from ?? 0,
-      $lte: to
-    }
-  });
+  // Counts posts per sig in MongoDB, without loading post content. `first`
+  // is the position of the sig's first post in natural (insertion) order,
+  // which is the order the previous implementation walked the posts in, so
+  // equal counts stay in the same order on the chart.
+  const groups = await schema.post.aggregate<{
+    _id: unknown;
+    count: number;
+    first: number;
+  }>(
+    [
+      {
+        $match: {
+          removed: false,
+          createdAt: {
+            $gte: from ?? new Date(0),
+            $lte: to
+          }
+        }
+      },
+      { $group: { _id: null, sigs: { $push: "$sig" } } },
+      { $unwind: { path: "$sigs", includeArrayIndex: "position" } },
+      {
+        $group: {
+          _id: "$sigs",
+          count: { $sum: 1 },
+          first: { $min: "$position" }
+        }
+      }
+    ],
+    // A natural-order scan keeps $push in insertion order.
+    { hint: { $natural: 1 } }
+  );
 
   // Removed sigs are left out of the chart
-  const sigList = await schema.sig.find({ removed: false });
-
-  const sigPosts: Array<{ name: string; count: number }> = [];
-  for (const post of posts) {
-    const sigId = post.sig;
-    const sigName = sigList.find(sig => sig._id?.toString() === sigId)
-      ?.name;
-    if (!sigName) continue;
-    const sigIndex = sigPosts.findIndex(sig => sig.name === sigName);
-    if (sigIndex === -1) {
-      sigPosts.push({ name: sigName, count: 1 });
-    }
-    else {
-      sigPosts[sigIndex].count += 1;
-    }
-  }
-
-  const sortedSigsPosts = Object.values(sigPosts).sort(
-    (a, b) => b.count! - a.count!
-  );
+  const sigNames = await readSigNames();
 
   return {
     func: posts_of_each_sigs.name,
     title: TITLE,
-    content: sortedSigsPosts
+    content: countByNameInFirstSeenOrder(groups, sigNames)
   };
 }
