@@ -4,10 +4,24 @@ import { MailApiRequest } from "@type/mailApiRequest";
 import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 
+/**
+ * `MAIL_DISABLED=true` turns every email off (set on beta, which runs on a
+ * copy of the prod data with real addresses). A skipped send counts as sent,
+ * so callers behave as they would on prod; only the recipient count is logged.
+ */
+function mailDisabled(kind: string, recipients: number) {
+  if (process.env.MAIL_DISABLED?.trim().toLowerCase() !== "true") return false;
+  console.log(
+    `Mail : disabled, skipped a ${kind} email to ${recipients} recipient(s)`,
+  );
+  return true;
+}
+
 const MAIL_PRETTY_API_URL =
   "https://mdsrl.mingdao.edu.tw/mdpp/Sig20Login/sendMail";
 
 export async function SendPretty(content: MailApiRequest) {
+  if (mailDisabled("join request", content.to?.length ?? 0)) return true;
   try {
     const {
       from = "SIG 平台開發團隊",
@@ -53,6 +67,7 @@ export async function SendText(
   message: string,
   target: string[],
 ) {
+  if (mailDisabled("text", target.length)) return true;
   try {
     const requestBody = {
       from: "SIG 平台開發團隊",
