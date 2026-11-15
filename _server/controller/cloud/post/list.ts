@@ -9,6 +9,7 @@ import { HttpStatus } from "@module/HttpStatusCode";
 import MongoDB from "@module/MongoDB";
 import CheckValidPaginationOption from "@module/CheckValidPaginationOption";
 import EscapeRegExp from "@module/EscapeRegExp";
+import { hotPostIds } from "@module/HotPosts";
 import { toPostListItems } from "./_listItems";
 
 const PostDB = new MongoDB.Post();
@@ -50,6 +51,16 @@ export const listAll: RequestHandler<Record<string, string>> = async (
     const sort = req.query?.sort;
 
     CheckValidPaginationOption(req);
+
+    // 熱門 (@module/HotPosts): a scored order, paged here.
+    if (sort === "hot") {
+      const start = skip ? Number(skip) : 0;
+      const size = limit ? Number(limit) : DEFAULT_LIST_LIMIT;
+      return await listPostsInOrder(
+        res,
+        (await hotPostIds()).slice(start, start + size),
+      );
+    }
 
     const sortMethod = sort
       ? sortMethods[String(sort) as keyof typeof sortMethods] ||
@@ -311,6 +322,22 @@ async function listPostBy(
   return res.status(HttpStatus.OK).json({
     status: CustomStatus.OK,
     data: await toPostListItems(postData),
+  });
+}
+
+/** The posts with these ids, in this order (removed ones left out). */
+async function listPostsInOrder(res: Response, ids: string[]) {
+  const posts =
+    ids.length === 0
+      ? []
+      : await PostDB.list({ _id: { $in: ids }, removed: false });
+  const byId = new Map(posts.map((doc) => [String(doc._id), doc]));
+  const ordered = ids
+    .map((id) => byId.get(id))
+    .filter((doc): doc is Post => Boolean(doc));
+  return res.status(HttpStatus.OK).json({
+    status: CustomStatus.OK,
+    data: await toPostListItems(ordered),
   });
 }
 
