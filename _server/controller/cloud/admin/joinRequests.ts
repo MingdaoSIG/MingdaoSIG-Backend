@@ -4,7 +4,11 @@ import { Filter } from "@type/database";
 import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
 import MongoDB from "@module/MongoDB";
-import { canManageSig, isAdmin, managedSigsFilter } from "@module/Permission";
+import {
+  activeManagedSigsFilter,
+  canManageSig,
+  isAdmin,
+} from "@module/Permission";
 import { recordAudit } from "@module/Audit";
 import { decideJoinRequest } from "@controller/cloud/sig/confirm";
 import { joinRequestAnswers } from "@module/SigSettings";
@@ -41,7 +45,9 @@ export const listJoinRequests: RequestHandler = async (req, res) => {
     if (isAdmin(caller(req))) {
       if (sig) filter.sig = sig;
     } else {
-      const managed = await AdminDB.sigIds(managedSigsFilter(callerId(req)));
+      const managed = await AdminDB.sigIds(
+        activeManagedSigsFilter(callerId(req)),
+      );
       if (managed.length === 0)
         fail(CustomStatus.FORBIDDEN, "Not an admin or SIG manager");
       if (sig && !managed.includes(sig))

@@ -3,7 +3,7 @@ import { RequestHandler } from "express";
 import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
 import MongoDB from "@module/MongoDB";
-import { isAdmin, managedSigsFilter } from "@module/Permission";
+import { activeManagedSigsFilter, isAdmin } from "@module/Permission";
 import { sigColor, sigDefaultCover } from "@module/SigDefaults";
 import { sigIdsWithDiscordWebhook } from "@module/DiscordWebhook";
 import { caller, callerId, fail, queryEnum, sendError } from "./_shared";
@@ -24,14 +24,16 @@ export const listSigs: RequestHandler = async (req, res) => {
     if (!admin) {
       if (archived === "1")
         fail(CustomStatus.FORBIDDEN, "Only an admin can list archived SIGs");
-      const managed = await AdminDB.sigIds(managedSigsFilter(userId));
+      const managed = await AdminDB.sigIds(activeManagedSigsFilter(userId));
       if (managed.length === 0)
         fail(CustomStatus.FORBIDDEN, "Not an admin or SIG manager");
     }
 
     const removed = archived === "1";
     const sigs = await AdminDB.listSigs(
-      admin ? { removed } : { removed, ...managedSigsFilter(userId) },
+      // Managers see their active SIGs; the announcement SIG is stored
+      // removed but counts as active, so it is not filtered by `removed`.
+      admin ? { removed } : activeManagedSigsFilter(userId),
     );
     const ids = sigs.map((sig) => String(sig._id));
 
