@@ -6,7 +6,7 @@ import sig from "@schema/sig";
 import CustomError from "@module/CustomError";
 import { CustomStatus } from "@module/CustomStatusCode";
 import { withNotificationSettings } from "@module/NotificationSettings";
-import { managedSigsFilter } from "@module/Permission";
+import { activeManagedSigsFilter, managedSigsFilter } from "@module/Permission";
 import { followedSigIds } from "@module/SigFollow";
 
 /**
@@ -67,14 +67,32 @@ export async function resolveOnboardedAt(
   return tookPart ? accountCreatedAt(user) : null;
 }
 
+/** Ids of the SIGs the user may manage (archived ones left out). */
+async function managedSigIds(userId: string) {
+  try {
+    const docs = await sig
+      .find(activeManagedSigsFilter(userId), { _id: 1 })
+      .lean<{ _id: unknown }[]>();
+    return docs.map((doc) => String(doc._id));
+  } catch (error) {
+    throw new CustomError(CustomStatus.ERROR_READING_SIG_FROM_DB, error);
+  }
+}
+
 /**
  * The caller's own user document as GET /user/me and POST /user return it:
  * notification settings with their defaults, `followedSigs` (ids of the SIGs
- * they follow) and `onboardedAt`.
+ * they follow), `onboardedAt`, and `managedSigIds` (the SIGs whose admin
+ * panel they may open: led or advised, not archived, the announcement SIG
+ * included).
  */
 export async function withOwnUserFields<T extends OnboardingUser>(user: T) {
   const data = withNotificationSettings(user);
-  const followedSigs = await followedSigIds(String(user._id));
+  const userId = String(user._id);
+  const [followedSigs, managed] = await Promise.all([
+    followedSigIds(userId),
+    managedSigIds(userId),
+  ]);
   const onboardedAt = await resolveOnboardedAt(data, followedSigs);
-  return { ...data, followedSigs, onboardedAt };
+  return { ...data, followedSigs, onboardedAt, managedSigIds: managed };
 }
