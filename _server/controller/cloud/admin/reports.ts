@@ -292,7 +292,13 @@ export const resolveReport: RequestHandler = async (req, res) => {
             label: target.label,
           },
           link: target.link,
-          meta: { action, status, targetKind: kind },
+          // The admin's note goes to the reporters too (owner 2026-11-16).
+          meta: {
+            action,
+            status,
+            targetKind: kind,
+            ...(resolution ? { resolution } : {}),
+          },
         })),
     );
 

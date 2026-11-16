@@ -9,6 +9,7 @@ import MongoDB from "@module/MongoDB";
 import CheckRequestRequirement from "@module/CheckRequestRequirement";
 import {
   ANNOUNCEMENT_SIG_ID,
+  isActiveSig,
   isAdmin,
   isSigLeader,
   isSigModerator,
@@ -85,7 +86,10 @@ export const write: RequestHandler<Record<string, string>> = async (
       );
     }
 
-    if (sigData.removed && !isModerator && !isAdminUser) {
+    // An archived SIG has stopped: only admins edit it (owner 2026-11-16).
+    // The announcement SIG is stored removed but stays editable by its
+    // managers (isActiveSig).
+    if (!isAdminUser && !isActiveSig(sigData)) {
       throw new CustomError(CustomStatus.FORBIDDEN, new Error("Sig removed"));
     }
 

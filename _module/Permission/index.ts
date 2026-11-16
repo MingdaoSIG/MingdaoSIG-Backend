@@ -54,9 +54,19 @@ export function isSigManager(sig: Sig, userId: string) {
 }
 
 /**
+ * Whether a SIG's leaders and advisors may still manage it. An archived SIG
+ * (`removed: true`) has stopped, so only admins manage it (owner decision
+ * 2026-11-16). The announcement SIG is stored `removed: true` to stay out of
+ * the SIG list but is live, so it counts as active.
+ */
+export function isActiveSig(sig: Pick<Sig, "_id" | "removed">) {
+  return !sig.removed || String(sig._id) === ANNOUNCEMENT_SIG_ID;
+}
+
+/**
  * Whether `user` may manage `sig` (edit it, list or remove its members,
- * decide its join requests): an admin, or a manager of that SIG. Without a
- * SIG only an admin may.
+ * decide its join requests): an admin, or a manager of that SIG while the
+ * SIG is active (isActiveSig). Without a SIG only an admin may.
  */
 export function canManageSig(
   user: User | null | undefined,
@@ -64,12 +74,25 @@ export function canManageSig(
 ) {
   if (isAdmin(user)) return true;
   if (!user?._id || !sig) return false;
-  return isSigManager(sig, String(user._id));
+  return isActiveSig(sig) && isSigManager(sig, String(user._id));
 }
 
-/** MongoDB filter for the SIGs that `userId` manages. */
+/**
+ * MongoDB filter for the SIGs that `userId` leads or advises, archived ones
+ * included. For what they may manage, use activeManagedSigsFilter.
+ */
 export function managedSigsFilter(userId: string) {
   return { $or: [{ leader: userId }, { moderator: userId }] };
+}
+
+/** The SIGs `userId` may manage: managedSigsFilter minus archived SIGs. */
+export function activeManagedSigsFilter(userId: string) {
+  return {
+    $and: [
+      managedSigsFilter(userId),
+      { $or: [{ removed: false }, { _id: ANNOUNCEMENT_SIG_ID }] },
+    ],
+  };
 }
 
 /**

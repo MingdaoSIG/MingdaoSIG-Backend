@@ -8,7 +8,7 @@ import { CustomStatus } from "@module/CustomStatusCode";
 import { HttpStatus } from "@module/HttpStatusCode";
 import MongoDB from "@module/MongoDB";
 import { recordAudit } from "@module/Audit";
-import { isAdmin, isSigManager } from "@module/Permission";
+import { isActiveSig, isAdmin, isSigManager } from "@module/Permission";
 import { sendError } from "./_shared";
 
 const CommentDB = new MongoDB.Comment();
@@ -107,7 +107,7 @@ async function moderatorAccess(
       ? await SigDB.read({ id: sigId }).catch(() => null)
       : null;
 
-  const isManager = sig ? isSigManager(sig, userId) : false;
+  const isManager = sig ? isActiveSig(sig) && isSigManager(sig, userId) : false;
 
   if (isManager) return { sig: sigId, role: "manager" as const };
   if (isAdmin(userData)) return { sig: sigId, role: "admin" as const };
